@@ -298,14 +298,26 @@
         <!-- المحتوى الرئيسي -->
         <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
             
-            <header class="h-20 bg-white/80 dark:bg-darkCard/80 backdrop-blur-md border-b border-slate-200 dark:border-darkBorder flex items-center justify-between px-6 z-10">
-                <div class="flex items-center gap-4">
+            <header class="h-20 bg-white/80 dark:bg-darkCard/80 backdrop-blur-md border-b border-slate-200 dark:border-darkBorder flex items-center justify-between px-4 sm:px-6 z-10">
+                <div class="flex items-center gap-3 sm:gap-4">
+                    <!-- زر القائمة الجانبية -->
                     <button onclick="toggleSidebar()" class="lg:hidden text-slate-600 dark:text-slate-300 text-2xl hover:text-brand-600"><i class="fa-solid fa-bars-staggered"></i></button>
-                    <h1 id="page-title" class="text-2xl font-black text-slate-800 dark:text-white hidden sm:block">الرئيسية</h1>
+                    
+                    <!-- لوجو الهوية والاسم معاً (يظهر دائماً بجانب زر القائمة في الموبايل) -->
+                    <div class="flex lg:hidden items-center gap-1.5 sm:gap-2 shrink-0 select-none">
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 bg-brand-500 text-white rounded-lg flex items-center justify-center text-xs sm:text-base shadow-sm">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                        <span class="font-black text-xs sm:text-sm tracking-wide text-slate-800 dark:text-white block">منصة كورسات HMS</span>
+                    </div>
+
+                    <!-- اسم الصفحة النشطة (للشاشات الكبيرة) -->
+                    <h1 id="page-title" class="text-2xl font-black text-slate-800 dark:text-white hidden lg:block">الرئيسية</h1>
                 </div>
                 
-                <div class="flex items-center gap-3 bg-brand-50 dark:bg-brand-950/30 border border-brand-100 dark:border-brand-800 text-brand-700 dark:text-brand-300 px-5 py-2 rounded-full text-sm font-bold shadow-sm max-w-md w-full overflow-hidden">
-                    <i class="fa-solid fa-bell animate-pulse text-brand-500"></i>
+                <!-- شريط الإعلانات الذكي (يتقلص بمرونة على الشاشات الصغيرة لمنع التداخل) -->
+                <div class="flex items-center gap-2 sm:gap-3 bg-brand-50 dark:bg-brand-950/30 border border-brand-100 dark:border-brand-800 text-brand-700 dark:text-brand-300 px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold shadow-sm max-w-[170px] xs:max-w-[240px] sm:max-w-md w-full overflow-hidden">
+                    <i class="fa-solid fa-bell animate-pulse text-brand-500 shrink-0"></i>
                     <marquee behavior="scroll" direction="right" class="w-full flex-1" id="global-announcement">أهلاً بك في منصة تقديم الكورسات HMS المميزة...</marquee>
                 </div>
             </header>
@@ -1817,6 +1829,12 @@
         window.editCourse = function(id) {
             const course = allCourses.find(c => c.id === id);
             if(!course) return;
+            
+            // فحص الصلاحيات الأمني: منع التعديل إذا لم يكن مالك الكورس أو سوبر ادمن
+            if (userData?.role !== 'superadmin' && course.createdBy !== currentUser?.uid) {
+                return showToast("عذراً، لا تملك الصلاحية لتعديل موديولات هذا الكورس.", "error");
+            }
+
             resetCourseForm();
             
             document.getElementById('course-edit-id').value = course.id;
@@ -1843,6 +1861,14 @@
         };
 
         window.deleteCourse = async function(id) {
+            const course = allCourses.find(c => c.id === id);
+            if(!course) return;
+
+            // فحص الصلاحيات الأمني: منع الحذف إذا لم يكن مالك الكورس أو سوبر ادمن
+            if (userData?.role !== 'superadmin' && course.createdBy !== currentUser?.uid) {
+                return showToast("عذراً، لا تملك الصلاحية لحذف هذا الكورس الأكاديمي.", "error");
+            }
+
             if(confirm("🚨 تحذير هام جداً: سيتم حذف هذا الكورس وكافة المحاضرات والمصادر المرتبطة به نهائياً! هل تريد المتابعة؟")) {
                 try { 
                     await deleteDoc(doc(db, "courses", id)); 
@@ -1856,12 +1882,19 @@
         function buildManagementTable() {
             const tbody = document.getElementById('manage-table-body');
             if(!tbody) return;
-            if(allCourses.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/30">لا توجد كورسات في الأرشيف حتى الآن.</td></tr>`;
+            
+            // تصفية الكورسات: المالك يرى الكل، والادمن يرى فقط الكورسات التي أنشأها بنفسه
+            const allowedCourses = allCourses.filter(course => {
+                if (userData?.role === 'superadmin') return true;
+                return course.createdBy === currentUser?.uid;
+            });
+
+            if(allowedCourses.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="p-8 text-center text-slate-500 bg-slate-50 dark:bg-slate-800/30">لا توجد كورسات خاصة بك في الأرشيف حتى الآن.</td></tr>`;
                 return;
             }
             tbody.innerHTML = "";
-            allCourses.forEach(course => {
+            allowedCourses.forEach(course => {
                 const lecsCount = course.lectures ? course.lectures.length : 0;
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition">
