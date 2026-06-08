@@ -107,6 +107,32 @@
             border-top-left-radius: 4px;
             border-top-right-radius: 4px;
         }
+        border-top-left-radius: 4px;
+            border-top-right-radius: 4px;
+        }
+
+        /* كود تكبير الفيديو والمحتوى بملء الشاشة بالكامل على الهواتف */
+        #main-video-container:fullscreen,
+        #main-video-container:-webkit-full-screen {
+            width: 100vw !important;
+            height: 100vh !important;
+            background-color: #000 !important;
+            border-radius: 0 !important;
+        }
+
+        #main-video-container:fullscreen > div.relative,
+        #main-video-container:-webkit-full-screen > div.relative {
+            padding-top: 0 !important;
+            height: 100vh !important;
+            width: 100vw !important;
+        }
+
+        #main-video-container:fullscreen iframe,
+        #main-video-container:-webkit-full-screen iframe {
+            border-radius: 0 !important;
+            height: 100% !important;
+            width: 100% !important;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 dark:bg-darkBg dark:text-slate-200 transition-colors duration-300 protect-content" oncontextmenu="return false;">
@@ -645,8 +671,8 @@
                 <!-- شاشة: مشغل الكورسات والمحاضرات (Theater Player) المطور والراقي (نسخة متزنة وموحدة الارتفاع) -->
                 <div id="student-player" class="content-view flex flex-col xl:flex-row gap-6 items-start">
                     
-                    <!-- العمود الأيمن: مشغل المحتوى وتبويباته ومحتواه السفلي -->
-                    <div class="w-full xl:w-3/4 flex flex-col gap-6">
+                    <!-- العمود الأيمن: مشغل المحتوى وتبويباته ومحتواه السفلي (يظهر ثانياً في الموبايل وأولاً في الكمبيوتر) -->
+        <div class="w-full xl:w-3/4 flex flex-col gap-6 order-2 xl:order-1">
                         
                         <!-- صندوق المشغل الموحد الجديد (بنظام ملء الشاشة) -->
                         <div class="bg-white dark:bg-darkCard rounded-3xl shadow-md border border-slate-200/80 dark:border-darkBorder overflow-hidden flex flex-col relative" id="main-video-container">
@@ -750,8 +776,8 @@
                         </div>
                     </div>
 
-                    <!-- العمود الأيسر: محتويات الكورس الجانبية (تم ضبط الارتفاع ليكون موازياً ومطابقاً للمشغل) -->
-                    <div class="w-full xl:w-1/4 xl:sticky xl:top-24 h-auto xl:h-[520px] flex flex-col">
+                    <!-- العمود الأيسر: محتويات الكورس الجانبية (يظهر أولاً في الموبايل وثانياً في الكمبيوتر) -->
+                    <div class="w-full xl:w-1/4 xl:sticky xl:top-24 h-auto xl:h-[520px] flex flex-col order-1 xl:order-2">
                         <div class="bg-white dark:bg-darkCard rounded-3xl shadow-md border border-slate-200/80 dark:border-darkBorder overflow-hidden flex flex-col h-full">
                             <!-- ترويسة الفهرس ومؤشر التقدم -->
                             <div class="p-4 bg-slate-50 dark:bg-slate-900/60 border-b border-slate-100 dark:border-darkBorder shrink-0">
