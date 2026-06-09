@@ -107,9 +107,6 @@
             border-top-left-radius: 4px;
             border-top-right-radius: 4px;
         }
-        border-top-left-radius: 4px;
-            border-top-right-radius: 4px;
-        }
 
         /* كود تكبير الفيديو والمحتوى بملء الشاشة بالكامل على الهواتف */
         #main-video-container:fullscreen,
@@ -170,6 +167,14 @@
             </div>
 
             <form id="auth-form" class="space-y-6" onsubmit="event.preventDefault();">
+                <!-- حقل الاسم الجديد -->
+                <div>
+                    <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">الاسم بالكامل (يظهر بالمنصة)</label>
+                    <div class="relative group">
+                        <div class="absolute right-4 top-3.5 text-slate-400 group-focus-within:text-brand-500 transition"><i class="fa-solid fa-id-badge"></i></div>
+                        <input type="text" id="auth-name" class="w-full pl-4 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-800/50 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none transition" placeholder="مثال: د. أحمد محمد">
+                    </div>
+                </div>
                 <div>
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">البريد الإلكتروني</label>
                     <div class="relative group">
@@ -274,6 +279,9 @@
                     <button onclick="navTo('admin-manage')" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-950/30 dark:hover:text-amber-400 transition font-bold">
                         <i class="fa-solid fa-list-check w-5 text-lg"></i> <span>إدارة الكورسات</span>
                     </button>
+                    <button onclick="navTo('doctor-inbox-view'); loadDoctorMessages();" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-950/30 dark:hover:text-amber-400 transition font-bold relative">
+                        <i class="fa-solid fa-envelope-open-text w-5 text-lg"></i> <span>صندوق الرسائل</span>
+                    </button>
                 </div>
 
                 <!-- المالك -->
@@ -338,7 +346,16 @@
                         </div>
                         <i class="fa-solid fa-atom text-[10rem] absolute left-10 opacity-10 rotate-12 pointer-events-none hidden md:block"></i>
                     </div>
-
+                    <!-- قسم نخبة الدكاترة -->
+                    <div class="bg-white dark:bg-darkCard p-6 rounded-3xl border border-slate-100 dark:border-darkBorder mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg flex items-center gap-2"><i class="fa-solid fa-user-doctor text-brand-500"></i> نخبة أعضاء هيئة التدريس</h3>
+                        </div>
+                        <!-- شريط التمرير الأفقي للدكاترة -->
+                        <div id="doctors-directory-list" class="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
+                            <div class="text-xs text-slate-400">جاري تحميل قائمة الدكاترة...</div>
+                        </div>
+                    </div>
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- عمود الإحصائيات والدراسة السريعة -->
 <div class="lg:col-span-2 space-y-6">
@@ -950,6 +967,52 @@
                 </div>
 
             </div>
+            <!-- شاشة: بروفايل الدكتور والكورسات الخاصة به -->
+                <div id="doctor-profile-view" class="content-view space-y-6">
+                    <div class="bg-white dark:bg-darkCard rounded-3xl border border-slate-100 dark:border-darkBorder overflow-hidden relative shadow-sm">
+                        <div class="h-32 bg-gradient-to-r from-brand-600 to-emerald-400 w-full"></div>
+                        <div class="px-6 sm:px-10 pb-6 relative">
+                            <div class="flex flex-col sm:flex-row justify-between items-center sm:items-end gap-4 -mt-12 sm:-mt-16 mb-6">
+                                <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-right">
+                                    <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white dark:border-darkCard bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-4xl sm:text-5xl text-brand-500 shadow-lg" id="doc-profile-avatar">
+                                        <i class="fa-solid fa-user-tie"></i>
+                                    </div>
+                                    <div class="mt-2 sm:mt-8">
+                                        <h2 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white" id="doc-profile-name">اسم الدكتور</h2>
+                                        <p class="text-sm font-bold text-slate-500 mt-1"><i class="fa-solid fa-chalkboard-user"></i> عضو هيئة تدريس معتمد</p>
+                                    </div>
+                                </div>
+                                <button onclick="document.getElementById('message-doctor-modal').classList.remove('hidden')" class="bg-slate-900 hover:bg-brand-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition-all flex items-center gap-2 text-sm shrink-0">
+                                    <i class="fa-solid fa-paper-plane"></i> تواصل مع الدكتور
+                                </button>
+                            </div>
+                            <h3 class="font-bold text-lg mb-4 border-b border-slate-100 dark:border-darkBorder pb-2">الكورسات التي يقدمها الدكتور</h3>
+                            <div id="doc-profile-courses" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <!-- سيتم جلب كورسات الدكتور هنا -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- شاشة: صندوق وارد الدكتور (Inbox) -->
+                <div id="doctor-inbox-view" class="content-view space-y-6">
+                    <div class="bg-white dark:bg-darkCard p-6 rounded-3xl border border-slate-100 dark:border-darkBorder">
+                        <h3 class="font-black text-xl flex items-center gap-2 mb-6"><i class="fa-solid fa-inbox text-brand-500"></i> صندوق الوارد واستفسارات الطلاب</h3>
+                        <div id="doctor-messages-list" class="space-y-4">
+                            <!-- سيتم جلب الرسائل هنا -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- نافذة منبثقة لإرسال رسالة للدكتور -->
+                <div id="message-doctor-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
+                    <div class="bg-white dark:bg-darkCard w-full max-w-lg rounded-3xl p-6 shadow-2xl relative">
+                        <button onclick="document.getElementById('message-doctor-modal').classList.add('hidden')" class="absolute top-4 left-4 text-slate-400 hover:text-rose-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+                        <h3 class="text-lg font-black mb-4"><i class="fa-solid fa-envelope text-brand-500"></i> إرسال رسالة مباشرة للدكتور</h3>
+                        <textarea id="msg-to-doctor-text" rows="4" class="w-full p-3 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none resize-none mb-4" placeholder="اكتب سؤالك أو استفسارك هنا وسيصل للدكتور في صندوقه الخاص..."></textarea>
+                        <button onclick="sendMessageToDoctor()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition">إرسال الرسالة</button>
+                    </div>
+                </div>
             <!-- تذييل المنصة (حقوق الملكية والدعاء) -->
             <footer class="w-full py-3 mt-auto bg-white/90 dark:bg-darkCard/90 backdrop-blur-md border-t border-slate-200 dark:border-darkBorder z-10 flex flex-col items-center justify-center gap-1.5 transition-colors duration-300">
                 <p class="text-xs font-bold text-slate-500 dark:text-slate-400 font-en">
@@ -961,6 +1024,46 @@
                     <i class="fa-solid fa-hands-praying"></i>
                 </p>
             </footer>
+            <!-- نافذة متابعة وتحليل طلاب الكورس (Course Analytics Modal) -->
+            <div id="analytics-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+                <div class="bg-white dark:bg-darkCard w-full max-w-5xl h-[85vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-slate-200 dark:border-darkBorder transform scale-95 transition-transform duration-300" id="analytics-modal-content">
+                    
+                    <!-- هيدر النافذة -->
+                    <div class="p-6 border-b border-slate-100 dark:border-darkBorder bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center shrink-0">
+                        <div>
+                            <h3 class="text-xl font-black text-slate-800 dark:text-white flex items-center gap-2"><i class="fa-solid fa-chart-pie text-brand-500"></i> تقرير متابعة طلاب الكورس</h3>
+                            <p class="text-xs text-slate-500 mt-1" id="analytics-course-title">جاري جلب البيانات...</p>
+                        </div>
+                        <button onclick="closeAnalyticsModal()" class="w-10 h-10 bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white rounded-xl flex items-center justify-center transition-colors text-lg"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+
+                    <!-- محتوى التقرير (الجدول) -->
+                    <div class="p-6 flex-1 overflow-y-auto custom-scrollbar bg-white dark:bg-darkCard">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-right text-xs">
+                                <thead>
+                                    <tr class="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-800">
+                                        <th class="p-4 rounded-tr-xl">اسم الطالب (البريد)</th>
+                                        <th class="p-4 text-center">نسبة إنجاز المنهج</th>
+                                        <th class="p-4 text-center">حالة الشهادة</th>
+                                        <th class="p-4 text-center">أعلى درجة باختبارات الكورس</th>
+                                        <th class="p-4 text-center rounded-tl-xl">وقت آخر نشاط</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="analytics-table-body" class="divide-y divide-slate-50 dark:divide-slate-800/50">
+                                    <tr><td colspan="5" class="p-10 text-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-brand-500"></i><p class="mt-2 text-slate-400 font-bold">جاري تجميع وتحليل بيانات الطلاب سحابياً...</p></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- تذييل النافذة -->
+                    <div class="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-darkBorder flex justify-between items-center shrink-0">
+                        <span class="text-[10px] text-slate-400 font-bold"><i class="fa-solid fa-circle-info text-blue-500"></i> يعرض هذا الجدول الطلاب الذين بدأوا بدراسة المصادر أو حلوا الاختبارات فقط.</span>
+                        <button class="bg-brand-100 text-brand-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-brand-500 hover:text-white transition cursor-not-allowed opacity-50" title="قريباً: تصدير لملف إكسيل">تصدير (Excel)</button>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 
@@ -1081,17 +1184,24 @@
         // نظام المصادقة والأمن
         // ==========================================
         document.getElementById('btn-signup').addEventListener('click', async () => {
+            const name = document.getElementById('auth-name').value.trim();
             const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value;
             const role = document.getElementById('auth-role').value;
+            
+            if(!name) return showToast("يرجى إدخال اسمك بالكامل أولاً.", "error");
             if(!email || !password) return showToast("يرجى ملء جميع الحقول المطلوبة.", "error");
 
             try {
                 const btn = document.getElementById('btn-signup');
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تأسيس حسابك...';
                 const uc = await createUserWithEmailAndPassword(auth, email, password);
+                
+                // حفظ الاسم مع باقي البيانات
                 await setDoc(doc(db, "users", uc.user.uid), {
-                    email: uc.user.email, role: role,
+                    name: name,
+                    email: uc.user.email, 
+                    role: role,
                     status: role === 'admin' ? 'pending' : 'active',
                     completedLectures: [] 
                 });
@@ -1124,13 +1234,14 @@
 
             if (user) {
                 currentUser = user;
-                document.getElementById('nav-user-email').textContent = user.email.split('@')[0];
                 document.getElementById('player-watermark').textContent = user.email;
 
                 try {
                     const uDoc = await getDoc(doc(db, "users", user.uid));
                     if(uDoc.exists()) {
                         userData = uDoc.data();
+                        // عرض الاسم الحقيقي في القائمة بدلا من الايميل
+                        document.getElementById('nav-user-email').textContent = userData.name || user.email.split('@')[0];
                         if(!userData.completedLectures) userData.completedLectures = [];
                         
                         let roleName = "👨‍🎓 طالب";
@@ -1202,6 +1313,8 @@
         window.buildDashboardHub = function() {
             if(!currentUser || !userData) return;
             
+            loadDoctorsDirectory();
+            
             // تحية تفاعلية
             const emailPart = currentUser.email.split('@')[0];
             const welcomeTitle = document.getElementById('dash-welcome-title');
@@ -1262,6 +1375,7 @@
                                 </div>
                                 <div class="text-center px-2">
                                     <h4 class="text-lg font-black text-slate-800 dark:text-white line-clamp-1 mb-2">${course.title}</h4>
+                                    <p class="text-[10px] text-slate-500 font-bold mb-2"><i class="fa-solid fa-user-tie text-brand-500"></i> د. ${course.creatorName || 'إدارة الأكاديمية'}</p>
                                     
                                     <!-- التقييم -->
                                     <div class="flex items-center justify-center gap-1.5 mb-2">
@@ -1442,6 +1556,7 @@
                 await addDoc(collection(db, "community"), {
                     text: val,
                     email: currentUser.email,
+                    userName: userData.name || currentUser.email.split('@')[0],
                     role: userData.role,
                     createdAt: new Date().getTime()
                 });
@@ -1492,7 +1607,7 @@
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-2 mb-1 justify-between">
                                     <div class="flex items-center gap-2">
-                                        <span class="text-xs font-black text-slate-800 dark:text-white truncate">${data.email.split('@')[0]}</span>
+                                        <span class="text-xs font-black text-slate-800 dark:text-white truncate">${data.userName || data.email.split('@')[0]}</span>
                                         ${isStaff ? `<span class="bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-400 text-[9px] px-1.5 py-0.5 rounded font-black border border-amber-200/35">هيئة التدريس</span>` : ''}
                                     </div>
                                     <div class="flex items-center gap-2">
@@ -1581,6 +1696,12 @@
                 <div class="bg-slate-50 dark:bg-slate-800/80 p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row gap-4 justify-between items-center cursor-move">
                     <div class="flex items-center gap-3 w-full">
                         <div class="cursor-grab text-slate-300 hover:text-brand-500"><i class="fa-solid fa-grip-vertical"></i></div>
+                        
+                        <!-- مربع رقم الترتيب الجديد -->
+                        <div class="w-16 shrink-0">
+                            <input type="number" class="lec-order-input w-full p-2 text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-sm font-bold text-brand-600 focus:ring-2 focus:ring-brand-500" placeholder="الترتيب" value="${lecData && lecData.order ? lecData.order : ''}" min="1" required title="رقم ترتيب المحاضرة (1, 2, 3...)">
+                        </div>
+
                         <div class="w-full flex-1">
                             <input type="text" class="lec-title-input w-full bg-transparent outline-none font-black text-slate-800 dark:text-white text-base placeholder-slate-400" placeholder="اكتب عنوان المحاضرة هنا (مثال: الوحدة الأولى: المقدمة)..." value="${lecTitle}" required>
                         </div>
@@ -1663,6 +1784,7 @@
             if(!cTitle) return showToast("أدخل اسم الكورس أولاً.", "error");
 
             const courseData = {
+                creatorName: userData.name || currentUser.email.split('@')[0],
                 faculty: document.getElementById('c-faculty').value.trim(),
                 semester: document.getElementById('c-semester').value.trim(),
                 category: document.getElementById('c-category').value.trim(),
@@ -1678,6 +1800,7 @@
             const lecBlocks = document.querySelectorAll('.lecture-block');
             lecBlocks.forEach(lecBlock => {
                 const lecTitle = lecBlock.querySelector('.lec-title-input').value.trim();
+                const lecOrder = parseInt(lecBlock.querySelector('.lec-order-input').value) || 99;
                 const lecId = lecBlock.dataset.lecid || getGenId();
                 const resources = [];
                 
@@ -1699,7 +1822,7 @@
                 });
                 
                 if(lecTitle) {
-                    courseData.lectures.push({ id: lecId, title: lecTitle, resources: resources });
+                    courseData.lectures.push({ id: lecId, title: lecTitle, order: lecOrder, resources: resources });
                 }
             });
 
@@ -1776,6 +1899,7 @@
                         </div>
                         <div class="text-center px-2">
                             <h4 class="text-lg font-black text-slate-800 dark:text-white line-clamp-1 mb-2">${course.title}</h4>
+                            <p class="text-[10px] text-slate-500 font-bold mb-2"><i class="fa-solid fa-user-tie text-brand-500"></i> د. ${course.creatorName || 'إدارة الأكاديمية'}</p>
                             
                             <!-- إظهار التقييم الفعلي بالنجوم في الكتالوج -->
                             <div class="flex items-center justify-center gap-1.5 mb-2">
@@ -1885,6 +2009,12 @@
                 
                 // زر التفعيل يظهر فقط لطلبات الدكتور المعلقة
                 let actionBtn = "";
+                let hideDoctorBtn = "";
+                if (user.role === 'admin' && user.status === 'active') {
+                    const isHidden = user.isHiddenFromDirectory ? 'text-rose-500 bg-rose-50' : 'text-slate-500 bg-slate-100';
+                    const titleHide = user.isHiddenFromDirectory ? 'إعادة إظهار في القائمة' : 'إخفاء من قائمة الدكاترة بالرئيسية';
+                    hideDoctorBtn = `<button onclick="window.toggleDoctorVisibility('${user.id}', ${user.isHiddenFromDirectory || false})" class="${isHidden} hover:bg-slate-200 p-2 rounded-xl transition text-[11px]" title="${titleHide}"><i class="fa-solid fa-eye-slash"></i> إخفاء</button>`;
+                }
                 if (isPendingAdmin) {
                     actionBtn = `
                         <button onclick="window.approveUser('${user.id}')" class="bg-emerald-100 hover:bg-emerald-500 text-emerald-600 hover:text-white px-3 py-1.5 rounded-lg font-black transition text-[10px]">
@@ -1912,6 +2042,7 @@
                         <td class="p-4 text-center">
                             <div class="flex justify-center items-center gap-1.5">
                                 ${actionBtn}
+                                ${hideDoctorBtn}
                                 <!-- زر إعادة تعيين كلمة المرور الفورية والدعم الفني -->
                                 <button onclick="window.sendResetEmail('${user.email}')" class="bg-amber-50 hover:bg-amber-500 text-amber-500 hover:text-white p-2 rounded-xl transition text-[11px]" title="إرسال رابط إعادة تعيين كلمة المرور">
                                     <i class="fa-solid fa-key"></i> كلمة المرور
@@ -2007,7 +2138,8 @@
             
             const container = document.getElementById('builder-lectures-container');
             container.innerHTML = "";
-            
+            // ترتيب المحاضرات تصاعدياً بناءً على حقل الترتيب الجديد
+            if(course.lectures) course.lectures.sort((a, b) => (a.order || 99) - (b.order || 99));
             if(course.lectures && course.lectures.length > 0) {
                 course.lectures.forEach(lec => window.addLectureBlock(lec));
             } else {
@@ -2064,6 +2196,7 @@
                             <span class="bg-brand-50 text-brand-600 dark:bg-brand-900/30 dark:text-brand-400 px-3 py-1 rounded-lg text-xs font-black border border-brand-200 dark:border-brand-800">${lecsCount} وحدات ومحاضرات</span>
                         </td>
                         <td class="p-4 border-b border-slate-100 dark:border-darkBorder text-center">
+                            <button onclick="window.openCourseAnalytics('${course.id}')" class="bg-blue-50 hover:bg-blue-500 text-blue-500 hover:text-white dark:bg-blue-900/20 dark:hover:bg-blue-600 p-2.5 rounded-xl transition mr-2" title="تقرير المتابعة ودرجات الطلاب"><i class="fa-solid fa-chart-simple"></i></button>
                             <button onclick="window.editCourse('${course.id}')" class="bg-slate-100 hover:bg-brand-50 text-slate-600 hover:text-brand-600 dark:bg-slate-800 dark:text-slate-400 p-2.5 rounded-xl transition mr-2" title="تعديل وهيكلة"><i class="fa-solid fa-pen-to-square"></i></button>
                             <button onclick="window.deleteCourse('${course.id}')" class="bg-rose-50 hover:bg-rose-100 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400 p-2.5 rounded-xl transition" title="حذف بالكامل"><i class="fa-solid fa-trash-can"></i></button>
                         </td>
@@ -2234,6 +2367,8 @@
         function buildCourseSidebar(course) {
             const sidebar = document.getElementById('player-lectures-list');
             if(!sidebar) return;
+            // ترتيب المحاضرات تصاعدياً بناءً على حقل الترتيب الجديد
+            if(course.lectures) course.lectures.sort((a, b) => (a.order || 99) - (b.order || 99));
             sidebar.innerHTML = "";
             let completedResourcesCount = 0;
             let totalResourcesCount = 0;
@@ -2545,16 +2680,19 @@
             const grid = document.getElementById('saved-courses-grid');
             if(!grid) return;
             
+            // التأكد من جلب البيانات بشكل صحيح
             const savedIds = userData?.savedCourses || [];
+            
+            // فلترة الكورسات بناءً على الآيديهات المحفوظة
             const savedList = allCourses.filter(c => savedIds.includes(c.id));
             
             if (savedList.length === 0) {
                 grid.innerHTML = `
-                    <div class="col-span-full py-20 flex flex-col items-center justify-center text-slate-400 bg-white dark:bg-darkCard rounded-3xl border border-slate-100 dark:border-darkBorder w-full">
+                    <div class="col-span-full py-20 flex flex-col items-center justify-center text-slate-400 bg-white dark:bg-darkCard rounded-3xl border border-slate-100 dark:border-darkBorder w-full shadow-sm">
                         <i class="fa-solid fa-heart-crack text-6xl mb-4 opacity-30 text-rose-500"></i>
                         <h3 class="text-xl font-black text-slate-700 dark:text-slate-300">لا توجد كورسات محفوظة</h3>
-                        <p class="text-sm mt-2">قم باستكشاف الكورسات واضغط على زر القلب لحفظها هنا للرجوع السريع.</p>
-                        <button onclick="navTo('student-catalog')" class="mt-4 bg-brand-500 hover:bg-brand-600 text-white px-6 py-2 rounded-xl font-bold transition">استكشاف الكورسات الآن</button>
+                        <p class="text-sm mt-2 text-center max-w-sm">قم باستكشاف الكورسات واضغط على أيقونة القلب لحفظها هنا للرجوع السريع.</p>
+                        <button onclick="navTo('student-catalog')" class="mt-6 bg-brand-500 hover:bg-brand-600 text-white px-8 py-3 rounded-xl font-bold transition shadow-lg">استكشاف الكورسات الآن</button>
                     </div>`;
                 return;
             }
@@ -2562,27 +2700,46 @@
             grid.innerHTML = "";
             savedList.forEach(course => {
                 const lecsCount = course.lectures ? course.lectures.length : 0;
+                const avgRating = course.ratingAvg ? course.ratingAvg.toFixed(1) : "5.0";
+                // بما أننا في قسم المحفوظات، فالتحديد دائماً سيكون "قلب أحمر"
+                const heartClass = 'fa-solid fa-heart text-rose-500';
+
                 const card = document.createElement('div');
-                card.className = "bg-white dark:bg-darkCard rounded-3xl border border-slate-200 dark:border-darkBorder overflow-hidden hover:shadow-xl hover:border-brand-500 transition-all duration-300 group flex flex-col cursor-pointer relative";
-                card.onclick = () => window.openCoursePlayer(course.id);
+                card.className = "bg-white dark:bg-darkCard rounded-3xl border border-slate-200 dark:border-darkBorder overflow-hidden hover:shadow-xl hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 group flex flex-col cursor-pointer relative";
                 
                 card.innerHTML = `
+                    <!-- زر إزالة الحفظ -->
                     <button onclick="toggleSaveCourse('${course.id}', event)" class="absolute top-6 left-6 z-10 w-9 h-9 bg-white/90 dark:bg-slate-900/90 rounded-xl flex items-center justify-center text-base shadow-md hover:scale-110 transition">
-                        <i class="fa-solid fa-heart text-rose-500"></i>
+                        <i class="${heartClass}"></i>
                     </button>
-                    <div class="p-3">
+
+                    <div class="p-3" onclick="window.openCoursePlayer('${course.id}')">
                         <div class="relative h-44 overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 mb-4">
-                            <img src="${course.cover || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" loading="lazy" class="w-full h-full object-cover">
+                            <img src="${course.cover || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
                         </div>
                         <div class="text-center px-2">
                             <h4 class="text-lg font-black text-slate-800 dark:text-white line-clamp-1 mb-2">${course.title}</h4>
+                            <p class="text-[10px] text-slate-500 font-bold mb-2"><i class="fa-solid fa-user-tie text-brand-500"></i> د. ${course.creatorName || 'إدارة الأكاديمية'}</p>
+                            
+                            <!-- إظهار التقييم الفعلي -->
+                            <div class="flex items-center justify-center gap-1.5 mb-2">
+                                <span class="text-xs font-black text-slate-800 dark:text-slate-200">${avgRating}</span>
+                                <div class="flex text-amber-400 text-2xs">
+                                    <i class="fa-solid fa-star"></i>
+                                </div>
+                                <span class="text-[10px] text-slate-400">(${course.ratingCount || 1} تقييم)</span>
+                            </div>
+
+                            <p class="text-brand-600 dark:text-brand-400 font-bold text-sm mb-3">مجانـاً</p>
                             <div class="flex justify-between items-center text-[11px] text-slate-400 mb-4 px-2">
                                 <span class="flex items-center gap-1"><i class="fa-regular fa-calendar"></i> متاح دائماً</span>
                                 <span class="flex items-center gap-1"><i class="fa-solid fa-list"></i> ${lecsCount} دروس</span>
                             </div>
-                            <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-2.5 rounded-xl transition-colors">
-                                متابعة الدراسة
-                            </button>
+                            <div class="flex flex-col gap-2">
+                                <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-2.5 rounded-xl transition-colors shadow-md">
+                                    متابعة الدراسة
+                                </button>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -2863,7 +3020,7 @@
                                 <div class="flex items-center justify-between p-2.5 bg-slate-900/60 rounded-xl border border-slate-800/40">
                                     <div class="flex items-center gap-2">
                                         ${rankBadge}
-                                        <span class="text-xs font-bold ${attempt.userId === currentUser.uid ? 'text-brand-400' : 'text-slate-300'}">${attempt.email.split('@')[0]}</span>
+                                        <span class="text-xs font-bold ${attempt.userId === currentUser.uid ? 'text-brand-400' : 'text-slate-300'}">${attempt.userName || attempt.email.split('@')[0]}</span>
                                     </div>
                                     <div class="flex items-center gap-4 text-[11px] font-bold">
                                         <span class="text-emerald-500 font-en">${attempt.score}%</span>
@@ -3071,6 +3228,7 @@
                             quizId: resource.id,
                             userId: currentUser.uid,
                             email: currentUser.email,
+                            userName: userData.name || currentUser.email.split('@')[0],
                             score: scorePct,
                             correctCount: correctCount,
                             totalCount: quizQuestions.length,
@@ -3170,6 +3328,287 @@
                 }
             }, 3000);
         });
+        // ==========================================
+        // 7. نظام متابعة الطلاب وتحليلات الكورس (Analytics)
+        // ==========================================
+        window.openCourseAnalytics = async function(courseId) {
+            const course = allCourses.find(c => c.id === courseId);
+            if(!course) return;
+
+            document.getElementById('analytics-course-title').textContent = course.title;
+            const modal = document.getElementById('analytics-modal');
+            const content = document.getElementById('analytics-modal-content');
+            const tbody = document.getElementById('analytics-table-body');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95');
+            }, 10);
+
+            tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-brand-500"></i></td></tr>`;
+
+            try {
+                // 1. حساب إجمالي مصادر الكورس لعمل النسبة المئوية
+                let totalCourseResources = 0;
+                let quizIds = [];
+                if(course.lectures) {
+                    course.lectures.forEach(lec => {
+                        if(lec.resources) {
+                            totalCourseResources += lec.resources.length;
+                            lec.resources.forEach(r => { if(r.type === 'quiz') quizIds.push(r.id); });
+                        }
+                    });
+                }
+
+                if(totalCourseResources === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 font-bold">هذا الكورس لا يحتوي على محتوى دراسي بعد.</td></tr>`;
+                    return;
+                }
+
+                // 2. جلب كل الطلاب
+                const usersSnap = await getDocs(collection(db, "users"));
+                
+                // 3. جلب كل محاولات الاختبار الخاصة بهذا الكورس
+                let attemptsMap = {}; // { userId: maxScore }
+                if(quizIds.length > 0) {
+                    const attemptsSnap = await getDocs(collection(db, "quizAttempts"));
+                    attemptsSnap.forEach(d => {
+                        const data = d.data();
+                        if(quizIds.includes(data.quizId)) {
+                            if(!attemptsMap[data.userId] || data.score > attemptsMap[data.userId]) {
+                                attemptsMap[data.userId] = data.score;
+                            }
+                        }
+                    });
+                }
+
+                let studentsData = [];
+
+                // 4. تحليل بيانات كل طالب
+                usersSnap.forEach(docSnap => {
+                    const student = docSnap.data();
+                    if(student.role !== 'student') return; // تتبع الطلاب فقط
+                    
+                    let completedInThisCourse = 0;
+                    if(student.completedLectures && course.lectures) {
+                        course.lectures.forEach(lec => {
+                            if(lec.resources) {
+                                lec.resources.forEach(r => {
+                                    if(student.completedLectures.includes(r.id)) completedInThisCourse++;
+                                });
+                            }
+                        });
+                    }
+
+                    if(completedInThisCourse > 0) {
+                        const progressPct = Math.round((completedInThisCourse / totalCourseResources) * 100);
+                        studentsData.push({
+                            name: student.name || student.email.split('@')[0],
+                            email: student.email,
+                            progress: progressPct > 100 ? 100 : progressPct,
+                            bestScore: attemptsMap[docSnap.id] !== undefined ? `${attemptsMap[docSnap.id]}%` : 'لم يختبر'
+                        });
+                    }
+                });
+
+                // 5. رسم الجدول وترتيب الطلاب (الأعلى إنجازاً أولاً)
+                studentsData.sort((a, b) => b.progress - a.progress);
+
+                if(studentsData.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 font-bold"><i class="fa-solid fa-ghost text-4xl mb-3 block opacity-50"></i> لم يبدأ أي طالب في دراسة هذا الكورس بعد.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = "";
+                studentsData.forEach(s => {
+                    const progressColor = s.progress === 100 ? 'bg-emerald-500' : (s.progress > 50 ? 'bg-brand-500' : 'bg-amber-500');
+                    const certBadge = s.progress === 100 
+                        ? '<span class="bg-emerald-100 text-emerald-600 px-2 py-1 rounded text-[10px] font-black"><i class="fa-solid fa-award"></i> مؤهل للشهادة</span>' 
+                        : '<span class="text-slate-300 text-[10px] font-bold">قيد الدراسة</span>';
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+                            <td class="p-4 font-bold text-slate-800 dark:text-white font-en flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500"><i class="fa-solid fa-user text-xs"></i></div>
+                                ${s.name}
+                            </td>
+                            <td class="p-4 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <div class="w-24 bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                                        <div class="${progressColor} h-2 rounded-full" style="width: ${s.progress}%"></div>
+                                    </div>
+                                    <span class="text-[10px] font-black text-slate-600 dark:text-slate-300 font-en">${s.progress}%</span>
+                                </div>
+                            </td>
+                            <td class="p-4 text-center">${certBadge}</td>
+                            <td class="p-4 text-center">
+                                <span class="font-black ${s.bestScore === 'لم يختبر' ? 'text-slate-400 text-[10px]' : 'text-amber-500 font-en'}">${s.bestScore}</span>
+                            </td>
+                            <td class="p-4 text-center text-slate-400 font-en text-[10px]">نشط حديثاً</td>
+                        </tr>
+                    `;
+                });
+
+            } catch(e) {
+                console.error(e);
+                tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-rose-500 font-bold">حدث خطأ في قراءة البيانات. يرجى مراجعة الصلاحيات.</td></tr>`;
+            }
+        };
+
+        window.closeAnalyticsModal = function() {
+            const modal = document.getElementById('analytics-modal');
+            const content = document.getElementById('analytics-modal-content');
+            content.classList.add('scale-95');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+        // ==========================================
+        // 8. نظام عرض الدكاترة والمراسلات (Directory & Messaging)
+        // ==========================================
+        let allDoctors = [];
+        let currentViewingDoctorId = null;
+
+        // دالة المالك لإخفاء/إظهار دكتور من الرئيسية
+        window.toggleDoctorVisibility = async function(userId, currentStatus) {
+            try {
+                await updateDoc(doc(db, "users", userId), { isHiddenFromDirectory: !currentStatus });
+                showToast("تم تحديث ظهور الدكتور في الرئيسية.", "success");
+                window.initSuperAdmin();
+            } catch(e) { showToast("حدث خطأ.", "error"); }
+        };
+
+        // دالة رسم قائمة الدكاترة في الرئيسية
+        async function loadDoctorsDirectory() {
+            const container = document.getElementById('doctors-directory-list');
+            if(!container) return;
+            try {
+                const snap = await getDocs(query(collection(db, "users"), where("role", "==", "admin"), where("status", "==", "active")));
+                allDoctors = [];
+                snap.forEach(d => allDoctors.push({ id: d.id, ...d.data() }));
+                
+                container.innerHTML = "";
+                const visibleDoctors = allDoctors.filter(d => !d.isHiddenFromDirectory);
+                
+                if(visibleDoctors.length === 0) {
+                    container.innerHTML = `<p class="text-xs text-slate-400 w-full text-center py-4">لا يوجد أعضاء هيئة تدريس متاحين حالياً.</p>`;
+                    return;
+                }
+
+                visibleDoctors.forEach(doc => {
+                    const avatar = doc.avatar || 'user-tie';
+                    container.innerHTML += `
+                        <div onclick="openDoctorProfile('${doc.id}')" class="min-w-[140px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:border-brand-500 hover:shadow-md transition-all group shrink-0">
+                            <div class="w-14 h-14 rounded-full bg-white dark:bg-darkCard text-brand-500 flex items-center justify-center text-2xl shadow-sm mb-2 group-hover:scale-110 transition border border-slate-100 dark:border-slate-700">
+                                <i class="fa-solid fa-${avatar}"></i>
+                            </div>
+                            <h4 class="font-bold text-xs text-slate-800 dark:text-white line-clamp-1 w-full">${doc.name || doc.email.split('@')[0]}</h4>
+                            <p class="text-[9px] text-slate-400 mt-1">عرض الملف</p>
+                        </div>
+                    `;
+                });
+            } catch(e) { console.error("خطأ تحميل الدكاترة", e); }
+        }
+
+        // فتح بروفايل الدكتور
+        window.openDoctorProfile = function(doctorId) {
+            const doctor = allDoctors.find(d => d.id === doctorId);
+            if(!doctor) return;
+            
+            currentViewingDoctorId = doctorId;
+            navTo('doctor-profile-view');
+            document.getElementById('page-title').innerText = "الملف الشخصي";
+            
+            document.getElementById('doc-profile-name').textContent = doctor.name || doctor.email.split('@')[0];
+            document.getElementById('doc-profile-avatar').innerHTML = `<i class="fa-solid fa-${doctor.avatar || 'user-tie'}"></i>`;
+            
+            const coursesContainer = document.getElementById('doc-profile-courses');
+            coursesContainer.innerHTML = "";
+            
+            const docCourses = allCourses.filter(c => c.createdBy === doctorId);
+            if(docCourses.length === 0) {
+                coursesContainer.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-sm border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">لا توجد كورسات منشورة لهذا الدكتور بعد.</div>`;
+                return;
+            }
+
+            // رسم بطاقات الكورسات الخاصة به بنفس التصميم
+            docCourses.forEach(course => {
+                const lecsCount = course.lectures ? course.lectures.length : 0;
+                coursesContainer.innerHTML += `
+                    <div class="bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden cursor-pointer hover:border-brand-500 transition" onclick="window.openCoursePlayer('${course.id}')">
+                        <div class="h-32 overflow-hidden bg-slate-200"><img src="${course.cover || ''}" class="w-full h-full object-cover"></div>
+                        <div class="p-3 text-center">
+                            <h4 class="text-sm font-black text-slate-800 dark:text-white line-clamp-1 mb-1">${course.title}</h4>
+                            <p class="text-[10px] text-slate-500 mb-2">${lecsCount} وحدات دراسية</p>
+                            <button class="w-full bg-brand-100 text-brand-600 text-xs font-bold py-2 rounded-lg">بدء الدراسة</button>
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        // إرسال رسالة للدكتور
+        window.sendMessageToDoctor = async function() {
+            const text = document.getElementById('msg-to-doctor-text').value.trim();
+            if(!text) return showToast("اكتب الرسالة أولاً.", "error");
+            if(!currentViewingDoctorId || !currentUser) return;
+
+            try {
+                await addDoc(collection(db, "messages"), {
+                    doctorId: currentViewingDoctorId,
+                    studentId: currentUser.uid,
+                    studentName: userData.name || currentUser.email.split('@')[0],
+                    studentEmail: currentUser.email,
+                    text: text,
+                    createdAt: new Date().getTime(),
+                    isRead: false
+                });
+                document.getElementById('msg-to-doctor-text').value = "";
+                document.getElementById('message-doctor-modal').classList.add('hidden');
+                showToast("تم إرسال رسالتك للدكتور بنجاح!", "success");
+            } catch(e) { showToast("فشل الإرسال.", "error"); }
+        };
+
+        // جلب الرسائل في صندوق الدكتور
+        window.loadDoctorMessages = async function() {
+            const container = document.getElementById('doctor-messages-list');
+            container.innerHTML = `<div class="text-center py-4"><i class="fa-solid fa-spinner fa-spin text-brand-500 text-2xl"></i></div>`;
+            
+            try {
+                const snap = await getDocs(query(collection(db, "messages"), where("doctorId", "==", currentUser.uid)));
+                let msgs = [];
+                snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
+                msgs.sort((a, b) => b.createdAt - a.createdAt);
+
+                if(msgs.length === 0) {
+                    container.innerHTML = `<div class="text-center py-10 text-slate-400 font-bold border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">صندوق الوارد فارغ. لا توجد رسائل جديدة.</div>`;
+                    return;
+                }
+
+                container.innerHTML = "";
+                msgs.forEach(msg => {
+                    const dateStr = new Date(msg.createdAt).toLocaleDateString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+                    container.innerHTML += `
+                        <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                            <div class="flex justify-between items-start mb-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-8 h-8 bg-brand-100 text-brand-600 rounded-full flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-user"></i></div>
+                                    <div>
+                                        <h4 class="text-sm font-black text-slate-800 dark:text-white">${msg.studentName}</h4>
+                                        <p class="text-[10px] text-slate-500 font-en">${msg.studentEmail}</p>
+                                    </div>
+                                </div>
+                                <span class="text-[9px] text-slate-400 font-bold font-en">${dateStr}</span>
+                            </div>
+                            <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-white dark:bg-darkCard p-3 rounded-xl border border-slate-100 dark:border-darkBorder mt-2">${msg.text}</p>
+                            <div class="mt-3 flex justify-end">
+                                <a href="mailto:${msg.studentEmail}?subject=رد من الأكاديمية على استفسارك" class="text-[10px] bg-brand-500 hover:bg-brand-600 text-white px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1"><i class="fa-solid fa-reply"></i> رد عبر الإيميل</a>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch(e) { container.innerHTML = `<p class="text-rose-500 text-xs">تعذر تحميل الرسائل.</p>`; }
+        };
     </script>
 </body>
 </html>
