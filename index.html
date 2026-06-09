@@ -269,6 +269,9 @@
                 <button onclick="navTo('student-progress')" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition font-bold">
                     <i class="fa-solid fa-user w-5 text-lg"></i> <span>حسابي</span>
                 </button>
+                <button onclick="navTo('student-messages-view'); loadStudentMessages();" class="nav-btn w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition font-bold relative">
+                    <i class="fa-solid fa-envelope-open-text w-5 text-lg"></i> <span>رسائلي</span>
+                </button>
 
                 <!-- الإدارة الأدوات -->
                 <div id="admin-menus" class="hidden pt-4 mt-4 border-t border-slate-100 dark:border-darkBorder space-y-1">
@@ -784,6 +787,22 @@
                             <!-- تفاصيل ونقاشات الكورس -->
                             <div class="md:col-span-2 space-y-6">
                                 <div class="bg-white dark:bg-darkCard p-6 rounded-3xl border border-slate-200/60 dark:border-darkBorder">
+                                    <!-- صندوق تنبيهات وإعلانات الكورس -->
+                        <div id="course-announcements-box" class="hidden bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 p-5 rounded-3xl relative overflow-hidden flex flex-col gap-3">
+                            <div class="flex justify-between items-center border-b border-amber-500/20 pb-2">
+                                <h4 class="text-xs font-black text-amber-500 flex items-center gap-1.5"><i class="fa-solid fa-bullhorn animate-bounce"></i> إعلانات وتنبيهات المدرس العاجلة لهذا الكورس</h4>
+                                <span class="text-[9px] text-slate-400 font-bold" id="announcement-date"></span>
+                            </div>
+                            <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-sans font-medium" id="announcement-text-view">لا توجد إعلانات نشطة للكورس حالياً.</p>
+                            
+                            <!-- لوحة كتابة إعلان جديد (تظهر فقط للدكاترة والمالك) -->
+                            <div id="admin-announcement-panel" class="hidden border-t border-slate-100 dark:border-slate-800 pt-3 mt-2">
+                                <div class="flex gap-2">
+                                    <input type="text" id="announcement-input-text" class="flex-1 p-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none" placeholder="اكتب تذكير أو تنبيه لطلبة هذا الكورس هنا...">
+                                    <button onclick="publishCourseAnnouncement()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-black transition">نشر الإعلان</button>
+                                </div>
+                            </div>
+                        </div>
                                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-brand-600 p-6 md:p-8 rounded-2xl mb-5 shadow-lg relative overflow-hidden text-white">
                                         <!-- أيقونة خلفية للتزيين -->
                                         <i class="fa-solid fa-flask text-white opacity-10 text-[8rem] absolute -left-4 -top-4 pointer-events-none"></i>
@@ -902,9 +921,29 @@
                                 <i class="fa-solid fa-user-gear text-brand-500"></i> إعدادات حسابي الشخصي
                             </h3>
                             
-                            <!-- اختيار الصورة الشخصية/الرمز التعبيري -->
+                            <!-- نموذج تحديث الاسم والصورة الحقيقية -->
+                            <div class="space-y-4 border-b border-slate-100 dark:border-darkBorder pb-4">
+                                <label class="block text-xs font-bold text-slate-400">صورتك الشخصية واسمك</label>
+                                <div class="flex items-center gap-4">
+                                    <!-- رفع الصورة -->
+                                    <div class="relative w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-brand-500 flex items-center justify-center overflow-hidden shrink-0 group hover:bg-brand-50 transition cursor-pointer">
+                                        <img id="real-profile-img" src="" class="absolute inset-0 w-full h-full object-cover hidden z-10">
+                                        <i class="fa-solid fa-camera text-brand-500 text-xl group-hover:scale-110 transition z-0"></i>
+                                        <input type="file" id="profile-image-upload" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-20" onchange="processAndUploadImage(this)">
+                                    </div>
+                                    <!-- تغيير الاسم -->
+                                    <div class="flex-1">
+                                        <input type="text" id="update-profile-name" class="w-full p-3 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-brand-500" placeholder="اكتب اسمك الجديد هنا...">
+                                    </div>
+                                </div>
+                                <button onclick="updatePersonalData()" class="w-full bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white py-2.5 rounded-xl font-bold text-xs transition shadow-md">
+                                    حفظ البيانات الأساسية
+                                </button>
+                            </div>
+
+                            <!-- اختيار الرمز التعبيري (بديل للصورة) -->
                             <div class="space-y-3">
-                                <label class="block text-xs font-bold text-slate-400">اختر صورتك الرمزية (Avatar)</label>
+                                <label class="block text-[10px] font-bold text-slate-400">أو اختر رمزاً تعبيرياً (Avatar)</label>
                                 <div class="grid grid-cols-4 gap-3" id="avatar-selection-grid">
                                     <button onclick="changeAvatar('user-graduate')" class="avatar-opt p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-brand-500 transition text-2xl text-slate-600 dark:text-slate-300" data-avatar="user-graduate"><i class="fa-solid fa-user-graduate"></i></button>
                                     <button onclick="changeAvatar('user-doctor')" class="avatar-opt p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-brand-500 transition text-2xl text-slate-600 dark:text-slate-300" data-avatar="user-doctor"><i class="fa-solid fa-user-md"></i></button>
@@ -1003,7 +1042,16 @@
                         </div>
                     </div>
                 </div>
-
+                <!-- شاشة: صندوق رسائل الطالب (Student Messages) -->
+                <div id="student-messages-view" class="content-view space-y-6">
+                    <div class="bg-white dark:bg-darkCard p-6 rounded-3xl border border-slate-100 dark:border-darkBorder">
+                        <h3 class="font-black text-xl flex items-center gap-2 mb-6"><i class="fa-solid fa-envelope-open-text text-brand-500"></i> رسائلي واستفساراتي</h3>
+                        <div id="student-messages-list" class="space-y-4">
+                            <!-- سيتم جلب رسائل الطالب وردود الدكاترة هنا -->
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- نافذة منبثقة لإرسال رسالة للدكتور -->
                 <div id="message-doctor-modal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
                     <div class="bg-white dark:bg-darkCard w-full max-w-lg rounded-3xl p-6 shadow-2xl relative">
@@ -1060,7 +1108,9 @@
                     <!-- تذييل النافذة -->
                     <div class="p-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-darkBorder flex justify-between items-center shrink-0">
                         <span class="text-[10px] text-slate-400 font-bold"><i class="fa-solid fa-circle-info text-blue-500"></i> يعرض هذا الجدول الطلاب الذين بدأوا بدراسة المصادر أو حلوا الاختبارات فقط.</span>
-                        <button class="bg-brand-100 text-brand-600 px-4 py-2 rounded-lg text-xs font-bold hover:bg-brand-500 hover:text-white transition cursor-not-allowed opacity-50" title="قريباً: تصدير لملف إكسيل">تصدير (Excel)</button>
+                        <button onclick="exportAnalyticsToCSV()" class="bg-emerald-100 hover:bg-emerald-600 text-emerald-600 hover:text-white px-4 py-2 rounded-lg text-xs font-black transition shadow-sm flex items-center gap-1">
+    <i class="fa-solid fa-file-excel"></i> تصدير التقرير (Excel)
+</button>
                     </div>
                 </div>
             </div>
@@ -1151,13 +1201,14 @@
             });
             
             const titles = {
-    'student-dashboard': 'لوحتي الأكاديمية', 'student-catalog': 'استكشاف الكورسات', 
-    'student-saved-courses': 'الكورسات المحفوظة', /* <-- هذا هو السطر الجديد */
-    'student-player': 'قاعة الكورس والمشاهدة', 'student-progress': 'سجل الإنجازات', 
-    'admin-add': 'مُنشئ الكورسات السحابي', 'admin-manage': 'أرشيف الكورسات والتحكم', 
-    'super-dashboard': 'لوحة تحكم الإدارة', 'pending-view': 'مراجعة الحساب والاعتماد',
-    'student-community': 'منتدى المنصة العام'
-};
+                'student-dashboard': 'لوحتي الأكاديمية', 'student-catalog': 'استكشاف الكورسات', 
+                'student-saved-courses': 'الكورسات المحفوظة', 'student-player': 'قاعة الكورس والمشاهدة', 
+                'student-progress': 'سجل الإنجازات', 'admin-add': 'مُنشئ الكورسات السحابي', 
+                'admin-manage': 'أرشيف الكورسات والتحكم', 'super-dashboard': 'لوحة تحكم الإدارة', 
+                'pending-view': 'مراجعة الحساب والاعتماد', 'student-community': 'منتدى المنصة العام',
+                'doctor-profile-view': 'الملف الشخصي', 'doctor-inbox-view': 'صندوق وارد الدكتور',
+                'student-messages-view': 'رسائلي واستفساراتي' /* <-- تمت الإضافة هنا */
+            };
             document.getElementById('page-title').innerText = titles[viewId] || 'منصة HMS';
 
             if(window.innerWidth < 1024 && document.getElementById('sidebar-overlay').classList.contains('hidden') === false) toggleSidebar(); 
@@ -1242,6 +1293,15 @@
                         userData = uDoc.data();
                         // عرض الاسم الحقيقي في القائمة بدلا من الايميل
                         document.getElementById('nav-user-email').textContent = userData.name || user.email.split('@')[0];
+                        // عرض الصورة الحقيقية إن وجدت في القائمة الجانبية وفي صفحة الإعدادات
+                        if(userData.realPhoto) {
+                            document.getElementById('user-avatar-icon').innerHTML = `<img src="${userData.realPhoto}" class="w-full h-full rounded-full object-cover">`;
+                            const editPreviewImg = document.getElementById('real-profile-img');
+                            if(editPreviewImg) {
+                                editPreviewImg.src = userData.realPhoto;
+                                editPreviewImg.classList.remove('hidden');
+                            }
+                        }
                         if(!userData.completedLectures) userData.completedLectures = [];
                         
                         let roleName = "👨‍🎓 طالب";
@@ -1388,7 +1448,7 @@
 
                                     <p class="text-brand-600 dark:text-brand-400 font-bold text-sm mb-3">مجانـاً</p>
                                     <div class="flex justify-between items-center text-[11px] text-slate-400 mb-4 px-2">
-                                        <span class="flex items-center gap-1"><i class="fa-regular fa-calendar"></i> متاح دائماً</span>
+                                        <span class="flex items-center gap-1"><i class="fa-regular fa-eye"></i> ${course.views || 0} مشاهدة</span>
                                         <span class="flex items-center gap-1"><i class="fa-solid fa-list"></i> ${lecsCount} دروس</span>
                                     </div>
                                     <div class="flex flex-col gap-2">
@@ -1912,7 +1972,7 @@
 
                             <p class="text-brand-600 dark:text-brand-400 font-bold text-sm mb-3">مجانـاً</p>
                             <div class="flex justify-between items-center text-[11px] text-slate-400 mb-4 px-2">
-                                <span class="flex items-center gap-1"><i class="fa-regular fa-calendar"></i> متاح دائماً</span>
+                                <span class="flex items-center gap-1"><i class="fa-regular fa-eye"></i> ${course.views || 0} مشاهدة</span>
                                 <span class="flex items-center gap-1"><i class="fa-solid fa-list"></i> ${lecsCount} دروس</span>
                             </div>
                             <div class="flex flex-col gap-2">
@@ -2213,10 +2273,18 @@
         // ==========================================
         // قاعة مشغل الكورسات التفاعلي (MasterClass Player)
         // ==========================================
-        window.openCoursePlayer = function(courseId) {
+        window.openCoursePlayer = async function(courseId) {
             const course = allCourses.find(c => c.id === courseId);
             if(!course) return;
 
+            // زيادة عداد المشاهدات تلقائياً (+1) في قاعدة البيانات السحابية عند فتح الكورس
+            try {
+                const currentViews = course.views || 0;
+                await updateDoc(doc(db, "courses", courseId), { views: currentViews + 1 });
+            } catch (e) {
+                console.error("خطأ في تحديث عداد المشاهدات:", e);
+            }
+            renderCourseAnnouncements(course);
             currentCourseId = courseId;
             currentActiveLectureId = null;
             currentActiveResourceId = null;
@@ -2680,10 +2748,7 @@
             const grid = document.getElementById('saved-courses-grid');
             if(!grid) return;
             
-            // التأكد من جلب البيانات بشكل صحيح
             const savedIds = userData?.savedCourses || [];
-            
-            // فلترة الكورسات بناءً على الآيديهات المحفوظة
             const savedList = allCourses.filter(c => savedIds.includes(c.id));
             
             if (savedList.length === 0) {
@@ -2701,14 +2766,12 @@
             savedList.forEach(course => {
                 const lecsCount = course.lectures ? course.lectures.length : 0;
                 const avgRating = course.ratingAvg ? course.ratingAvg.toFixed(1) : "5.0";
-                // بما أننا في قسم المحفوظات، فالتحديد دائماً سيكون "قلب أحمر"
                 const heartClass = 'fa-solid fa-heart text-rose-500';
 
                 const card = document.createElement('div');
                 card.className = "bg-white dark:bg-darkCard rounded-3xl border border-slate-200 dark:border-darkBorder overflow-hidden hover:shadow-xl hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 group flex flex-col cursor-pointer relative";
                 
                 card.innerHTML = `
-                    <!-- زر إزالة الحفظ -->
                     <button onclick="toggleSaveCourse('${course.id}', event)" class="absolute top-6 left-6 z-10 w-9 h-9 bg-white/90 dark:bg-slate-900/90 rounded-xl flex items-center justify-center text-base shadow-md hover:scale-110 transition">
                         <i class="${heartClass}"></i>
                     </button>
@@ -2721,7 +2784,6 @@
                             <h4 class="text-lg font-black text-slate-800 dark:text-white line-clamp-1 mb-2">${course.title}</h4>
                             <p class="text-[10px] text-slate-500 font-bold mb-2"><i class="fa-solid fa-user-tie text-brand-500"></i> د. ${course.creatorName || 'إدارة الأكاديمية'}</p>
                             
-                            <!-- إظهار التقييم الفعلي -->
                             <div class="flex items-center justify-center gap-1.5 mb-2">
                                 <span class="text-xs font-black text-slate-800 dark:text-slate-200">${avgRating}</span>
                                 <div class="flex text-amber-400 text-2xs">
@@ -2732,7 +2794,7 @@
 
                             <p class="text-brand-600 dark:text-brand-400 font-bold text-sm mb-3">مجانـاً</p>
                             <div class="flex justify-between items-center text-[11px] text-slate-400 mb-4 px-2">
-                                <span class="flex items-center gap-1"><i class="fa-regular fa-calendar"></i> متاح دائماً</span>
+                                <span class="flex items-center gap-1"><i class="fa-regular fa-eye"></i> ${course.views || 0} مشاهدة</span>
                                 <span class="flex items-center gap-1"><i class="fa-solid fa-list"></i> ${lecsCount} دروس</span>
                             </div>
                             <div class="flex flex-col gap-2">
@@ -3539,7 +3601,10 @@
                         <div class="h-32 overflow-hidden bg-slate-200"><img src="${course.cover || ''}" class="w-full h-full object-cover"></div>
                         <div class="p-3 text-center">
                             <h4 class="text-sm font-black text-slate-800 dark:text-white line-clamp-1 mb-1">${course.title}</h4>
-                            <p class="text-[10px] text-slate-500 mb-2">${lecsCount} وحدات دراسية</p>
+                            <div class="flex justify-between items-center text-[10px] text-slate-500 mb-3 px-1">
+                                <span><i class="fa-regular fa-eye"></i> ${course.views || 0} مشاهدة</span>
+                                <span><i class="fa-solid fa-list"></i> ${lecsCount} وحدات</span>
+                            </div>
                             <button class="w-full bg-brand-100 text-brand-600 text-xs font-bold py-2 rounded-lg">بدء الدراسة</button>
                         </div>
                     </div>
@@ -3588,6 +3653,26 @@
                 container.innerHTML = "";
                 msgs.forEach(msg => {
                     const dateStr = new Date(msg.createdAt).toLocaleDateString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+                    
+                    // تحديد إذا كان الدكتور قد رد مسبقاً أم لا
+                    let replyUI = '';
+                    if (msg.replyText) {
+                        replyUI = `
+                            <div class="mt-3 p-3 bg-brand-50 dark:bg-brand-900/20 border-r-4 border-brand-500 rounded-lg text-xs">
+                                <span class="font-bold text-brand-600 dark:text-brand-400 block mb-1"><i class="fa-solid fa-check-double"></i> تم الرد:</span>
+                                <p class="text-slate-700 dark:text-slate-300">${msg.replyText}</p>
+                            </div>`;
+                    } else {
+                        replyUI = `
+                            <div class="mt-3 flex justify-end">
+                                <button onclick="document.getElementById('reply-box-${msg.id}').classList.toggle('hidden')" class="text-[10px] bg-slate-800 hover:bg-brand-600 dark:bg-slate-700 text-white px-4 py-2 rounded-lg font-bold transition flex items-center gap-1"><i class="fa-solid fa-reply"></i> كتابة رد بالمنصة</button>
+                            </div>
+                            <div id="reply-box-${msg.id}" class="hidden mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 transition-all">
+                                <textarea id="reply-input-${msg.id}" rows="2" class="w-full p-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none resize-none mb-2" placeholder="اكتب ردك هنا ليظهر للطالب في حسابه..."></textarea>
+                                <button onclick="submitDoctorReply('${msg.id}')" class="bg-brand-500 hover:bg-brand-600 text-white px-4 py-2 rounded-lg text-xs font-bold transition shadow-sm">إرسال الرد</button>
+                            </div>`;
+                    }
+
                     container.innerHTML += `
                         <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
                             <div class="flex justify-between items-start mb-2">
@@ -3601,9 +3686,221 @@
                                 <span class="text-[9px] text-slate-400 font-bold font-en">${dateStr}</span>
                             </div>
                             <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-white dark:bg-darkCard p-3 rounded-xl border border-slate-100 dark:border-darkBorder mt-2">${msg.text}</p>
-                            <div class="mt-3 flex justify-end">
-                                <a href="mailto:${msg.studentEmail}?subject=رد من الأكاديمية على استفسارك" class="text-[10px] bg-brand-500 hover:bg-brand-600 text-white px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1"><i class="fa-solid fa-reply"></i> رد عبر الإيميل</a>
+                            ${replyUI}
+                        </div>
+                    `;
+                });
+            } catch(e) { container.innerHTML = `<p class="text-rose-500 text-xs">تعذر تحميل الرسائل.</p>`; }
+        };
+        // ==========================================
+        // 9. نظام تحديث الملف الشخصي ورفع الصور
+        // ==========================================
+        let tempBase64Image = null;
+
+        // دالة معالجة وضغط الصورة قبل رفعها
+        window.processAndUploadImage = function(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    
+                    img.onload = function() {
+                        // ضغط الصورة لتصبح صغيرة الحجم جداً
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 150; 
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        // استخراج الصورة المضغوطة
+                        tempBase64Image = canvas.toDataURL('image/jpeg', 0.7);
+                        
+                        // عرض الصورة محلياً للمعاينة
+                        const imgEl = document.getElementById('real-profile-img');
+                        imgEl.src = tempBase64Image;
+                        imgEl.classList.remove('hidden');
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        // دالة حفظ الاسم والصورة في قاعدة البيانات
+        window.updatePersonalData = async function() {
+            if(!currentUser) return;
+            const newName = document.getElementById('update-profile-name').value.trim();
+            
+            let updates = {};
+            if(newName) updates.name = newName;
+            if(tempBase64Image) {
+                updates.realPhoto = tempBase64Image;
+                updates.avatar = 'custom'; // لتعطيل الرمز التعبيري
+            }
+
+            if(Object.keys(updates).length === 0) {
+                return showToast("لم تقم بإدخال اسم جديد أو صورة لحفظها.", "info");
+            }
+
+            try {
+                const btn = document.querySelector('button[onclick="updatePersonalData()"]');
+                const origTxt = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+
+                await updateDoc(doc(db, "users", currentUser.uid), updates);
+                
+                // تحديث البيانات في الجلسة الحالية
+                if(newName) {
+                    userData.name = newName;
+                    document.getElementById('nav-user-email').textContent = newName;
+                }
+                if(tempBase64Image) {
+                    userData.realPhoto = tempBase64Image;
+                    document.getElementById('user-avatar-icon').innerHTML = `<img src="${tempBase64Image}" class="w-full h-full rounded-full object-cover">`;
+                }
+                
+                btn.innerHTML = origTxt;
+                showToast("تم تحديث بياناتك الشخصية بنجاح!", "success");
+            } catch(e) {
+                showToast("حدث خطأ أثناء حفظ البيانات.", "error");
+            }
+        };
+        // ==========================================
+        // 10. نظام إعلانات الكورس المخصصة (Announcements)
+        // ==========================================
+        window.publishCourseAnnouncement = async function() {
+            const text = document.getElementById('announcement-input-text').value.trim();
+            if(!text) return showToast("يرجى كتابة نص الإعلان أولاً.", "error");
+            if(!currentCourseId) return;
+
+            try {
+                const dateStr = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+                await updateDoc(doc(db, "courses", currentCourseId), {
+                    announcement: {
+                        text: text,
+                        date: dateStr,
+                        createdAt: new Date().getTime()
+                    }
+                });
+                document.getElementById('announcement-input-text').value = "";
+                showToast("تم نشر إعلان الكورس وإخطار الطلبة بنجاح!", "success");
+            } catch(e) { showToast("عذراً، فشل نشر الإعلان.", "error"); }
+        };
+
+        // دالة لعرض الإعلان فور فتح الكورس للطالب
+        function renderCourseAnnouncements(course) {
+            const box = document.getElementById('course-announcements-box');
+            const txtView = document.getElementById('announcement-text-view');
+            const dateView = document.getElementById('announcement-date');
+            const adminPanel = document.getElementById('admin-announcement-panel');
+
+            if(!box) return;
+
+            // إظهار لوحة التحكم للدكتور فقط
+            const isAuthorized = userData?.role === 'admin' || userData?.role === 'superadmin';
+            adminPanel.classList.toggle('hidden', !isAuthorized);
+
+            if (course.announcement && course.announcement.text) {
+                box.classList.remove('hidden');
+                txtView.textContent = course.announcement.text;
+                dateView.textContent = course.announcement.date;
+            } else {
+                // إذا لم يكن هناك إعلان، تظهر لوحة التحكم للدكتور فقط ليتمكن من الإضافة
+                box.classList.toggle('hidden', !isAuthorized);
+                txtView.textContent = "لا توجد إعلانات نشطة حالياً لطلبة هذا المنهج.";
+                dateView.textContent = "";
+            }
+        }
+        // دالة توليد وتنزيل تقرير إنجاز ودرجات الطلاب (CSV) متوافق مع Excel
+        window.exportAnalyticsToCSV = function() {
+            const table = document.querySelector('#analytics-modal table');
+            if(!table) return showToast("لا توجد بيانات متاحة للتصدير حالياً.", "error");
+
+            let csvRows = [];
+            const rows = table.querySelectorAll('tr');
+            
+            // ترميز ملف ليدعم اللغة العربية في إكسل (BOM)
+            const BOM = "\uFEFF";
+
+            rows.forEach(row => {
+                let cols = row.querySelectorAll('th, td');
+                let rowData = [];
+                cols.forEach(col => {
+                    // تنظيف النص وإزالة المسافات والأقواس الزائدة
+                    let text = col.innerText.replace(/(\r\n|\n|\r)/gm, "").trim();
+                    text = text.replace(/"/g, '""'); // حماية علامات التنصيص
+                    rowData.push('"' + text + '"');
+                });
+                csvRows.push(rowData.join(','));
+            });
+
+            const csvContent = BOM + csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement("a");
+            const courseTitle = document.getElementById('analytics-course-title').textContent || 'Course';
+            link.setAttribute("href", url);
+            link.setAttribute("download", `تقرير_طلاب_${courseTitle}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast("تم توليد وتنزيل تقرير الإكسل لدرجات الطلاب بنجاح!", "success");
+        };
+        // دالة حفظ رد الدكتور في قاعدة البيانات
+        window.submitDoctorReply = async function(msgId) {
+            const replyText = document.getElementById(`reply-input-${msgId}`).value.trim();
+            if(!replyText) return showToast("الرجاء كتابة الرد أولاً.", "error");
+            
+            try {
+                await updateDoc(doc(db, "messages", msgId), {
+                    replyText: replyText,
+                    repliedAt: new Date().getTime()
+                });
+                showToast("تم إرسال الرد للطالب بنجاح.", "success");
+                loadDoctorMessages(); // تحديث صندوق الدكتور
+            } catch(e) { showToast("حدث خطأ في الإرسال.", "error"); }
+        };
+
+        // دالة جلب الرسائل وعرضها للطالب
+        window.loadStudentMessages = async function() {
+            const container = document.getElementById('student-messages-list');
+            if(!container) return;
+            container.innerHTML = `<div class="text-center py-4"><i class="fa-solid fa-spinner fa-spin text-brand-500 text-2xl"></i></div>`;
+            
+            try {
+                const snap = await getDocs(query(collection(db, "messages"), where("studentId", "==", currentUser.uid)));
+                let msgs = [];
+                snap.forEach(d => msgs.push({ id: d.id, ...d.data() }));
+                msgs.sort((a, b) => b.createdAt - a.createdAt);
+
+                if(msgs.length === 0) {
+                    container.innerHTML = `<div class="text-center py-10 text-slate-400 font-bold border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl">لم تقم بإرسال أي رسائل لأعضاء هيئة التدريس بعد.</div>`;
+                    return;
+                }
+
+                container.innerHTML = "";
+                msgs.forEach(msg => {
+                    const dateStr = new Date(msg.createdAt).toLocaleDateString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+                    
+                    let replyStatus = msg.replyText 
+                        ? `<div class="mt-3 p-3 bg-brand-50 dark:bg-brand-900/20 border-r-4 border-brand-500 rounded-xl text-xs animate-slide-up"><span class="font-bold text-brand-600 dark:text-brand-400 block mb-1"><i class="fa-solid fa-reply"></i> رد الدكتور:</span><p class="text-slate-700 dark:text-slate-300 leading-relaxed">${msg.replyText}</p></div>`
+                        : `<p class="mt-3 text-[10px] text-amber-500 font-bold flex items-center gap-1"><i class="fa-solid fa-clock"></i> في انتظار مراجعة ورد الدكتور...</p>`;
+                    
+                    container.innerHTML += `
+                        <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-[10px] bg-slate-200 dark:bg-slate-800 px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-400 font-bold">استفسارك</span>
+                                <span class="text-[9px] text-slate-400 font-bold font-en">${dateStr}</span>
                             </div>
+                            <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed bg-white dark:bg-darkCard p-3 rounded-xl border border-slate-100 dark:border-darkBorder">${msg.text}</p>
+                            ${replyStatus}
                         </div>
                     `;
                 });
