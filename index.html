@@ -592,8 +592,14 @@
                                             <input type="number" id="c-duration" oninput="updateLivePreview()" class="w-full p-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none" placeholder="مثال: 12">
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-bold mb-1 text-slate-500">رابط صورة الغلاف (اختياري)</label>
-                                            <input type="url" id="c-cover" oninput="updateLivePreview()" class="w-full p-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none" placeholder="https://images.unsplash.com/...">
+                                            <label class="block text-xs font-bold mb-1 text-slate-500">تحميل صورة الغلاف</label>
+                                            <div class="flex gap-2 items-center">
+                                                <div class="relative flex-1 p-2.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+                                                    <span id="cover-upload-status" class="text-slate-400 font-bold"><i class="fa-solid fa-cloud-arrow-up"></i> اختر غلاف الكورس...</span>
+                                                    <input type="file" id="cover-file-input" accept="image/*" onchange="processCourseCover(this)" class="absolute inset-0 opacity-0 cursor-pointer">
+                                                </div>
+                                                <input type="hidden" id="c-cover">
+                                            </div>
                                         </div>
                                     </div>
 
@@ -697,7 +703,7 @@
         </div>
     </div>
     
-    <div id="saved-courses-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-10">
+    <div id="saved-courses-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 pb-10 animate-slide-up">
         <!-- جاري العمل عليها برمجياً -->
         <div class="col-span-full py-20 flex flex-col items-center justify-center text-slate-400 bg-white dark:bg-darkCard rounded-3xl border border-slate-100 dark:border-darkBorder">
             <i class="fa-solid fa-heart-crack text-6xl mb-4 opacity-30 text-rose-500"></i>
@@ -734,7 +740,7 @@
                     </div>
                     
                     <!-- شبكة الكورسات -->
-                    <div id="modern-cards-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-10">
+                    <div id="modern-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 pb-10 animate-slide-up">
                         <!-- سيتم حقن الكورسات هنا عبر الجافاسكربت -->
                     </div>
                 </div>
@@ -1026,7 +1032,7 @@
                                 </button>
                             </div>
                             <h3 class="font-bold text-lg mb-4 border-b border-slate-100 dark:border-darkBorder pb-2">الكورسات التي يقدمها الدكتور</h3>
-                            <div id="doc-profile-courses" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div id="doc-profile-courses" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
                                 <!-- سيتم جلب كورسات الدكتور هنا -->
                             </div>
                         </div>
@@ -1229,6 +1235,11 @@
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark');
             document.getElementById('dark-icon').className = 'fa-solid fa-sun text-lg text-amber-500';
+        } else {
+            // فرض الوضع النهاري النظيف افتراضياً إذا لم يختر الزائر شيئاً مسبقاً
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+            document.getElementById('dark-icon').className = 'fa-solid fa-moon text-lg';
         }
 
         // ==========================================
@@ -1423,39 +1434,35 @@
                     const heartClass = isSaved ? 'fa-solid fa-heart text-rose-500' : 'fa-regular fa-heart text-slate-400 hover:text-rose-500';
 
                     targetList.innerHTML += `
-                        <div class="bg-white dark:bg-darkCard rounded-3xl border border-slate-200 dark:border-darkBorder overflow-hidden hover:shadow-xl hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 group flex flex-col cursor-pointer relative">
+                        <div class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200 dark:border-darkBorder overflow-hidden hover:shadow-lg hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 group flex flex-col cursor-pointer relative shadow-sm">
                             <!-- زر الحفظ السريع ككورس مفضل -->
-                            <button onclick="toggleSaveCourse('${course.id}', event)" class="absolute top-6 left-6 z-10 w-9 h-9 bg-white/90 dark:bg-slate-900/90 rounded-xl flex items-center justify-center text-base shadow-md hover:scale-110 transition">
+                            <button onclick="toggleSaveCourse('${course.id}', event)" class="absolute top-4 left-4 z-10 w-8 h-8 bg-white/95 dark:bg-slate-900/95 rounded-lg flex items-center justify-center text-xs shadow hover:scale-110 transition">
                                 <i class="${heartClass}"></i>
                             </button>
 
-                            <div class="p-3" onclick="window.openCoursePlayer('${course.id}')">
-                                <div class="relative h-44 overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 mb-4">
+                            <div class="p-2" onclick="window.openCoursePlayer('${course.id}')">
+                                <div class="relative h-32 overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 mb-2.5">
                                     <img src="${course.cover || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 </div>
-                                <div class="text-center px-2">
-                                    <h4 class="text-lg font-black text-slate-800 dark:text-white line-clamp-1 mb-2">${course.title}</h4>
-                                    <p class="text-[10px] text-slate-500 font-bold mb-2"><i class="fa-solid fa-user-tie text-brand-500"></i> د. ${course.creatorName || 'إدارة الأكاديمية'}</p>
+                                <div class="text-center px-1">
+                                    <h4 class="text-xs font-black text-slate-800 dark:text-white line-clamp-1 mb-1">${course.title}</h4>
+                                    <p class="text-[9px] text-slate-400 font-bold mb-1.5"><i class="fa-solid fa-user-tie text-brand-500"></i> د. ${course.creatorName || 'إدارة الأكاديمية'}</p>
                                     
                                     <!-- التقييم -->
-                                    <div class="flex items-center justify-center gap-1.5 mb-2">
-                                        <span class="text-xs font-black text-slate-800 dark:text-slate-200">${avgRating}</span>
-                                        <div class="flex text-amber-400 text-2xs">
-                                            <i class="fa-solid fa-star"></i>
-                                        </div>
-                                        <span class="text-[10px] text-slate-400">(${course.ratingCount || 1} تقييم)</span>
+                                    <div class="flex items-center justify-center gap-1 mb-1.5">
+                                        <span class="text-[10px] font-black text-slate-800 dark:text-slate-200">${avgRating}</span>
+                                        <div class="flex text-amber-400 text-[8px]"><i class="fa-solid fa-star"></i></div>
+                                        <span class="text-[8px] text-slate-400">(${course.ratingCount || 1})</span>
                                     </div>
 
-                                    <p class="text-brand-600 dark:text-brand-400 font-bold text-sm mb-3">مجانـاً</p>
-                                    <div class="flex justify-between items-center text-[11px] text-slate-400 mb-4 px-2">
-                                        <span class="flex items-center gap-1"><i class="fa-regular fa-eye"></i> ${course.views || 0} مشاهدة</span>
+                                    <p class="text-brand-600 dark:text-brand-400 font-black text-xs mb-2">مجانـاً</p>
+                                    <div class="flex justify-between items-center text-[9px] text-slate-400 mb-2 px-1">
+                                        <span class="flex items-center gap-1"><i class="fa-regular fa-eye"></i> ${course.views || 0}</span>
                                         <span class="flex items-center gap-1"><i class="fa-solid fa-list"></i> ${lecsCount} دروس</span>
                                     </div>
-                                    <div class="flex flex-col gap-2">
-                                        <button class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl transition-colors shadow-md">
-                                            ابدأ الدراسة الآن !
-                                        </button>
-                                    </div>
+                                    <button class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow">
+                                        ابدأ الدراسة
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1949,37 +1956,33 @@
                 
                 card.innerHTML = `
                     <!-- زر الحفظ السريع ككورس مفضل -->
-                    <button onclick="toggleSaveCourse('${course.id}', event)" class="absolute top-6 left-6 z-10 w-9 h-9 bg-white/90 dark:bg-slate-900/90 rounded-xl flex items-center justify-center text-base shadow-md hover:scale-110 transition">
+                    <button onclick="toggleSaveCourse('${course.id}', event)" class="absolute top-4 left-4 z-10 w-8 h-8 bg-white/95 dark:bg-slate-900/95 rounded-lg flex items-center justify-center text-xs shadow hover:scale-110 transition">
                         <i class="${heartClass}"></i>
                     </button>
 
-                    <div class="p-3" onclick="window.openCoursePlayer('${course.id}')">
-                        <div class="relative h-44 overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 mb-4">
+                    <div class="p-2" onclick="window.openCoursePlayer('${course.id}')">
+                        <div class="relative h-32 overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 mb-2.5">
                             <img src="${course.cover || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
                         </div>
-                        <div class="text-center px-2">
-                            <h4 class="text-lg font-black text-slate-800 dark:text-white line-clamp-1 mb-2">${course.title}</h4>
-                            <p class="text-[10px] text-slate-500 font-bold mb-2"><i class="fa-solid fa-user-tie text-brand-500"></i> د. ${course.creatorName || 'إدارة الأكاديمية'}</p>
+                        <div class="text-center px-1">
+                            <h4 class="text-xs font-black text-slate-800 dark:text-white line-clamp-1 mb-1">${course.title}</h4>
+                            <p class="text-[9px] text-slate-400 font-bold mb-1.5"><i class="fa-solid fa-user-tie text-brand-500"></i> د. ${course.creatorName || 'إدارة الأكاديمية'}</p>
                             
                             <!-- إظهار التقييم الفعلي بالنجوم في الكتالوج -->
-                            <div class="flex items-center justify-center gap-1.5 mb-2">
-                                <span class="text-xs font-black text-slate-800 dark:text-slate-200">${avgRating}</span>
-                                <div class="flex text-amber-400 text-2xs">
-                                    <i class="fa-solid fa-star"></i>
-                                </div>
-                                <span class="text-[10px] text-slate-400">(${course.ratingCount || 1} تقييم)</span>
+                            <div class="flex items-center justify-center gap-1 mb-1.5">
+                                <span class="text-[10px] font-black text-slate-800 dark:text-slate-200">${avgRating}</span>
+                                <div class="flex text-amber-400 text-[8px]"><i class="fa-solid fa-star"></i></div>
+                                <span class="text-[8px] text-slate-400">(${course.ratingCount || 1})</span>
                             </div>
 
-                            <p class="text-brand-600 dark:text-brand-400 font-bold text-sm mb-3">مجانـاً</p>
-                            <div class="flex justify-between items-center text-[11px] text-slate-400 mb-4 px-2">
-                                <span class="flex items-center gap-1"><i class="fa-regular fa-eye"></i> ${course.views || 0} مشاهدة</span>
+                            <p class="text-brand-600 dark:text-brand-400 font-black text-xs mb-2">مجانـاً</p>
+                            <div class="flex justify-between items-center text-[9px] text-slate-400 mb-2 px-1">
+                                <span class="flex items-center gap-1"><i class="fa-regular fa-eye"></i> ${course.views || 0}</span>
                                 <span class="flex items-center gap-1"><i class="fa-solid fa-list"></i> ${lecsCount} دروس</span>
                             </div>
-                            <div class="flex flex-col gap-2">
-                                <button class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl transition-colors shadow-md">
-                                    ابدأ الدراسة الآن !
-                                </button>
-                            </div>
+                            <button class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow">
+                                ابدأ الدراسة
+                            </button>
                         </div>
                     </div>
                 `;
@@ -2772,36 +2775,34 @@
                 card.className = "bg-white dark:bg-darkCard rounded-3xl border border-slate-200 dark:border-darkBorder overflow-hidden hover:shadow-xl hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 group flex flex-col cursor-pointer relative";
                 
                 card.innerHTML = `
-                    <button onclick="toggleSaveCourse('${course.id}', event)" class="absolute top-6 left-6 z-10 w-9 h-9 bg-white/90 dark:bg-slate-900/90 rounded-xl flex items-center justify-center text-base shadow-md hover:scale-110 transition">
+                    <!-- زر إزالة الحفظ -->
+                    <button onclick="toggleSaveCourse('${course.id}', event)" class="absolute top-4 left-4 z-10 w-8 h-8 bg-white/95 dark:bg-slate-900/95 rounded-lg flex items-center justify-center text-xs shadow hover:scale-110 transition">
                         <i class="${heartClass}"></i>
                     </button>
 
-                    <div class="p-3" onclick="window.openCoursePlayer('${course.id}')">
-                        <div class="relative h-44 overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 mb-4">
+                    <div class="p-2" onclick="window.openCoursePlayer('${course.id}')">
+                        <div class="relative h-32 overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 mb-2.5">
                             <img src="${course.cover || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
                         </div>
-                        <div class="text-center px-2">
-                            <h4 class="text-lg font-black text-slate-800 dark:text-white line-clamp-1 mb-2">${course.title}</h4>
-                            <p class="text-[10px] text-slate-500 font-bold mb-2"><i class="fa-solid fa-user-tie text-brand-500"></i> د. ${course.creatorName || 'إدارة الأكاديمية'}</p>
+                        <div class="text-center px-1">
+                            <h4 class="text-xs font-black text-slate-800 dark:text-white line-clamp-1 mb-1">${course.title}</h4>
+                            <p class="text-[9px] text-slate-400 font-bold mb-1.5"><i class="fa-solid fa-user-tie text-brand-500"></i> د. ${course.creatorName || 'إدارة الأكاديمية'}</p>
                             
-                            <div class="flex items-center justify-center gap-1.5 mb-2">
-                                <span class="text-xs font-black text-slate-800 dark:text-slate-200">${avgRating}</span>
-                                <div class="flex text-amber-400 text-2xs">
-                                    <i class="fa-solid fa-star"></i>
-                                </div>
-                                <span class="text-[10px] text-slate-400">(${course.ratingCount || 1} تقييم)</span>
+                            <!-- إظهار التقييم الفعلي -->
+                            <div class="flex items-center justify-center gap-1 mb-1.5">
+                                <span class="text-[10px] font-black text-slate-800 dark:text-slate-200">${avgRating}</span>
+                                <div class="flex text-amber-400 text-[8px]"><i class="fa-solid fa-star"></i></div>
+                                <span class="text-[8px] text-slate-400">(${course.ratingCount || 1})</span>
                             </div>
 
-                            <p class="text-brand-600 dark:text-brand-400 font-bold text-sm mb-3">مجانـاً</p>
-                            <div class="flex justify-between items-center text-[11px] text-slate-400 mb-4 px-2">
-                                <span class="flex items-center gap-1"><i class="fa-regular fa-eye"></i> ${course.views || 0} مشاهدة</span>
+                            <p class="text-brand-600 dark:text-brand-400 font-black text-xs mb-2">مجانـاً</p>
+                            <div class="flex justify-between items-center text-[9px] text-slate-400 mb-2 px-1">
+                                <span class="flex items-center gap-1"><i class="fa-regular fa-eye"></i> ${course.views || 0}</span>
                                 <span class="flex items-center gap-1"><i class="fa-solid fa-list"></i> ${lecsCount} دروس</span>
                             </div>
-                            <div class="flex flex-col gap-2">
-                                <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-2.5 rounded-xl transition-colors shadow-md">
-                                    متابعة الدراسة
-                                </button>
-                            </div>
+                            <button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow">
+                                متابعة الدراسة
+                            </button>
                         </div>
                     </div>
                 `;
@@ -3913,6 +3914,33 @@
                     `;
                 });
             } catch(e) { container.innerHTML = `<p class="text-rose-500 text-xs">تعذر تحميل الرسائل.</p>`; }
+        };
+        // دالة معالجة وضغط صورة غلاف الكورس قبل رفعها لحفظ المساحة
+        window.processCourseCover = function(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 500; // دقة ممتازة لغلاف الكورس
+                        const scaleSize = MAX_WIDTH / img.width;
+                        canvas.width = MAX_WIDTH;
+                        canvas.height = img.height * scaleSize;
+                        
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        
+                        const base64Cover = canvas.toDataURL('image/jpeg', 0.8);
+                        document.getElementById('c-cover').value = base64Cover;
+                        document.getElementById('cover-upload-status').innerHTML = `<span class="text-emerald-500 font-black"><i class="fa-solid fa-circle-check"></i> تم رفع الغلاف بنجاح!</span>`;
+                        updateLivePreview(); // تحديث المعاينة الحية فوراً
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
         };
     </script>
 </body>
