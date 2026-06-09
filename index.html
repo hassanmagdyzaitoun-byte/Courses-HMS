@@ -1243,7 +1243,7 @@
                         <div onclick="window.openCoursePlayer('${course.id}')" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden hover:shadow-lg hover:border-brand-500 transition-all duration-300 cursor-pointer group flex flex-col">
                             <!-- صورة الكورس المصغرة -->
                             <div class="relative h-28 overflow-hidden bg-slate-200 dark:bg-slate-900">
-                                <img src="${course.cover || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                <img src="${course.cover || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                                 <!-- تأثير التظليل وزر التشغيل عند تمرير الماوس -->
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                                     <div class="w-10 h-10 bg-brand-500 text-white rounded-full flex items-center justify-center shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all">
@@ -2464,8 +2464,26 @@
 
         function getTotalLecturesCount() {
             let count = 0;
+            const savedIds = userData?.savedCourses || []; 
+            
             allCourses.forEach(c => { 
-                if(c.lectures) {
+                // التحقق مما إذا كان الطالب قد حفظ الكورس أو أكمل أي محاضرة فيه مسبقاً
+                let isEnrolledOrStarted = savedIds.includes(c.id);
+                
+                if(!isEnrolledOrStarted && c.lectures) {
+                    c.lectures.forEach(lec => {
+                        if(lec.resources) {
+                            lec.resources.forEach(res => {
+                                if(userData?.completedLectures?.includes(res.id)) {
+                                    isEnrolledOrStarted = true;
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // حساب المحاضرات فقط للكورسات التي تخص هذا الطالب
+                if(isEnrolledOrStarted && c.lectures) {
                     c.lectures.forEach(lec => {
                         if(lec.resources) count += lec.resources.length;
                     });
@@ -2532,7 +2550,7 @@
                     </button>
                     <div class="p-3">
                         <div class="relative h-44 overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800 mb-4">
-                            <img src="${course.cover || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" class="w-full h-full object-cover">
+                            <img src="${course.cover || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" loading="lazy" class="w-full h-full object-cover">
                         </div>
                         <div class="text-center px-2">
                             <h4 class="text-lg font-black text-slate-800 dark:text-white line-clamp-1 mb-2">${course.title}</h4>
