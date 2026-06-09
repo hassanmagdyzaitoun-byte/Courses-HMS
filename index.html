@@ -460,21 +460,55 @@
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                        <div class="xl:col-span-2 space-y-6">
-                            <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-darkBorder">
-                                <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center"><i class="fa-solid fa-bullhorn"></i></div> بث إعلان عام للطلاب بالمنصة</h3>
-                                <div class="flex flex-col sm:flex-row gap-3">
-                                    <input type="text" id="news-input" class="flex-1 p-3.5 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-800 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none" placeholder="اكتب خبراً أو تنبيهاً يظهر في أعلى الشاشة لجميع الطلاب والرواد...">
-                                    <button id="btn-publish-news" class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg transition whitespace-nowrap">نشر التحديث العام</button>
-                                </div>
+                    <!-- الواجهة المتكاملة الجديدة للتحكم السحابي للمالك -->
+                    <div class="space-y-6">
+                        <!-- أولاً: صندوق بث الإعلانات -->
+                        <div class="bg-white dark:bg-darkCard p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-darkBorder">
+                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center"><i class="fa-solid fa-bullhorn"></i></div> بث إعلان عام للطلاب بالمنصة</h3>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <input type="text" id="news-input" class="flex-1 p-3.5 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-850 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="اكتب خبراً أو تنبيهاً يظهر في أعلى الشاشة لجميع الطلاب والرواد...">
+                                <button id="btn-publish-news" class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg transition whitespace-nowrap text-sm">نشر التحديث العام</button>
                             </div>
                         </div>
 
-                        <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-darkBorder flex flex-col">
-                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 text-rose-500"><div class="w-8 h-8 rounded-lg bg-rose-100 flex items-center justify-center"><i class="fa-solid fa-id-card-clip"></i></div> تفعيل حسابات الإدارة الجدد</h3>
-                            <div id="pending-list" class="space-y-3 flex-1 overflow-y-auto custom-scrollbar pr-1">
-                                <div class="flex justify-center items-center h-full text-slate-400"><i class="fa-solid fa-spinner fa-spin text-2xl"></i></div>
+                        <!-- ثانياً: كونسول إدارة المستخدمين والصلاحيات والطلبات -->
+                        <div class="bg-white dark:bg-darkCard p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-darkBorder">
+                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-100 dark:border-darkBorder pb-4">
+                                <div>
+                                    <h3 class="font-black text-xl flex items-center gap-2">
+                                        <i class="fa-solid fa-users-gear text-brand-500"></i> التحكم بالمستخدمين والصلاحيات والطلبات
+                                    </h3>
+                                    <p class="text-xs text-slate-400 mt-1">تعديل الصلاحيات الفورية، قبول طلبات التدريس، أو إلغاء وحذف الحسابات.</p>
+                                </div>
+                                
+                                <!-- أدوات الفلترة والبحث السريع -->
+                                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                                    <input type="text" id="user-search-input" oninput="window.filterUsersTable()" class="p-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none" placeholder="ابحث بالبريد الإلكتروني...">
+                                    <select id="user-filter-select" onchange="window.filterUsersTable()" class="p-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none font-bold text-slate-600 dark:text-slate-300">
+                                        <option value="all">كل الحسابات</option>
+                                        <option value="student">👨‍🎓 الطلاب</option>
+                                        <option value="admin_active">👨‍🏫 الدكاترة النشطين</option>
+                                        <option value="admin_pending">⏳ طلبات الدكاترة المعلقة</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-right text-xs">
+                                    <thead>
+                                        <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-150 dark:border-darkBorder">
+                                            <th class="p-4">البريد الإلكتروني للعميل / الطالب</th>
+                                            <th class="p-4 text-center">نوع الرتبة / الصلاحية الفورية</th>
+                                            <th class="p-4 text-center">الحالة</th>
+                                            <th class="p-4 text-center">التحكم والإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="owner-users-tbody" class="divide-y divide-slate-100 dark:divide-darkBorder font-medium">
+                                        <tr>
+                                            <td colspan="4" class="p-10 text-center"><i class="fa-solid fa-spinner fa-spin text-2xl text-slate-300"></i></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -930,7 +964,7 @@
     <!-- ========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, setPersistence, browserLocalPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, setPersistence, browserLocalPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, query, orderBy, onSnapshot, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -1763,64 +1797,166 @@
         }
 
         // ==========================================
-        // لوحة تحكم المالك وسجل المسؤولين والطلبات (Owner Dashboard functions)
+        // لوحة تحكم المالك المطورة وإدارة المستخدمين الفورية
         // ==========================================
+        let superAdminUsersList = []; // مصفوفة لتخزين قائمة المستخدمين محلياً للبحث السريع
+
         window.initSuperAdmin = async function() {
             try {
                 const snap = await getDocs(collection(db, "users"));
                 let sCount = 0, aCount = 0, pCount = 0;
-                const list = document.getElementById('pending-list');
-                list.innerHTML = "";
+                superAdminUsersList = [];
 
                 snap.forEach(docSnap => {
                     const data = docSnap.data();
+                    const userId = docSnap.id;
+                    
+                    // نقوم باستبعاد المالك نفسه من جدول التحكم لكي لا يعبث بصلاحياته بالخطأ
+                    if (data.role !== 'superadmin') {
+                        superAdminUsersList.push({ id: userId, ...data });
+                    }
+                    
                     if(data.role === 'student') sCount++;
                     if(data.role === 'admin' && data.status === 'active') aCount++;
-                    if(data.role === 'admin' && data.status === 'pending') {
-                        pCount++;
-                        list.innerHTML += `
-                            <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-100 dark:border-darkBorder flex justify-between items-center group">
-                                <p class="text-sm font-bold text-slate-700 dark:text-slate-300"><i class="fa-solid fa-user-clock text-slate-400 mr-2"></i> ${data.email}</p>
-                                <div class="flex gap-2">
-                                    <button onclick="window.approveUser('${docSnap.id}')" class="bg-emerald-100 text-emerald-600 hover:bg-emerald-500 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">تفعيل</button>
-                                    <button onclick="window.rejectUser('${docSnap.id}')" class="bg-rose-100 text-rose-600 hover:bg-rose-500 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition">رفض</button>
-                                </div>
-                            </div>`;
-                    }
+                    if(data.role === 'admin' && data.status === 'pending') pCount++;
                 });
 
                 document.getElementById('stat-students').innerText = sCount; 
                 document.getElementById('stat-admins').innerText = aCount;
                 document.getElementById('stat-courses').innerText = allCourses.length; 
                 document.getElementById('stat-pending').innerText = pCount;
-                if(pCount === 0) list.innerHTML = `<div class="text-center py-6 text-slate-400"><i class="fa-solid fa-check-circle text-3xl mb-2 text-emerald-500"></i><p>لا توجد طلبات معلقة</p></div>`;
+
+                // رندر الجدول فوراً
+                window.filterUsersTable();
 
             } catch(e) { 
                 console.error(e); 
-                showToast("خطأ في تحديث بيانات لوحة تحكم المالك.", "error");
+                showToast("خطأ في الاتصال السحابي لجلب سجل المستخدمين.", "error");
             }
         };
 
-        window.approveUser = async function(id) { 
+        // دالة الفلترة والبحث الفوري في قائمة المستخدمين
+        window.filterUsersTable = function() {
+            const tbody = document.getElementById('owner-users-tbody');
+            if(!tbody) return;
+
+            const searchQuery = (document.getElementById('user-search-input')?.value || "").toLowerCase().trim();
+            const filterRole = document.getElementById('user-filter-select')?.value || "all";
+
+            const filtered = superAdminUsersList.filter(user => {
+                const matchSearch = user.email.toLowerCase().includes(searchQuery);
+                let matchRole = true;
+                if (filterRole === 'student') matchRole = user.role === 'student';
+                if (filterRole === 'admin_active') matchRole = user.role === 'admin' && user.status === 'active';
+                if (filterRole === 'admin_pending') matchRole = user.role === 'admin' && user.status === 'pending';
+                return matchSearch && matchRole;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400">لا توجد حسابات تطابق خيارات البحث الحالية.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = "";
+            filtered.forEach(user => {
+                const isPendingAdmin = user.role === 'admin' && user.status === 'pending';
+                
+                // زر التفعيل يظهر فقط لطلبات الدكتور المعلقة
+                let actionBtn = "";
+                if (isPendingAdmin) {
+                    actionBtn = `
+                        <button onclick="window.approveUser('${user.id}')" class="bg-emerald-100 hover:bg-emerald-500 text-emerald-600 hover:text-white px-3 py-1.5 rounded-lg font-black transition text-[10px]">
+                            <i class="fa-solid fa-check"></i> تفعيل كدكتور
+                        </button>
+                    `;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
+                        <td class="p-4 font-bold text-slate-800 dark:text-white font-en">${user.email}</td>
+                        <td class="p-4 text-center">
+                            <!-- المنسدل الفوري لتغيير الصلاحيات للمستخدم بدون طلب -->
+                            <select onchange="window.updateUserRole('${user.id}', this.value)" class="p-1.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-darkBorder rounded-lg outline-none font-bold text-[11px] text-slate-700 dark:text-slate-350 cursor-pointer">
+                                <option value="student" ${user.role === 'student' ? 'selected' : ''}>👨‍🎓 طالب</option>
+                                <option value="admin" ${user.role === 'admin' ? 'selected' : ''}>👨‍🏫 دكتور / مسؤول</option>
+                            </select>
+                        </td>
+                        <td class="p-4 text-center">
+                            ${user.status === 'active' 
+                                ? '<span class="bg-emerald-50 text-emerald-600 dark:bg-emerald-950/20 dark:text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-black border border-emerald-150">نشط الآن</span>' 
+                                : '<span class="bg-rose-50 text-rose-500 dark:bg-rose-950/20 dark:text-rose-400 px-2.5 py-1 rounded-full text-[10px] font-black border border-rose-150 animate-pulse">معلق للمراجعة</span>'
+                            }
+                        </td>
+                        <td class="p-4 text-center">
+                            <div class="flex justify-center items-center gap-1.5">
+                                ${actionBtn}
+                                <!-- زر إعادة تعيين كلمة المرور الفورية والدعم الفني -->
+                                <button onclick="window.sendResetEmail('${user.email}')" class="bg-amber-50 hover:bg-amber-500 text-amber-500 hover:text-white p-2 rounded-xl transition text-[11px]" title="إرسال رابط إعادة تعيين كلمة المرور">
+                                    <i class="fa-solid fa-key"></i> كلمة المرور
+                                </button>
+                                <button onclick="window.deleteUserByOwner('${user.id}')" class="bg-rose-50 hover:bg-rose-500 text-rose-500 hover:text-white p-2 rounded-xl transition text-[11px]" title="حذف الحساب نهائياً">
+                                    <i class="fa-solid fa-trash-can"></i> حذف العميل
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        };
+
+        // دالة الترقية الفورية وتغيير الرتب سحابياً
+        window.updateUserRole = async function(userId, newRole) {
             try {
-                await updateDoc(doc(db, "users", id), { status: 'active' }); 
-                showToast("تم تفعيل حساب الدكتور بنجاح!", "success"); 
+                const updateData = { role: newRole };
+                // إذا تم تعيينه كمسؤول، نقوم بتفعيل حسابه تلقائياً دون الحاجة لطلب
+                if (newRole === 'admin') {
+                    updateData.status = 'active';
+                }
+                
+                await updateDoc(doc(db, "users", userId), updateData);
+                showToast("تم تحديث رتبة وصلاحيات العميل سحابياً بنجاح!", "success");
+                window.initSuperAdmin(); // إعادة جلب البيانات فوراً
+            } catch (e) {
+                console.error(e);
+                showToast("فشلت عملية تحديث الرتبة، يرجى فحص الصلاحيات.", "error");
+            }
+        };
+
+        // دالة تفعيل وقبول طلب الدكتور المعلق
+        window.approveUser = async function(userId) { 
+            try {
+                await updateDoc(doc(db, "users", userId), { status: 'active' }); 
+                showToast("تم قبول طلب الدكتور وتفعيل صلاحياته بنجاح!", "success"); 
                 window.initSuperAdmin(); 
             } catch(e) {
-                showToast("فشل التفعيل: تأكد من صلاحيات Firestore.", "error");
+                showToast("فشل التفعيل السحابي.", "error");
             }
         };
         
-        window.rejectUser = async function(id) { 
-            if(confirm("هل أنت متأكد من رفض وحذف طلب هذا العضو؟")) { 
+        // دالة حذف حساب مستخدم نهائياً من قاعدة البيانات وطرد جلسته الفورية
+        window.deleteUserByOwner = async function(userId) { 
+            if(confirm("🚨 تنبيه مالك المنصة: هل أنت متأكد من رغبتك في حذف هذا الحساب نهائياً من المنصة؟ سيتم تسجيل خروجه فوراً وطرده من السيرفر.")) { 
                 try {
-                    await deleteDoc(doc(db, "users", id)); 
-                    showToast("تم رفض وحذف الطلب بنجاح.", "info"); 
+                    await deleteDoc(doc(db, "users", userId)); 
+                    showToast("تم حذف وإلغاء الحساب بالكامل من قاعدة البيانات بنجاح.", "success"); 
                     window.initSuperAdmin(); 
                 } catch(e) {
-                    showToast("فشل في مسح الطلب.", "error");
+                    showToast("فشلت عملية حذف العميل.", "error");
                 }
             } 
+        };
+        // دالة إرسال بريد إلكتروني آمن لإعادة تعيين كلمة مرور الطالب يدوياً بطلب من المالك
+        window.sendResetEmail = async function(email) {
+            if (confirm(`هل أنت متأكد من إرسال رابط آمن ومباشر لإعادة تعيين كلمة المرور إلى بريد العميل التالي:\n${email}؟`)) {
+                try {
+                    // إرسال طلب إعادة التعيين سحابياً لبريد الطالب
+                    await sendPasswordResetEmail(auth, email);
+                    showToast(`تم إرسال رابط تعيين كلمة المرور بنجاح إلى البريد: ${email}`, "success");
+                } catch (e) {
+                    console.error("خطأ إرسال بريد استعادة كلمة المرور:", e);
+                    showToast("فشل الإرسال، يرجى التأكد من صحة البريد الإلكتروني للطالب والاتصال بالشبكة.", "error");
+                }
+            }
         };
 
         // ==========================================
