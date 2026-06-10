@@ -608,6 +608,9 @@
                                         <div>
                                             <label class="block text-xs font-bold mb-1 text-slate-500">رابط صورة الغلاف (URL)</label>
                                             <input type="text" id="c-cover" oninput="updateLivePreview()" class="w-full p-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none" placeholder="الصق رابط الصورة هنا (مثال: https://...)">
+                                            <a href="https://phototourl.com/ar" target="_blank" class="inline-flex items-center gap-1 text-[10px] font-bold text-brand-600 dark:text-brand-400 hover:underline mt-1.5">
+                                                <i class="fa-solid fa-cloud-arrow-up"></i> اضغط هنا لرفع صورة الغلاف والحصول على رابط مباشر
+                                            </a>
                                         </div>
                                     </div>
 
@@ -948,6 +951,9 @@
                                     <div class="flex-1 space-y-2">
                                         <input type="text" id="update-profile-name" class="w-full p-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-brand-500" placeholder="اكتب اسمك الجديد هنا...">
                                         <input type="text" id="update-profile-url" class="w-full p-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-brand-500" placeholder="الصق رابط صورتك (URL)..." oninput="document.getElementById('real-profile-img').src=this.value; document.getElementById('real-profile-img').classList.remove('hidden');">
+                                        <a href="https://phototourl.com/ar" target="_blank" class="inline-flex items-center gap-1 text-[10px] font-bold text-brand-600 dark:text-brand-400 hover:underline mt-1">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i> اضغط هنا لرفع صورتك الشخصية والحصول على رابط مباشر
+                                        </a>
                                     </div>
                                 </div>
                                 <button onclick="updatePersonalData()" class="w-full bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white py-2.5 rounded-xl font-bold text-xs transition shadow-md">
