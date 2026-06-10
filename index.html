@@ -1851,7 +1851,8 @@
                 {val: 'video', txt: '🎥 فيديو الشرح (YouTube/Drive)'},
                 {val: 'pdf', txt: '📄 مستند تفريغ أو مرجع PDF'},
                 {val: 'quiz', txt: '📝 اختبار تفاعلي قصير (Quiz)'},
-                {val: 'link', txt: '🔗 رابط ويب أو مرجع خارجي'}
+                {val: 'link', txt: '🔗 رابط ويب أو مرجع خارجي'},
+                {val: 'sub-banner', txt: '🏷️ بانر فرعي / عنوان جانبي (اختياري)'} // النوع الجديد
             ];
             
             let optionsHTML = types.map(t => `<option value="${t.val}" ${resData && resData.type === t.val ? 'selected' : ''}>${t.txt}</option>`).join('');
@@ -2516,6 +2517,15 @@
                 
                 if (lec.resources && lec.resources.length > 0) {
                     lec.resources.forEach(res => {
+                    // إذا كان المصدر عبارة عن بانر فرعي (عنوان جانبي)
+                    if (res.type === 'sub-banner') {
+                        resourcesHtml += `
+                            <div class="px-3 py-2 bg-slate-100 dark:bg-slate-700/40 text-[10px] font-black text-slate-500 dark:text-slate-300 rounded-lg mt-3 mb-1.5 select-none border-r-4 border-brand-500 shadow-sm text-right">
+                                ${res.title}
+                            </div>
+                        `;
+                    } else {
+                        // المصادر العادية القابلة للضغط يتم حسابها في النسبة المئوية
                         totalResourcesCount++;
                         const isResComplete = userData.completedLectures?.includes(res.id);
                         if(isResComplete) completedResourcesCount++;
@@ -2527,7 +2537,7 @@
                         if(res.type === 'quiz') resIcon = 'fa-list-check text-amber-500';
 
                         resourcesHtml += `
-                            <button id="res-btn-${res.id}" onclick="window.selectResource('${lec.id}', '${res.id}')" class="resource-item-btn w-full text-right p-3 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border-b border-slate-100 dark:border-slate-700/50 last:border-0 group">
+                            <button id="res-btn-${res.id}" onclick="window.selectResource('${lec.id}', '${res.id}')" class="resource-item-btn w-full text-right p-3 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border-b border-slate-100 dark:border-slate-700/50 last:border-0 group animate-scale-up">
                                 <div class="flex items-center gap-3">
                                     <i class="fa-solid ${resIcon} text-sm"></i>
                                     <span class="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-brand-600 transition-colors">${res.title}</span>
@@ -2535,7 +2545,8 @@
                                 ${isResComplete ? '<i class="fa-solid fa-circle-check text-emerald-500 text-sm shadow-sm rounded-full bg-white"></i>' : ''}
                             </button>
                         `;
-                    });
+                    }
+                });
                 } else {
                     resourcesHtml = `<div class="p-3 text-center text-[10px] text-slate-400">لا توجد مصادر مرفوعة هنا.</div>`;
                 }
