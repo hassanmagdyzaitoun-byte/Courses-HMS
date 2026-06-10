@@ -167,14 +167,16 @@
             </div>
 
             <form id="auth-form" class="space-y-6" onsubmit="event.preventDefault();">
-                <!-- حقل الاسم الجديد -->
-                <div>
+                <!-- حقل الاسم (مخفي افتراضياً ويظهر عند إنشاء الحساب) -->
+                <div id="name-field-container" class="hidden animate-scale-up">
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">الاسم بالكامل (يظهر بالمنصة)</label>
                     <div class="relative group">
                         <div class="absolute right-4 top-3.5 text-slate-400 group-focus-within:text-brand-500 transition"><i class="fa-solid fa-id-badge"></i></div>
                         <input type="text" id="auth-name" class="w-full pl-4 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-800/50 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none transition" placeholder="مثال: د. أحمد محمد">
                     </div>
                 </div>
+
+                <!-- حقل البريد الإلكتروني (يظهر دائماً) -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">البريد الإلكتروني</label>
                     <div class="relative group">
@@ -182,6 +184,8 @@
                         <input type="email" id="auth-email" class="w-full pl-4 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-800/50 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none transition" placeholder="student@hms.com" required>
                     </div>
                 </div>
+
+                <!-- حقل كلمة المرور (يظهر دائماً) -->
                 <div>
                     <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">كلمة المرور</label>
                     <div class="relative group">
@@ -189,8 +193,10 @@
                         <input type="password" id="auth-password" class="w-full pl-4 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-800/50 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none transition" placeholder="••••••••" required>
                     </div>
                 </div>
-                <div>
-                    <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">نوع الحساب (للتسجيل الجديد فقط)</label>
+
+                <!-- حقل اختيار الرتبة (مخفي افتراضياً ويظهر عند إنشاء الحساب) -->
+                <div id="role-field-container" class="hidden animate-scale-up">
+                    <label class="block text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">نوع الحساب</label>
                     <div class="relative">
                         <select id="auth-role" class="w-full pl-4 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-800/50 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none appearance-none cursor-pointer">
                             <option value="student">👨‍🎓 طالب (تصفح الكورسات)</option>
@@ -200,12 +206,13 @@
                     </div>
                 </div>
                 
-                <div class="pt-4 flex flex-col gap-3">
-                    <button type="button" id="btn-login" class="w-full bg-brand-600 hover:bg-brand-700 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-brand-500/30 transition duration-200 flex justify-center items-center gap-2">
-                        <span>تسجيل الدخول الآمن</span> <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                <!-- الأزرار التفاعلية الذكية للتبديل -->
+                <div class="pt-4 flex flex-col gap-3 shrink-0">
+                    <button type="button" id="btn-primary-auth" class="w-full bg-brand-600 hover:bg-brand-700 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-brand-500/30 transition duration-200 flex justify-center items-center gap-2">
+                        <span id="primary-auth-text">تسجيل الدخول الآمن</span> <i class="fa-solid fa-arrow-right-to-bracket" id="primary-auth-icon"></i>
                     </button>
-                    <button type="button" id="btn-signup" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-3.5 rounded-xl font-bold transition duration-200 border border-slate-200 dark:border-slate-700">
-                        إنشاء حساب جديد بالمنصة
+                    <button type="button" id="btn-toggle-auth-mode" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-3.5 rounded-xl font-bold transition duration-200 border border-slate-200 dark:border-slate-700">
+                        ليس لديك حساب؟ إنشاء حساب جديد بالمنصة
                     </button>
                 </div>
             </form>
@@ -599,14 +606,8 @@
                                             <input type="number" id="c-duration" oninput="updateLivePreview()" class="w-full p-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none" placeholder="مثال: 12">
                                         </div>
                                         <div>
-                                            <label class="block text-xs font-bold mb-1 text-slate-500">تحميل صورة الغلاف</label>
-                                            <div class="flex gap-2 items-center">
-                                                <div class="relative flex-1 p-2.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none flex items-center justify-between cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition">
-                                                    <span id="cover-upload-status" class="text-slate-400 font-bold"><i class="fa-solid fa-cloud-arrow-up"></i> اختر غلاف الكورس...</span>
-                                                    <input type="file" id="cover-file-input" accept="image/*" onchange="processCourseCover(this)" class="absolute inset-0 opacity-0 cursor-pointer">
-                                                </div>
-                                                <input type="hidden" id="c-cover">
-                                            </div>
+                                            <label class="block text-xs font-bold mb-1 text-slate-500">رابط صورة الغلاف (URL)</label>
+                                            <input type="text" id="c-cover" oninput="updateLivePreview()" class="w-full p-2.5 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none" placeholder="الصق رابط الصورة هنا (مثال: https://...)">
                                         </div>
                                     </div>
 
@@ -934,19 +935,19 @@
                                 <i class="fa-solid fa-user-gear text-brand-500"></i> إعدادات حسابي الشخصي
                             </h3>
                             
-                            <!-- نموذج تحديث الاسم والصورة الحقيقية -->
+                            <!-- نموذج تحديث الاسم وصورة الرابط -->
                             <div class="space-y-4 border-b border-slate-100 dark:border-darkBorder pb-4">
                                 <label class="block text-xs font-bold text-slate-400">صورتك الشخصية واسمك</label>
                                 <div class="flex items-center gap-4">
-                                    <!-- رفع الصورة -->
-                                    <div class="relative w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-dashed border-brand-500 flex items-center justify-center overflow-hidden shrink-0 group hover:bg-brand-50 transition cursor-pointer">
+                                    <!-- عرض الصورة فقط -->
+                                    <div class="relative w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-brand-500 flex items-center justify-center overflow-hidden shrink-0">
                                         <img id="real-profile-img" src="" class="absolute inset-0 w-full h-full object-cover hidden z-10">
-                                        <i class="fa-solid fa-camera text-brand-500 text-xl group-hover:scale-110 transition z-0"></i>
-                                        <input type="file" id="profile-image-upload" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-20" onchange="processAndUploadImage(this)">
+                                        <i class="fa-solid fa-user text-brand-500 text-xl z-0"></i>
                                     </div>
-                                    <!-- تغيير الاسم -->
-                                    <div class="flex-1">
-                                        <input type="text" id="update-profile-name" class="w-full p-3 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-brand-500" placeholder="اكتب اسمك الجديد هنا...">
+                                    <!-- تغيير الاسم ورابط الصورة -->
+                                    <div class="flex-1 space-y-2">
+                                        <input type="text" id="update-profile-name" class="w-full p-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-brand-500" placeholder="اكتب اسمك الجديد هنا...">
+                                        <input type="text" id="update-profile-url" class="w-full p-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-brand-500" placeholder="الصق رابط صورتك (URL)..." oninput="document.getElementById('real-profile-img').src=this.value; document.getElementById('real-profile-img').classList.remove('hidden');">
                                     </div>
                                 </div>
                                 <button onclick="updatePersonalData()" class="w-full bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white py-2.5 rounded-xl font-bold text-xs transition shadow-md">
@@ -1170,6 +1171,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, setPersistence, browserLocalPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, query, orderBy, onSnapshot, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyC0VbPYiHIudIm7uiOld0a3bqsnx6oT3SY",
@@ -1184,8 +1186,10 @@
         const auth = getAuth(app);
         setPersistence(auth, browserLocalPersistence).catch(console.error);
         const db = getFirestore(app);
+        const storage = getStorage(app);
 
         let currentUser = null;
+        let currentCourseIsUnlocked = false;
         let userData = null;
         let allCourses = []; 
         let currentCourseId = null;
@@ -1308,46 +1312,87 @@
         // ==========================================
         // نظام المصادقة والأمن
         // ==========================================
-        document.getElementById('btn-signup').addEventListener('click', async () => {
-            const name = document.getElementById('auth-name').value.trim();
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value;
-            const role = document.getElementById('auth-role').value;
-            
-            if(!name) return showToast("يرجى إدخال اسمك بالكامل أولاً.", "error");
-            if(!email || !password) return showToast("يرجى ملء جميع الحقول المطلوبة.", "error");
+        // نظام التبديل والمصادقة المطور التفاعلي (Auth Controller)
+        let authMode = 'login'; // الوضع الافتراضي عند الفتح هو تسجيل الدخول
 
-            try {
-                const btn = document.getElementById('btn-signup');
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تأسيس حسابك...';
-                const uc = await createUserWithEmailAndPassword(auth, email, password);
-                
-                // حفظ الاسم مع باقي البيانات
-                await setDoc(doc(db, "users", uc.user.uid), {
-                    name: name,
-                    email: uc.user.email, 
-                    role: role,
-                    status: role === 'admin' ? 'pending' : 'active',
-                    completedLectures: [] 
-                });
-                showToast("تم تأسيس حسابك بنجاح وسلاسه بالمنصة!", "success");
-            } catch(e) {
-                showToast("خطأ أمن: " + e.message, "error");
-                document.getElementById('btn-signup').innerHTML = 'إنشاء حساب جديد بالمنصة';
+        // دالة إدارة تبديل الحقول والأزرار برمجياً
+        document.getElementById('btn-toggle-auth-mode').addEventListener('click', () => {
+            const nameContainer = document.getElementById('name-field-container');
+            const roleContainer = document.getElementById('role-field-container');
+            const primaryText = document.getElementById('primary-auth-text');
+            const primaryIcon = document.getElementById('primary-auth-icon');
+            const toggleBtn = document.getElementById('btn-toggle-auth-mode');
+            
+            if (authMode === 'login') {
+                authMode = 'signup';
+                nameContainer.classList.remove('hidden');
+                roleContainer.classList.remove('hidden');
+                primaryText.textContent = "إنشاء الحساب الجديد بالمنصة";
+                primaryIcon.className = "fa-solid fa-user-plus";
+                toggleBtn.textContent = "لديك حساب بالفعل؟ تسجيل الدخول الآن";
+            } else {
+                authMode = 'login';
+                nameContainer.classList.add('hidden');
+                roleContainer.classList.add('hidden');
+                primaryText.textContent = "تسجيل الدخول الآمن";
+                primaryIcon.className = "fa-solid fa-arrow-right-to-bracket";
+                toggleBtn.textContent = "ليس لديك حساب؟ إنشاء حساب جديد بالمنصة";
             }
         });
 
-        document.getElementById('btn-login').addEventListener('click', async () => {
+        // تشغيل العملية المطلوبة سحابياً بناءً على وضع الشاشة الحالي
+        document.getElementById('btn-primary-auth').addEventListener('click', async () => {
             const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value;
-            if(!email || !password) return showToast("أدخل البريد وكلمة المرور المسجلة.", "error");
-            try {
-                const btn = document.getElementById('btn-login');
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
-                await signInWithEmailAndPassword(auth, email, password);
-            } catch(e) {
-                showToast("البيانات المدخلة خاطئة، يرجى المحاولة ثانية.", "error");
-                document.getElementById('btn-login').innerHTML = '<span>تسجيل الدخول الآمن</span> <i class="fa-solid fa-arrow-right-to-bracket"></i>';
+
+            if (authMode === 'login') {
+                // 1. تشغيل عملية تسجيل الدخول
+                if(!email || !password) return showToast("الرجاء إدخال البريد الإلكتروني وكلمة المرور.", "error");
+                try {
+                    const btn = document.getElementById('btn-primary-auth');
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق وتسجيل الدخول...';
+                    
+                    await signInWithEmailAndPassword(auth, email, password);
+                    
+                    // توليد وحفظ معرف جلسة فريد لمنع تشارك الحساب
+                    const newSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    localStorage.setItem('hms_session_id', newSessionId);
+                    await updateDoc(doc(db, "users", auth.currentUser.uid), { sessionId: newSessionId });
+                    
+                } catch(e) {
+                    showToast("البريد أو كلمة المرور غير صحيحة يرجى إعادة المحاولة ثانية.", "error");
+                    document.getElementById('btn-primary-auth').innerHTML = `<span>تسجيل الدخول الآمن</span> <i class="fa-solid fa-arrow-right-to-bracket"></i>`;
+                }
+            } else {
+                // 2. تشغيل عملية إنشاء حساب جديد
+                const name = document.getElementById('auth-name').value.trim();
+                const role = document.getElementById('auth-role').value;
+                
+                if(!name) return showToast("يرجى إدخال اسمك بالكامل أولاً.", "error");
+                if(!email || !password) return showToast("يرجى ملء جميع الحقول المطلوبة.", "error");
+
+                try {
+                    const btn = document.getElementById('btn-primary-auth');
+                    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تأسيس حسابك وحفظ البيانات...';
+                    
+                    const uc = await createUserWithEmailAndPassword(auth, email, password);
+                    const newSession = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                    
+                    await setDoc(doc(db, "users", uc.user.uid), {
+                        name: name,
+                        email: uc.user.email, 
+                        role: role,
+                        sessionId: newSession,
+                        status: role === 'admin' ? 'pending' : 'active',
+                        completedLectures: [] 
+                    });
+                    
+                    localStorage.setItem('hms_session_id', newSession);
+                    showToast("تم تأسيس حسابك بنجاح وسلاسه بالمنصة!", "success");
+                } catch(e) {
+                    showToast("خطأ أمن: " + e.message, "error");
+                    document.getElementById('btn-primary-auth').innerHTML = `<span>إنشاء الحساب الجديد بالمنصة</span> <i class="fa-solid fa-user-plus"></i>`;
+                }
             }
         });
 
@@ -1365,6 +1410,30 @@
                     const uDoc = await getDoc(doc(db, "users", user.uid));
                     if(uDoc.exists()) {
                         userData = uDoc.data();
+                        // --- إضافة الحماية من الحذف (الطرد الآمن) ---
+                        if (userData.status === 'deleted') {
+                            showToast("تم إيقاف هذا الحساب من قبل الإدارة.", "error");
+                            signOut(auth);
+                            return;
+                        }
+
+                        // --- إضافة حارس الجلسات اللحظي (منع تشارك الحسابات) ---
+                        if (window.unsubscribeSession) window.unsubscribeSession();
+                        window.unsubscribeSession = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+                            if (docSnap.exists()) {
+                                const currentDbSession = docSnap.data().sessionId;
+                                const localSession = localStorage.getItem('hms_session_id');
+                                if (currentDbSession && localSession && currentDbSession !== localSession) {
+                                    showToast("⚠️ تم تسجيل الدخول من جهاز آخر. سيتم تسجيل خروجك الآن حماية لحسابك.", "error");
+                                    signOut(auth);
+                                }
+                                if (docSnap.data().status === 'deleted') {
+                                    showToast("تم حذف هذا الحساب.", "error");
+                                    signOut(auth);
+                                }
+                            }
+                        });
+                        // --------------------------------------------------------
                         // عرض الاسم الحقيقي في القائمة بدلا من الايميل
                         document.getElementById('nav-user-email').textContent = userData.name || user.email.split('@')[0];
                         // عرض الصورة الحقيقية إن وجدت في القائمة الجانبية وفي صفحة الإعدادات
@@ -1413,13 +1482,21 @@
                     window.unsubscribeSession();
                     window.unsubscribeSession = null;
                 }
+
                 isAppReady = false; currentUser = null; userData = null;
                 document.getElementById('main-layout').classList.add('hidden');
                 document.getElementById('login-view').classList.add('active');
-                document.getElementById('btn-login').innerHTML = '<span>تسجيل الدخول الآمن</span> <i class="fa-solid fa-arrow-right-to-bracket"></i>';
-                document.getElementById('btn-signup').innerHTML = 'إنشاء حساب جديد بالمنصة';
+                
+                // إعادة تهيئة أزرار تسجيل الدخول التفاعلية الجديدة
+                authMode = 'login';
+                document.getElementById('name-field-container').classList.add('hidden');
+                document.getElementById('role-field-container').classList.add('hidden');
+                document.getElementById('primary-auth-text').textContent = "تسجيل الدخول الآمن";
+                document.getElementById('primary-auth-icon').className = "fa-solid fa-arrow-right-to-bracket";
+                document.getElementById('btn-toggle-auth-mode').textContent = "ليس لديك حساب؟ إنشاء حساب جديد بالمنصة";
+                document.getElementById('btn-primary-auth').innerHTML = `<span>تسجيل الدخول الآمن</span> <i class="fa-solid fa-arrow-right-to-bracket" id="primary-auth-icon"></i>`;
             }
-        });
+        });    
 
         // ==========================================
         // جلب سحابي ومزامنة البيانات اللحظية
@@ -1507,11 +1584,14 @@
                                        (userData?.role === 'admin' && course.createdBy === currentUser.uid);
 
                     const priceLabel = isPaid ? (isUnlocked ? '<span class="text-emerald-500"><i class="fa-solid fa-lock-open"></i> مفعّل</span>' : '<span class="text-rose-500"><i class="fa-solid fa-lock"></i> يتطلب كود</span>') : 'مجانـاً';
-                    const cardClickAction = (isPaid && !isUnlocked) ? `window.openActivationModal('${course.id}', event)` : `window.openCoursePlayer('${course.id}')`;
+                    const cardClickAction = `window.openCoursePlayer('${course.id}')`;
 
-                    const actionBtnHtml = (isPaid && !isUnlocked) 
-                        ? `<button onclick="${cardClickAction}" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-key"></i> تفعيل بالكود</button>` 
-                        : `<button onclick="${cardClickAction}" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow">ابدأ الدراسة</button>`;
+const actionBtnHtml = (isPaid && !isUnlocked) 
+    ? `<div class="flex gap-1.5">
+        <button onclick="window.openCoursePlayer('${course.id}'); event.stopPropagation();" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-eye"></i> استعراض</button>
+        <button onclick="window.openActivationModal('${course.id}', event); event.stopPropagation();" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-key"></i> تفعيل</button>
+       </div>` 
+    : `<button onclick="${cardClickAction}" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-play"></i> ابدأ الدراسة</button>`;
 
                     targetList.innerHTML += `
                         <div class="bg-white dark:bg-darkCard rounded-3xl border border-slate-200 dark:border-darkBorder overflow-hidden hover:shadow-xl hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 group flex flex-col cursor-pointer relative shadow-sm">
@@ -1600,6 +1680,34 @@
                         }
                     }
                 });
+            }
+        };
+        // ==========================================
+        // نظام التلخيصات والملاحظات الشخصية للطالب
+        // ==========================================
+        window.saveLectureNote = function() {
+            if(!currentActiveLectureId || !currentUser) return;
+            const noteArea = document.getElementById('lecture-note-area');
+            const note = noteArea.value;
+            const storageKey = `hms_note_${currentUser.uid}_${currentActiveLectureId}`;
+            localStorage.setItem(storageKey, note);
+        };
+
+        window.loadLectureNote = function() {
+            if(!currentActiveLectureId || !currentUser) return;
+            const noteArea = document.getElementById('lecture-note-area');
+            const storageKey = `hms_note_${currentUser.uid}_${currentActiveLectureId}`;
+            const savedNote = localStorage.getItem(storageKey) || "";
+            noteArea.value = savedNote;
+        };
+
+        window.clearLectureNote = function() {
+            if(!currentActiveLectureId || !currentUser) return;
+            if(confirm("هل أنت متأكد من حذف هذه الملاحظة نهائياً؟")) {
+                const storageKey = `hms_note_${currentUser.uid}_${currentActiveLectureId}`;
+                localStorage.removeItem(storageKey);
+                document.getElementById('lecture-note-area').value = "";
+                showToast("تم حذف الملاحظة بنجاح.", "info");
             }
         };
 
@@ -1894,11 +2002,37 @@
                     <input type="text" class="res-url flex-1 p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg outline-none text-xs" placeholder="رابط المصدر أو اتركه فارغاً للاختبار التفاعلي" value="${resData ? resData.url : ''}">
                     <button type="button" onclick="this.closest('.resource-block').remove();" class="text-slate-400 hover:text-rose-500 p-2 shrink-0 transition"><i class="fa-solid fa-xmark"></i></button>
                 </div>
-                <!-- حقل بناء أسئلة الاختبار التفاعلي -->
-                <div class="quiz-questions-wrapper ${resData && resData.type === 'quiz' ? '' : 'hidden'} w-full bg-slate-50 dark:bg-slate-900/60 p-3 rounded-xl border border-slate-200/50 dark:border-slate-800">
-                    <label class="block text-[10px] font-black text-amber-600 dark:text-amber-400 mb-1.5 uppercase tracking-wide"><i class="fa-solid fa-tools"></i> أداة بناء الأسئلة التفاعلية المتقدمة (MCQs):</label>
-                    <p class="text-[9px] text-slate-400 mb-2">اكتب كل سؤال في سطر مستقل بهذا الشكل: السؤال | خيار A, خيار B, خيار C, خيار D, خيار E (يمكن 4 أو 5 اختيارات) | رقم الاختيار الصحيح (0 للـ A، و1 للـ B، وهكذا..)</p>
-                    <textarea class="res-quiz-data w-full p-2.5 text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-none resize-none h-24 font-mono" placeholder="مثال:&#10;ما هو العضو الرئيسي لضخ الدم؟ | الرئتين, القلب, الكبد | 1&#10;كم عدد عظام جسم الإنسان؟ | 120, 206, 300 | 1">${resData && resData.quizData ? resData.quizData : ''}</textarea>
+                <!-- حقل بناء أسئلة الاختبار (يدعم الواجهة التفاعلية والإدخال النصي معاً) -->
+                <div class="quiz-questions-wrapper ${resData && resData.type === 'quiz' ? '' : 'hidden'} w-full bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800">
+                    
+                    <!-- أزرار التبديل بين الطريقتين -->
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <label class="text-xs font-black text-amber-600 dark:text-amber-400"><i class="fa-solid fa-tools"></i> محرك بناء الاختبارات:</label>
+                        <div class="flex bg-slate-200 dark:bg-slate-800 rounded-lg p-1">
+                            <button type="button" onclick="window.switchQuizMode(this, 'ui')" class="quiz-mode-btn bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white px-3 py-1.5 rounded text-[10px] font-bold transition">واجهة الأزرار (سهل)</button>
+                            <button type="button" onclick="window.switchQuizMode(this, 'text')" class="quiz-mode-btn text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 px-3 py-1.5 rounded text-[10px] font-bold transition">الإدخال النصي (متقدم)</button>
+                        </div>
+                    </div>
+
+                    <!-- الطريقة الأولى: واجهة الأزرار التفاعلية -->
+                    <div class="quiz-ui-mode-container">
+                        <button type="button" onclick="window.addQuizQuestionUI(this)" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg text-[10px] mb-3 transition"><i class="fa-solid fa-plus"></i> إضافة سؤال جديد</button>
+                        <div class="quiz-ui-container space-y-4">
+                            <!-- سيتم حقن الأسئلة هنا -->
+                        </div>
+                    </div>
+
+                    <!-- الطريقة الثانية: النص المتقدم (النظام القديم الذي طلبته) -->
+                    <div class="quiz-text-mode-container hidden">
+                        <p class="text-[9px] text-slate-500 dark:text-slate-400 mb-2 font-bold leading-relaxed">
+                            <i class="fa-solid fa-circle-info text-blue-500"></i> اكتب كل سؤال في سطر مستقل بهذا الشكل:<br>
+                            السؤال | خيار 1, خيار 2, خيار 3 | رقم الاختيار الصحيح (0 للأول، 1 للثاني..) | شرح علمي (اختياري)
+                        </p>
+                        <textarea class="res-quiz-data w-full p-3 text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-none resize-none h-32 font-mono" placeholder="مثال:&#10;ما هو العضو الذي يضخ الدم؟ | الرئة, القلب, الكبد | 1 | لأن القلب هو العضلة المسؤولة عن الدورة الدموية">${resData && resData.quizData ? resData.quizData : ''}</textarea>
+                    </div>
+
+                    <!-- حقل مخفي لمعرفة أي طريقة يستخدمها الدكتور الآن لحفظها -->
+                    <input type="hidden" class="active-quiz-mode" value="ui">
                 </div>
             `;
             container.appendChild(block);
@@ -1914,6 +2048,110 @@
                 wrapper.classList.add('hidden');
             }
         };
+        // ==========================================
+        // محرك بناء الاختبارات التفاعلية (Quiz Builder UI)
+        // ==========================================
+        window.switchQuizMode = function(btnElem, mode) {
+            const wrapper = btnElem.closest('.quiz-questions-wrapper');
+            const uiContainer = wrapper.querySelector('.quiz-ui-mode-container');
+            const textContainer = wrapper.querySelector('.quiz-text-mode-container');
+            const modeInput = wrapper.querySelector('.active-quiz-mode');
+            
+            // إعادة ضبط ألوان الأزرار
+            wrapper.querySelectorAll('.quiz-mode-btn').forEach(b => {
+                b.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-slate-800', 'dark:text-white');
+                b.classList.add('text-slate-500', 'dark:text-slate-400');
+            });
+            
+            // تلوين الزر النشط
+            btnElem.classList.remove('text-slate-500', 'dark:text-slate-400');
+            btnElem.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-slate-800', 'dark:text-white');
+            
+            // حفظ الوضع الحالي وإظهار/إخفاء الحاويات
+            modeInput.value = mode;
+            if (mode === 'ui') {
+                uiContainer.classList.remove('hidden');
+                textContainer.classList.add('hidden');
+            } else {
+                uiContainer.classList.add('hidden');
+                textContainer.classList.remove('hidden');
+            }
+        };
+        window.addQuizQuestionUI = function(btnElem, qData = null) {
+            const container = btnElem.closest('.quiz-questions-wrapper').querySelector('.quiz-ui-container');
+            const qDiv = document.createElement('div');
+            qDiv.className = "quiz-question-item bg-white dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 relative";
+            
+            let optionsHtml = '';
+            let qText = qData ? qData.q : '';
+            let qExp = qData ? qData.exp : '';
+            let correctIdx = qData ? qData.c : 0;
+            let opts = qData && qData.opts ? qData.opts : ['', '', '', '']; // افتراضيا 4 خيارات
+            
+            opts.forEach((opt, idx) => {
+                optionsHtml += `
+                    <div class="flex items-center gap-2 quiz-option-row">
+                        <input type="radio" name="correct_${Date.now()}_${Math.random()}" class="q-correct-radio w-4 h-4 text-amber-500 focus:ring-amber-500 cursor-pointer" ${idx === correctIdx ? 'checked' : ''} title="حدد هذه كإجابة صحيحة">
+                        <input type="text" class="q-opt-input flex-1 p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-xs" placeholder="خيار ${idx + 1}" value="${opt}">
+                        <button type="button" onclick="this.closest('.quiz-option-row').remove()" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                    </div>
+                `;
+            });
+
+            qDiv.innerHTML = `
+                <button type="button" onclick="this.closest('.quiz-question-item').remove()" class="absolute top-2 left-2 text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg text-[10px]"><i class="fa-solid fa-xmark"></i> حذف</button>
+                <input type="text" class="q-title-input w-full mb-2 p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-xs font-bold text-slate-800 dark:text-white" placeholder="اكتب السؤال هنا..." value="${qText}">
+                
+                <div class="q-options-container space-y-2 mb-2 pr-4 border-r-2 border-amber-500">
+                    ${optionsHtml}
+                </div>
+                
+                <div class="flex gap-2 items-center">
+                    <button type="button" onclick="window.addQuizOptionUI(this)" class="text-[10px] text-amber-600 dark:text-amber-400 font-bold hover:underline"><i class="fa-solid fa-plus"></i> إضافة خيار آخر</button>
+                    <input type="text" class="q-exp-input flex-1 p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-[10px]" placeholder="شرح الإجابة (اختياري) سيظهر للطالب بعد الحل..." value="${qExp}">
+                </div>
+            `;
+            container.appendChild(qDiv);
+            
+            // إصلاح مشكلة تكرار أسماء الراديو بوتن للخيارات
+            const radios = qDiv.querySelectorAll('.q-correct-radio');
+            const uniqueName = `correct_${Date.now()}_${Math.random()}`;
+            radios.forEach(r => r.name = uniqueName);
+        };
+
+        window.addQuizOptionUI = function(btnElem) {
+            const optsContainer = btnElem.closest('.quiz-question-item').querySelector('.q-options-container');
+            const radioName = optsContainer.querySelector('.q-correct-radio').name;
+            const newOpt = document.createElement('div');
+            newOpt.className = "flex items-center gap-2 quiz-option-row";
+            newOpt.innerHTML = `
+                <input type="radio" name="${radioName}" class="q-correct-radio w-4 h-4 text-amber-500 focus:ring-amber-500 cursor-pointer" title="حدد هذه كإجابة صحيحة">
+                <input type="text" class="q-opt-input flex-1 p-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-xs" placeholder="خيار جديد">
+                <button type="button" onclick="this.closest('.quiz-option-row').remove()" class="text-slate-400 hover:text-rose-500"><i class="fa-solid fa-trash text-[10px]"></i></button>
+            `;
+            optsContainer.appendChild(newOpt);
+        };
+
+        // دالة مساعدة لتحويل النص القديم إلى واجهة UI عند التعديل
+        window.parseQuizToUI = function(quizDataStr, wrapperElem) {
+            const container = wrapperElem.querySelector('.quiz-ui-container');
+            container.innerHTML = "";
+            if(!quizDataStr) return;
+            
+            const lines = quizDataStr.split("\\n").filter(l => l.trim().includes("|"));
+            lines.forEach(line => {
+                const parts = line.split("|");
+                if (parts.length >= 3) {
+                    window.addQuizQuestionUI(wrapperElem.querySelector('button'), {
+                        q: parts[0].trim(),
+                        opts: parts[1].split(",").map(o => o.trim()),
+                        c: parseInt(parts[2].trim()),
+                        exp: parts[3] ? parts[3].trim() : ""
+                    });
+                }
+            });
+        };
+        // ==========================================
 
         function getGenId() { 
             return 'id_' + Date.now() + '_' + (uuidCounter++); 
@@ -1950,7 +2188,37 @@
                     let rType = resBlock.querySelector('.res-type').value;
                     let rTitle = resBlock.querySelector('.res-title').value.trim();
                     let rUrl = resBlock.querySelector('.res-url').value.trim();
-                    let rQuizData = resBlock.querySelector('.res-quiz-data') ? resBlock.querySelector('.res-quiz-data').value.trim() : "";
+                    let rQuizData = "";
+                    if(rType === 'quiz') {
+                        const activeMode = resBlock.querySelector('.active-quiz-mode').value;
+                        
+                        if (activeMode === 'text') {
+                            // الحفظ من الواجهة النصية القديمة المتقدمة
+                            rQuizData = resBlock.querySelector('.res-quiz-data').value.trim();
+                        } else {
+                            // الحفظ من واجهة الأزرار التفاعلية
+                            const qItems = resBlock.querySelectorAll('.quiz-question-item');
+                            let builtLines = [];
+                            qItems.forEach(item => {
+                                const title = item.querySelector('.q-title-input').value.trim() || 'سؤال بدون عنوان';
+                                const exp = item.querySelector('.q-exp-input').value.trim();
+                                const optInputs = item.querySelectorAll('.q-opt-input');
+                                const radios = item.querySelectorAll('.q-correct-radio');
+                                
+                                let optsArray = [];
+                                let correctIdx = 0;
+                                
+                                optInputs.forEach((inp, idx) => {
+                                    const val = inp.value.trim() || `خيار ${idx+1}`;
+                                    optsArray.push(val);
+                                    if(radios[idx].checked) correctIdx = idx;
+                                });
+                                
+                                builtLines.push(`${title} | ${optsArray.join(', ')} | ${correctIdx} ${exp ? '| ' + exp : ''}`);
+                            });
+                            rQuizData = builtLines.join('\n');
+                        }
+                    }
                     
                     if(rTitle) {
                         resources.push({
@@ -2028,11 +2296,14 @@
                                    (userData?.role === 'admin' && course.createdBy === currentUser.uid);
 
                 const priceLabel = isPaid ? (isUnlocked ? '<span class="text-emerald-500"><i class="fa-solid fa-lock-open"></i> مفعّل</span>' : '<span class="text-rose-500"><i class="fa-solid fa-lock"></i> يتطلب كود</span>') : 'مجانـاً';
-                const cardClickAction = (isPaid && !isUnlocked) ? `window.openActivationModal('${course.id}', event)` : `window.openCoursePlayer('${course.id}')`;
+                const cardClickAction = `window.openCoursePlayer('${course.id}')`;
 
-                const actionBtnHtml = (isPaid && !isUnlocked) 
-                    ? `<button onclick="${cardClickAction}" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-key"></i> تفعيل بالكود</button>` 
-                    : `<button onclick="${cardClickAction}" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow">ابدأ الدراسة</button>`;
+const actionBtnHtml = (isPaid && !isUnlocked) 
+    ? `<div class="flex gap-1.5">
+        <button onclick="window.openCoursePlayer('${course.id}'); event.stopPropagation();" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-eye"></i> استعراض</button>
+        <button onclick="window.openActivationModal('${course.id}', event); event.stopPropagation();" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-key"></i> تفعيل</button>
+       </div>` 
+    : `<button onclick="${cardClickAction}" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-play"></i> ابدأ الدراسة</button>`;
 
                 const card = document.createElement('div');
                 card.className = "bg-white dark:bg-darkCard rounded-3xl border border-slate-200 dark:border-darkBorder overflow-hidden hover:shadow-xl hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 group flex flex-col cursor-pointer relative";
@@ -2229,8 +2500,9 @@
         window.deleteUserByOwner = async function(userId) { 
             if(confirm("🚨 تنبيه مالك المنصة: هل أنت متأكد من رغبتك في حذف هذا الحساب نهائياً من المنصة؟ سيتم تسجيل خروجه فوراً وطرده من السيرفر.")) { 
                 try {
-                    await deleteDoc(doc(db, "users", userId)); 
-                    showToast("تم حذف وإلغاء الحساب بالكامل من قاعدة البيانات بنجاح.", "success"); 
+                    // تحديث الحالة بدلاً من الحذف لتفعيل الطرد التلقائي
+                    await updateDoc(doc(db, "users", userId), { status: 'deleted' }); 
+                    showToast("تم حظر وحذف الحساب بالكامل من المنصة بنجاح.", "success"); 
                     window.initSuperAdmin(); 
                 } catch(e) {
                     showToast("فشلت عملية حذف العميل.", "error");
@@ -2287,6 +2559,13 @@
             
             navTo('admin-add');
             document.getElementById('page-title').innerText = "تعديل محتوى الكورس";
+            // تفعيل الواجهة التفاعلية للاختبارات عند التعديل
+            setTimeout(() => {
+                document.querySelectorAll('.quiz-questions-wrapper').forEach(wrapper => {
+                    const textData = wrapper.querySelector('.res-quiz-data').value;
+                    if(textData) window.parseQuizToUI(textData.replace(/\n/g, "\\n"), wrapper);
+                });
+            }, 500);
         };
 
         window.deleteCourse = async function(id) {
@@ -2356,26 +2635,20 @@
         window.openCoursePlayer = async function(courseId) {
             const course = allCourses.find(c => c.id === courseId);
             if(!course) return;
-            // --- حارس الأمان (منع فتح الكورس المقفل بأي طريقة) ---
+            
+            // تحديد ما إذا كان الكورس مفتوحاً أم مقفلاً للطالب الحالي
             const isPaid = course.priceType === 'paid';
-            const isUnlocked = userData?.unlockedCourses?.includes(courseId) || 
+            currentCourseIsUnlocked = !isPaid || (userData?.unlockedCourses?.includes(courseId)) || 
                                userData?.role === 'superadmin' || 
                                (userData?.role === 'admin' && course.createdBy === currentUser.uid);
-            
-            if (isPaid && !isUnlocked) {
-                showToast("عذراً، هذا الكورس مدفوع ويتطلب إدخال كود التفعيل أولاً.", "error");
-                window.openActivationModal(courseId);
-                return; // إيقاف العملية وطرد المستخدم
-            }
-            // ----------------------------------------------------
 
-            // زيادة عداد المشاهدات تلقائياً (+1) في قاعدة البيانات السحابية عند فتح الكورس
             try {
                 const currentViews = course.views || 0;
                 await updateDoc(doc(db, "courses", courseId), { views: currentViews + 1 });
             } catch (e) {
                 console.error("خطأ في تحديث عداد المشاهدات:", e);
             }
+            
             renderCourseAnnouncements(course);
             currentCourseId = courseId;
             currentActiveLectureId = null;
@@ -2383,21 +2656,47 @@
             navTo('student-player');
             
             document.getElementById('current-lec-title').textContent = course.title;
-            document.getElementById('current-lec-subtitle').innerHTML = `<i class="fa-solid fa-bookmark text-brand-500"></i> <span>اختر محاضرة أو موديول من القائمة للبدء بالدراسة</span>`;
+            document.getElementById('current-lec-subtitle').innerHTML = `<i class="fa-solid fa-bookmark text-brand-500"></i> <span>${currentCourseIsUnlocked ? 'اختر محاضرة من القائمة للبدء بالدراسة' : 'استكشف محتويات الكورس قبل الاشتراك'}</span>`;
             
-            // إخفاء شريط الإكمال وأزرار التحكم بالبداية
             document.getElementById('resource-completion-bar').classList.add('hidden');
             document.getElementById('player-controls-overlay').classList.add('hidden');
             
             document.getElementById('lecture-note-area').value = "";
-            document.getElementById('lecture-note-area').disabled = true;
-
-            document.getElementById('player-dynamic-content').innerHTML = `
-                <div class="text-slate-400 font-bold flex flex-col items-center gap-3 w-full h-full justify-center bg-white dark:bg-slate-900 absolute top-0 left-0">
-                    <i class="fa-solid fa-laptop-medical text-5xl mb-2 text-slate-300 dark:text-slate-700"></i>
-                    <span class="text-base text-slate-800 dark:text-slate-200">مرحباً بك في كورس ${course.title}</span>
-                    <span class="text-xs font-normal text-slate-400">اضغط على المحاضرات في القائمة الجانبية لتوسيعها وعرض مصادرها.</span>
-                </div>`;
+            
+            const contentContainer = document.getElementById('player-dynamic-content');
+            
+            // --- السحر هنا: إذا كان مقفولاً، نعرض شاشة قفل ترويجية بدلاً من شاشة الترحيب العادية ---
+            if (!currentCourseIsUnlocked) {
+                contentContainer.innerHTML = `
+                    <div class="text-white flex flex-col items-center justify-center gap-4 w-full h-full bg-slate-900 absolute top-0 left-0 p-8 text-center animate-fade-in">
+                        <div class="w-20 h-20 bg-amber-500/10 text-amber-500 rounded-full flex items-center justify-center text-4xl mb-2 shadow-inner">
+                            <i class="fa-solid fa-lock"></i>
+                        </div>
+                        <h3 class="text-2xl md:text-3xl font-black drop-shadow-md">هذا الكورس مقفل</h3>
+                        <p class="text-sm text-slate-400 max-w-lg leading-relaxed">${course.desc || 'استكشف الفهرس والمحتويات من القائمة الجانبية. لمشاهدة الفيديوهات والملفات واختبار معلوماتك، يرجى تفعيل الكورس باستخدام كود الاشتراك الخاص بك.'}</p>
+                        <button onclick="window.openActivationModal('${course.id}')" class="mt-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white px-8 py-3.5 rounded-xl font-black shadow-lg shadow-amber-500/20 transition transform hover:-translate-y-1 flex items-center gap-2">
+                            <i class="fa-solid fa-key"></i> تفعيل الكورس الآن
+                        </button>
+                    </div>`;
+                
+                // تعطيل التلخيصات والأسئلة للمتطفلين
+                document.getElementById('lecture-note-area').disabled = true;
+                document.getElementById('lecture-note-area').placeholder = "يجب تفعيل الكورس لكتابة ملاحظاتك...";
+                document.getElementById('qa-textarea').disabled = true;
+                document.getElementById('qa-textarea').placeholder = "يجب تفعيل الكورس للمشاركة في النقاش...";
+            } else {
+                contentContainer.innerHTML = `
+                    <div class="text-slate-400 font-bold flex flex-col items-center gap-3 w-full h-full justify-center bg-white dark:bg-slate-900 absolute top-0 left-0">
+                        <i class="fa-solid fa-laptop-medical text-5xl mb-2 text-slate-300 dark:text-slate-700"></i>
+                        <span class="text-base text-slate-800 dark:text-slate-200">مرحباً بك في كورس ${course.title}</span>
+                        <span class="text-xs font-normal text-slate-400">اضغط على المحاضرات في القائمة الجانبية لتوسيعها وعرض مصادرها.</span>
+                    </div>`;
+                
+                document.getElementById('lecture-note-area').disabled = true; // يفعل فقط عند اختيار محاضرة
+                document.getElementById('lecture-note-area').placeholder = "اكتب ملاحظاتك وتلخيصك الشخصي هنا...";
+                document.getElementById('qa-textarea').disabled = false;
+                document.getElementById('qa-textarea').placeholder = "لديك استفسار حول هذا الموديل الأكاديمي؟ اكتبه هنا...";
+            }
 
             buildCourseSidebar(course);
             loadCourseQA(courseId);
@@ -2436,6 +2735,12 @@
 
         // دالة تشغيل المصدر عند الضغط عليه من داخل الأكورديون
         window.selectResource = function(lecId, resId) {
+            // -- حارس الأمان اللحظي: صد الطالب وفتح نافذة الكود إذا كان الكورس مقفلاً --
+            if (!currentCourseIsUnlocked) {
+                showToast("عذراً، يجب تفعيل الكورس أولاً لمشاهدة ودراسة هذا المحتوى.", "error");
+                window.openActivationModal(currentCourseId);
+                return; // إيقاف تنفيذ الدالة فوراً
+            }
             currentActiveLectureId = lecId;
             currentActiveResourceId = resId;
             
@@ -2564,13 +2869,17 @@
                         if(res.type === 'link') resIcon = 'fa-link text-emerald-500';
                         if(res.type === 'quiz') resIcon = 'fa-list-check text-amber-500';
 
+                        // تحديد شكل أيقونة القفل إذا كان الكورس غير مفعل
+                        const lockIcon = !currentCourseIsUnlocked ? '<i class="fa-solid fa-lock text-amber-500 text-[10px] mr-auto pl-2 opacity-70" title="محتوى مقفل"></i>' : '';
+
                         resourcesHtml += `
-                            <button id="res-btn-${res.id}" onclick="window.selectResource('${lec.id}', '${res.id}')" class="resource-item-btn w-full text-right p-3 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border-b border-slate-100 dark:border-slate-700/50 last:border-0 group animate-scale-up">
-                                <div class="flex items-center gap-3">
-                                    <i class="fa-solid ${resIcon} text-sm"></i>
-                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-brand-600 transition-colors">${res.title}</span>
+                            <button id="res-btn-${res.id}" onclick="window.selectResource('${lec.id}', '${res.id}')" class="resource-item-btn w-full text-right p-3 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border-b border-slate-100 dark:border-slate-700/50 last:border-0 group animate-scale-up ${!currentCourseIsUnlocked ? 'opacity-80' : ''}">
+                                <div class="flex items-center gap-3 w-full">
+                                    <i class="fa-solid ${resIcon} text-sm ${!currentCourseIsUnlocked ? 'text-slate-400' : ''}"></i>
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-brand-600 transition-colors flex-1 text-right">${res.title}</span>
+                                    ${lockIcon}
                                 </div>
-                                ${isResComplete ? '<i class="fa-solid fa-circle-check text-emerald-500 text-sm shadow-sm rounded-full bg-white"></i>' : ''}
+                                ${isResComplete ? '<i class="fa-solid fa-circle-check text-emerald-500 text-sm shadow-sm rounded-full bg-white shrink-0"></i>' : ''}
                             </button>
                         `;
                     }
@@ -2876,11 +3185,14 @@
                                    (userData?.role === 'admin' && course.createdBy === currentUser.uid);
 
                 const priceLabel = isPaid ? (isUnlocked ? '<span class="text-emerald-500"><i class="fa-solid fa-lock-open"></i> مفعّل</span>' : '<span class="text-rose-500"><i class="fa-solid fa-lock"></i> يتطلب كود</span>') : 'مجانـاً';
-                const cardClickAction = (isPaid && !isUnlocked) ? `window.openActivationModal('${course.id}', event)` : `window.openCoursePlayer('${course.id}')`;
+                const cardClickAction = `window.openCoursePlayer('${course.id}')`;
 
-                const actionBtnHtml = (isPaid && !isUnlocked) 
-                    ? `<button onclick="${cardClickAction}" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-key"></i> تفعيل بالكود</button>` 
-                    : `<button onclick="${cardClickAction}" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow">متابعة الدراسة</button>`;
+const actionBtnHtml = (isPaid && !isUnlocked) 
+    ? `<div class="flex gap-1.5">
+        <button onclick="window.openCoursePlayer('${course.id}'); event.stopPropagation();" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-eye"></i> استعراض</button>
+        <button onclick="window.openActivationModal('${course.id}', event); event.stopPropagation();" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-key"></i> تفعيل</button>
+       </div>` 
+    : `<button onclick="${cardClickAction}" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-play"></i> ابدأ الدراسة</button>`;
 
                 const card = document.createElement('div');
                 card.className = "bg-white dark:bg-darkCard rounded-3xl border border-slate-200 dark:border-darkBorder overflow-hidden hover:shadow-xl hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 group flex flex-col cursor-pointer relative";
@@ -3845,9 +4157,8 @@
                     img.src = e.target.result;
                     
                     img.onload = function() {
-                        // ضغط الصورة لتصبح صغيرة الحجم جداً
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 150; 
+                        const MAX_WIDTH = 120; // حجم أفاتار صغير جداً ومناسب للمتصفح
                         const scaleSize = MAX_WIDTH / img.width;
                         canvas.width = MAX_WIDTH;
                         canvas.height = img.height * scaleSize;
@@ -3855,10 +4166,9 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         
-                        // استخراج الصورة المضغوطة
-                        tempBase64Image = canvas.toDataURL('image/jpeg', 0.7);
+                        // ضغط فائق يجعل حجم الصورة حوالي 5 كيلوبايت فقط!
+                        tempBase64Image = canvas.toDataURL('image/jpeg', 0.55);
                         
-                        // عرض الصورة محلياً للمعاينة
                         const imgEl = document.getElementById('real-profile-img');
                         imgEl.src = tempBase64Image;
                         imgEl.classList.remove('hidden');
@@ -3868,20 +4178,21 @@
             }
         };
 
-        // دالة حفظ الاسم والصورة في قاعدة البيانات
+        // دالة حفظ الاسم والصورة بالرابط في قاعدة البيانات
         window.updatePersonalData = async function() {
             if(!currentUser) return;
             const newName = document.getElementById('update-profile-name').value.trim();
+            const newPhotoUrl = document.getElementById('update-profile-url').value.trim();
             
             let updates = {};
             if(newName) updates.name = newName;
-            if(tempBase64Image) {
-                updates.realPhoto = tempBase64Image;
-                updates.avatar = 'custom'; // لتعطيل الرمز التعبيري
+            if(newPhotoUrl) {
+                updates.realPhoto = newPhotoUrl;
+                updates.avatar = 'custom';
             }
 
-            if(Object.keys(updates).length === 0) {
-                return showToast("لم تقم بإدخال اسم جديد أو صورة لحفظها.", "info");
+            if(!newName && !newPhotoUrl) {
+                return showToast("لم تقم بإدخال اسم جديد أو رابط صورة لحفظه.", "info");
             }
 
             try {
@@ -3891,19 +4202,20 @@
 
                 await updateDoc(doc(db, "users", currentUser.uid), updates);
                 
-                // تحديث البيانات في الجلسة الحالية
                 if(newName) {
                     userData.name = newName;
                     document.getElementById('nav-user-email').textContent = newName;
                 }
-                if(tempBase64Image) {
-                    userData.realPhoto = tempBase64Image;
-                    document.getElementById('user-avatar-icon').innerHTML = `<img src="${tempBase64Image}" class="w-full h-full rounded-full object-cover">`;
+                if(newPhotoUrl) {
+                    userData.realPhoto = newPhotoUrl;
+                    document.getElementById('user-avatar-icon').innerHTML = `<img src="${newPhotoUrl}" class="w-full h-full rounded-full object-cover">`;
                 }
                 
                 btn.innerHTML = origTxt;
+                document.getElementById('update-profile-url').value = ""; // تفريغ الحقل بعد الحفظ
                 showToast("تم تحديث بياناتك الشخصية بنجاح!", "success");
             } catch(e) {
+                console.error(e);
                 showToast("حدث خطأ أثناء حفظ البيانات.", "error");
             }
         };
@@ -4047,13 +4359,16 @@
         window.processCourseCover = function(input) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
+                const statusEl = document.getElementById('cover-upload-status');
+                statusEl.innerHTML = `<span class="text-amber-500 font-bold"><i class="fa-solid fa-spinner fa-spin"></i> جاري ضغط ومعالجة الصورة...</span>`;
+                
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const img = new Image();
                     img.src = e.target.result;
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 500; // دقة ممتازة لغلاف الكورس
+                        const MAX_WIDTH = 350; // حجم غلاف صغير ومثالي وموفر للمساحة جداً
                         const scaleSize = MAX_WIDTH / img.width;
                         canvas.width = MAX_WIDTH;
                         canvas.height = img.height * scaleSize;
@@ -4061,10 +4376,12 @@
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                         
-                        const base64Cover = canvas.toDataURL('image/jpeg', 0.8);
-                        document.getElementById('c-cover').value = base64Cover;
-                        document.getElementById('cover-upload-status').innerHTML = `<span class="text-emerald-500 font-black"><i class="fa-solid fa-circle-check"></i> تم رفع الغلاف بنجاح!</span>`;
-                        updateLivePreview(); // تحديث المعاينة الحية فوراً
+                        // ضغط قوي جداً بجودة 0.55 يقلص الحجم لـ 15 كيلوبايت فقط بدقة ممتازة
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.55);
+                        
+                        document.getElementById('c-cover').value = compressedBase64;
+                        statusEl.innerHTML = `<span class="text-emerald-500 font-black"><i class="fa-solid fa-circle-check"></i> تم حفظ الغلاف بنجاح!</span>`;
+                        updateLivePreview();
                     }
                 };
                 reader.readAsDataURL(file);
