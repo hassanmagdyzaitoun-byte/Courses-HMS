@@ -1136,7 +1136,7 @@
                         <div class="overflow-x-auto">
                             <table class="w-full text-right text-xs">
                                 <thead>
-                                    <tr class="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-slate-800">
+                                    <tr class="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 font-bold border-b border-slate-200 dark:border-darkBorder" id="analytics-table-header">
                                         <th class="p-4 rounded-tr-xl">اسم الطالب (البريد)</th>
                                         <th class="p-4 text-center">نسبة إنجاز المنهج</th>
                                         <th class="p-4 text-center">حالة الشهادة</th>
@@ -3475,6 +3475,7 @@
             const modal = document.getElementById('analytics-modal');
             const content = document.getElementById('analytics-modal-content');
             const tbody = document.getElementById('analytics-table-body');
+            const headerRow = document.getElementById('analytics-table-header');
             
             modal.classList.remove('hidden');
             setTimeout(() => {
@@ -3482,10 +3483,21 @@
                 content.classList.remove('scale-95');
             }, 10);
 
-            tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-brand-500"></i></td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="p-10 text-center"><i class="fa-solid fa-spinner fa-spin text-3xl text-brand-500"></i></td></tr>`;
+
+            const isPaidCourse = course.priceType === 'paid';
+
+            // تحديث رؤوس الجدول ديناميكياً بناءً على نوع الكورس
+            headerRow.innerHTML = `
+                <th class="p-4 rounded-tr-xl">اسم الطالب (البريد)</th>
+                <th class="p-4 text-center">نسبة إنجاز المنهج</th>
+                <th class="p-4 text-center">حالة الشهادة</th>
+                <th class="p-4 text-center">أعلى درجة باختبارات الكورس</th>
+                ${isPaidCourse ? '<th class="p-4 text-center">التحكم بالاشتراك الكود</th>' : ''}
+                <th class="p-4 text-center rounded-tl-xl">وقت آخر نشاط</th>
+            `;
 
             try {
-                // 1. حساب إجمالي مصادر الكورس لعمل النسبة المئوية
                 let totalCourseResources = 0;
                 let quizIds = [];
                 if(course.lectures) {
@@ -3497,16 +3509,9 @@
                     });
                 }
 
-                if(totalCourseResources === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 font-bold">هذا الكورس لا يحتوي على محتوى دراسي بعد.</td></tr>`;
-                    return;
-                }
-
-                // 2. جلب كل الطلاب
                 const usersSnap = await getDocs(collection(db, "users"));
                 
-                // 3. جلب كل محاولات الاختبار الخاصة بهذا الكورس
-                let attemptsMap = {}; // { userId: maxScore }
+                let attemptsMap = {}; 
                 if(quizIds.length > 0) {
                     const attemptsSnap = await getDocs(collection(db, "quizAttempts"));
                     attemptsSnap.forEach(d => {
@@ -3521,10 +3526,11 @@
 
                 let studentsData = [];
 
-                // 4. تحليل بيانات كل طالب
                 usersSnap.forEach(docSnap => {
                     const student = docSnap.data();
-                    if(student.role !== 'student') return; // تتبع الطلاب فقط
+                    if(student.role !== 'student') return; 
+                    
+                    const isUnlocked = student.unlockedCourses && student.unlockedCourses.includes(courseId);
                     
                     let completedInThisCourse = 0;
                     if(student.completedLectures && course.lectures) {
@@ -3537,22 +3543,24 @@
                         });
                     }
 
-                    if(completedInThisCourse > 0) {
-                        const progressPct = Math.round((completedInThisCourse / totalCourseResources) * 100);
+                    // إظهار الطالب لو كان أكمل محاضرة أو قام بشراء الكورس وتفعيله (حتى لو نسبة إنجازه 0%)
+                    if(completedInThisCourse > 0 || isUnlocked) {
+                        const progressPct = totalCourseResources === 0 ? 0 : Math.round((completedInThisCourse / totalCourseResources) * 100);
                         studentsData.push({
+                            id: docSnap.id,
                             name: student.name || student.email.split('@')[0],
                             email: student.email,
                             progress: progressPct > 100 ? 100 : progressPct,
-                            bestScore: attemptsMap[docSnap.id] !== undefined ? `${attemptsMap[docSnap.id]}%` : 'لم يختبر'
+                            bestScore: attemptsMap[docSnap.id] !== undefined ? `${attemptsMap[docSnap.id]}%` : 'لم يختبر',
+                            isUnlocked: isUnlocked
                         });
                     }
                 });
 
-                // 5. رسم الجدول وترتيب الطلاب (الأعلى إنجازاً أولاً)
                 studentsData.sort((a, b) => b.progress - a.progress);
 
                 if(studentsData.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-slate-400 font-bold"><i class="fa-solid fa-ghost text-4xl mb-3 block opacity-50"></i> لم يبدأ أي طالب في دراسة هذا الكورس بعد.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-slate-400 font-bold">لا يوجد طلاب مسجلين في هذا الكورس حالياً.</td></tr>`;
                     return;
                 }
 
@@ -3560,8 +3568,23 @@
                 studentsData.forEach(s => {
                     const progressColor = s.progress === 100 ? 'bg-emerald-500' : (s.progress > 50 ? 'bg-brand-500' : 'bg-amber-500');
                     const certBadge = s.progress === 100 
-                        ? '<span class="bg-emerald-100 text-emerald-600 px-2 py-1 rounded text-[10px] font-black"><i class="fa-solid fa-award"></i> مؤهل للشهادة</span>' 
+                        ? '<span class="bg-emerald-100 text-emerald-600 px-2 py-1 rounded text-[10px] font-black"><i class="fa-solid fa-award"></i> مؤهل</span>' 
                         : '<span class="text-slate-300 text-[10px] font-bold">قيد الدراسة</span>';
+
+                    // أزرار التحكم الديناميكية في حال كان الكورس مدفوعاً
+                    let controlActionTd = "";
+                    if(isPaidCourse) {
+                        if(s.isUnlocked) {
+                            controlActionTd = `
+                                <td class="p-4 text-center flex justify-center gap-1.5">
+                                    <button onclick="window.revokeStudentCode('${courseId}', '${s.id}', '${s.email}')" class="bg-amber-50 hover:bg-amber-500 text-amber-500 hover:text-white px-2.5 py-1.5 rounded-lg text-[9px] font-black transition" title="إلغاء تفعيل الكود ليصبح صالحاً للاستخدام مجدداً">إلغاء الكود</button>
+                                    <button onclick="window.removeStudentFromCourse('${courseId}', '${s.id}', '${s.email}')" class="bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white px-2.5 py-1.5 rounded-lg text-[9px] font-black transition" title="إزالة الطالب من الكورس نهائياً وتدمير كود التفعيل">إزالة الطالب</button>
+                                </td>
+                            `;
+                        } else {
+                            controlActionTd = `<td class="p-4 text-center text-slate-400 text-[10px] font-bold">غير مشترك (مجاني)</td>`;
+                        }
+                    }
 
                     tbody.innerHTML += `
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
@@ -3581,6 +3604,7 @@
                             <td class="p-4 text-center">
                                 <span class="font-black ${s.bestScore === 'لم يختبر' ? 'text-slate-400 text-[10px]' : 'text-amber-500 font-en'}">${s.bestScore}</span>
                             </td>
+                            ${controlActionTd}
                             <td class="p-4 text-center text-slate-400 font-en text-[10px]">نشط حديثاً</td>
                         </tr>
                     `;
@@ -3588,7 +3612,7 @@
 
             } catch(e) {
                 console.error(e);
-                tbody.innerHTML = `<tr><td colspan="5" class="p-10 text-center text-rose-500 font-bold">حدث خطأ في قراءة البيانات. يرجى مراجعة الصلاحيات.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-rose-500 font-bold">حدث خطأ في قراءة البيانات.</td></tr>`;
             }
         };
 
@@ -4098,6 +4122,62 @@
                 
                 renderModernCatalog(); renderSavedCourses(); buildDashboardHub();
             } catch(e) { showToast("خطأ غير متوقع.", "error"); }
+        };
+        // 1. دالة إلغاء تفعيل الكود (تعطيل الكورس للطالب وجعل الكود صالحاً للاستخدام مجدداً)
+        window.revokeStudentCode = async function(courseId, studentId, studentEmail) {
+            if(confirm(`🚨 تنبيه هام:\nهل أنت متأكد من إلغاء تفعيل كود الطالب (${studentEmail})؟\nسيتم قفل الكورس عليه فوراً ويصبح كود التفعيل القديم متاحاً للاستخدام مجدداً.`)) {
+                try {
+                    showToast("جاري إلغاء تفعيل الكود وقفل الكورس...", "info");
+                    
+                    // البحث عن الكود المستعمل وتصفيره
+                    const codesSnap = await getDocs(query(collection(db, "promoCodes"), where("courseId", "==", courseId), where("usedBy", "==", studentId)));
+                    if(!codesSnap.empty) {
+                        const codeDoc = codesSnap.docs[0];
+                        await updateDoc(doc(db, "promoCodes", codeDoc.id), {
+                            isUsed: false,
+                            usedBy: "",
+                            usedAt: null
+                        });
+                    }
+
+                    // إزالة صلاحية دخول الكورس من حساب الطالب
+                    await updateDoc(doc(db, "users", studentId), {
+                        unlockedCourses: arrayRemove(courseId)
+                    });
+
+                    showToast("تم إلغاء تفعيل الكود بنجاح وإغلاق الكورس على الطالب.", "success");
+                    openCourseAnalytics(courseId); // تحديث الجدول تلقائياً
+                } catch(e) {
+                    console.error(e);
+                    showToast("حدث خطأ أثناء إلغاء التفعيل.", "error");
+                }
+            }
+        };
+
+        // 2. دالة إزالة الطالب من الكورس نهائياً وتدمير الكود الخاص به
+        window.removeStudentFromCourse = async function(courseId, studentId, studentEmail) {
+            if(confirm(`⚠️ تحذير جراحي هام:\nهل أنت متأكد من طرد الطالب (${studentEmail}) من الكورس؟\nسيتم قفل الكورس عليه فوراً وتدمير كود التفعيل الخاص به لكي لا يتمكن من تفعيله مجدداً.`)) {
+                try {
+                    showToast("جاري إزالة الطالب وتدمير الكود...", "info");
+                    
+                    // تدمير الكود وحذفه كلياً من السيرفر لكي لا يفعله مرة أخرى
+                    const codesSnap = await getDocs(query(collection(db, "promoCodes"), where("courseId", "==", courseId), where("usedBy", "==", studentId)));
+                    if(!codesSnap.empty) {
+                        await deleteDoc(doc(db, "promoCodes", codesSnap.docs[0].id));
+                    }
+
+                    // إزالة صلاحية الدخول من حساب الطالب
+                    await updateDoc(doc(db, "users", studentId), {
+                        unlockedCourses: arrayRemove(courseId)
+                    });
+
+                    showToast("تم طرد الطالب وتدمير كود التفعيل بنجاح.", "success");
+                    openCourseAnalytics(courseId); // تحديث الجدول تلقائياً
+                } catch(e) {
+                    console.error(e);
+                    showToast("حدث خطأ أثناء طرد الطالب.", "error");
+                }
+            }
         };
     </script>
 </body>
