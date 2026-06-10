@@ -563,6 +563,35 @@
                                     <p class="text-slate-500 text-xs mt-1">أنشئ كورساتك بمرونة عالية، مع إمكانية إضافة عدد غير محدود من المحاضرات والمصادر الديناميكية للمحاضرة الواحدة.</p>
                                 </div>
                             </div>
+                            <!-- بطاقة توجيهية ومساعد الدكاترة لصناعة الاختبارات بالذكاء الاصطناعي -->
+                            <div class="bg-gradient-to-r from-brand-500/10 to-emerald-500/10 border border-brand-500/20 p-5 rounded-2xl mb-6 relative overflow-hidden animate-scale-up">
+                                <h3 class="font-black text-sm text-brand-700 dark:text-brand-400 flex items-center gap-2 mb-2">
+                                    <i class="fa-solid fa-robot animate-pulse"></i> مساعد الذكاء الاصطناعي لصناعة الاختبارات التفاعلية (AI Prompt Guide)
+                                </h3>
+                                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                                    دكتورنا الفاضل، يمكنك الآن توليد عشرات الأسئلة التفاعلية لكورسِك في ثوانٍ! انسخ البرومبت (الأمر) الموجه بالأسفل ثم افتح <a href="https://chatgpt.com" target="_blank" class="text-brand-600 font-bold underline">ChatGPT</a> وارفع ملف المحاضرة (PDF) والصق معه البرومبت، ليقوم بإنتاج الأسئلة بالصيغة البرمجية المناسبة للمنصة تماماً دون عناء.
+                                </p>
+                                <div class="relative bg-slate-950 rounded-xl p-4 border border-slate-800">
+                                    <button type="button" onclick="window.copyAIPrompt()" class="absolute top-3 left-3 bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold transition flex items-center gap-1 shadow-md">
+                                        <i class="fa-solid fa-copy"></i> <span id="prompt-copy-text">نسخ البرومبت</span>
+                                    </button>
+                                    <pre id="ai-prompt-content" class="text-[10px] text-slate-300 font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed select-all pr-4 max-h-40 custom-scrollbar text-left" dir="ltr">Act as an expert LMS Instructional Designer and Academic Subject Matter Expert. Your task is to analyze the attached/provided file thoroughly and generate 15 highly relevant, high-yield Multiple Choice Questions (MCQs) in Arabic.
+
+You must strictly output the MCQs in the following custom raw-text format, with no intro, no conversational filler, and no markdown tables. Each MCQ must be on a single line using the pipe character (|) as a delimiter:
+
+Question | Option 1, Option 2, Option 3, Option 4 | Correct_Index | Explanation
+
+Strict Constraints for the Output:
+1. Question: Must be clear, precise, and directly based on the facts in the file.
+2. Options: Exactly 4 options separated by commas. Ensure no stray commas are used inside the options themselves to prevent breaking the array.
+3. Correct_Index: This must be a 0-based index indicating the correct answer (0 for Option 1, 1 for Option 2, 2 for Option 3, 3 for Option 4).
+4. Explanation: Provide a high-yield scientific/clinical explanation clarifying why the correct option is right and referencing the facts from the text.
+5. Formatting: Put all the output inside a single, copy-pasteable code block. No bullet points, no numbered lists, just plain text lines inside the code block.
+
+Here is an example of the expected output format:
+ما هو المستوى الفقري للغدة الدرقية؟ | C1 to C3, C3 to C5, C5 to T1, T2 to T4 | 2 | تقع الغدة الدرقية في المستويات الفقرية C5 و C6 و C7 و T1.</pre>
+                                </div>
+                            </div>
 
                             <form id="form-course-builder" class="space-y-6" onsubmit="event.preventDefault(); saveCourseData();">
                                 <input type="hidden" id="course-edit-id">
@@ -4540,6 +4569,21 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                     showToast("حدث خطأ أثناء طرد الطالب.", "error");
                 }
             }
+        };
+        // دالة نسخ برومبت الذكاء الاصطناعي للدكاترة
+        window.copyAIPrompt = function() {
+            const promptText = document.getElementById('ai-prompt-content').textContent;
+            navigator.clipboard.writeText(promptText).then(() => {
+                const btnText = document.getElementById('prompt-copy-text');
+                btnText.textContent = "تم النسخ بنجاح!";
+                showToast("تم نسخ البرومبت بنجاح! افتح ChatGPT الآن والصقه هناك مع ملف المحاضرة.", "success");
+                setTimeout(() => {
+                    btnText.textContent = "نسخ البرومبت";
+                }, 3000);
+            }).catch(err => {
+                console.error("فشل النسخ التلقائي:", err);
+                showToast("حدث خطأ أثناء النسخ التلقائي، يمكنك تحديد النص ونسخه يدوياً.", "error");
+            });
         };
         // دالة العودة للخلف الذكية مع تصفير وحذف السجل تدريجياً
         window.goBack = function() {
