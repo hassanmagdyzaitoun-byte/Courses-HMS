@@ -1473,34 +1473,35 @@
                     const isSaved = userData?.savedCourses?.includes(course.id);
                     const heartClass = isSaved ? 'fa-solid fa-heart text-rose-500' : 'fa-regular fa-heart text-slate-400 hover:text-rose-500';
 
-                    // منطق التسعير والتفعيل الجديد
                     const isPaid = course.priceType === 'paid';
-                    const isUnlocked = userData?.unlockedCourses?.includes(course.id) || userData?.role === 'admin' || userData?.role === 'superadmin';
+                    const isUnlocked = userData?.unlockedCourses?.includes(course.id) || 
+                                       userData?.role === 'superadmin' || 
+                                       (userData?.role === 'admin' && course.createdBy === currentUser.uid);
+
                     const priceLabel = isPaid ? (isUnlocked ? '<span class="text-emerald-500"><i class="fa-solid fa-lock-open"></i> مفعّل</span>' : '<span class="text-rose-500"><i class="fa-solid fa-lock"></i> يتطلب كود</span>') : 'مجانـاً';
+                    const cardClickAction = (isPaid && !isUnlocked) ? `window.openActivationModal('${course.id}', event)` : `window.openCoursePlayer('${course.id}')`;
+
                     const actionBtnHtml = (isPaid && !isUnlocked) 
-                        ? `<button onclick="window.openActivationModal('${course.id}', event)" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-key"></i> تفعيل بالكود</button>` 
-                        : `<button class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow">ابدأ الدراسة</button>`;
+                        ? `<button onclick="${cardClickAction}" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-key"></i> تفعيل بالكود</button>` 
+                        : `<button onclick="${cardClickAction}" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow">ابدأ الدراسة</button>`;
 
                     targetList.innerHTML += `
-                        <div class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200 dark:border-darkBorder overflow-hidden hover:shadow-lg hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 group flex flex-col cursor-pointer relative shadow-sm">
+                        <div class="bg-white dark:bg-darkCard rounded-3xl border border-slate-200 dark:border-darkBorder overflow-hidden hover:shadow-xl hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 group flex flex-col cursor-pointer relative shadow-sm">
                             <button onclick="toggleSaveCourse('${course.id}', event)" class="absolute top-4 left-4 z-10 w-8 h-8 bg-white/95 dark:bg-slate-900/95 rounded-lg flex items-center justify-center text-xs shadow hover:scale-110 transition">
                                 <i class="${heartClass}"></i>
                             </button>
-
-                            <div class="p-2" onclick="window.openCoursePlayer('${course.id}')">
+                            <div class="p-2" onclick="${cardClickAction}">
                                 <div class="relative h-32 overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 mb-2.5">
                                     <img src="${course.cover || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                                 </div>
                                 <div class="text-center px-1">
                                     <h4 class="text-xs font-black text-slate-800 dark:text-white line-clamp-1 mb-1">${course.title}</h4>
                                     <p class="text-[9px] text-slate-400 font-bold mb-1.5"><i class="fa-solid fa-user-tie text-brand-500"></i> د. ${course.creatorName || 'إدارة الأكاديمية'}</p>
-                                    
                                     <div class="flex items-center justify-center gap-1 mb-1.5">
                                         <span class="text-[10px] font-black text-slate-800 dark:text-slate-200">${avgRating}</span>
                                         <div class="flex text-amber-400 text-[8px]"><i class="fa-solid fa-star"></i></div>
                                         <span class="text-[8px] text-slate-400">(${course.ratingCount || 1})</span>
                                     </div>
-
                                     <p class="text-brand-600 dark:text-brand-400 font-black text-xs mb-2">${priceLabel}</p>
                                     <div class="flex justify-between items-center text-[9px] text-slate-400 mb-2 px-1">
                                         <span class="flex items-center gap-1"><i class="fa-regular fa-eye"></i> ${course.views || 0}</span>
@@ -1992,13 +1993,17 @@
                 const isSaved = userData?.savedCourses?.includes(course.id);
                 const heartClass = isSaved ? 'fa-solid fa-heart text-rose-500' : 'fa-regular fa-heart text-slate-400 hover:text-rose-500';
 
-                // منطق التسعير والتفعيل الجديد
                 const isPaid = course.priceType === 'paid';
-                const isUnlocked = userData?.unlockedCourses?.includes(course.id) || userData?.role === 'admin' || userData?.role === 'superadmin';
+                const isUnlocked = userData?.unlockedCourses?.includes(course.id) || 
+                                   userData?.role === 'superadmin' || 
+                                   (userData?.role === 'admin' && course.createdBy === currentUser.uid);
+
                 const priceLabel = isPaid ? (isUnlocked ? '<span class="text-emerald-500"><i class="fa-solid fa-lock-open"></i> مفعّل</span>' : '<span class="text-rose-500"><i class="fa-solid fa-lock"></i> يتطلب كود</span>') : 'مجانـاً';
+                const cardClickAction = (isPaid && !isUnlocked) ? `window.openActivationModal('${course.id}', event)` : `window.openCoursePlayer('${course.id}')`;
+
                 const actionBtnHtml = (isPaid && !isUnlocked) 
-                    ? `<button onclick="window.openActivationModal('${course.id}', event)" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-key"></i> تفعيل بالكود</button>` 
-                    : `<button class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow">ابدأ الدراسة</button>`;
+                    ? `<button onclick="${cardClickAction}" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-key"></i> تفعيل بالكود</button>` 
+                    : `<button onclick="${cardClickAction}" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow">ابدأ الدراسة</button>`;
 
                 const card = document.createElement('div');
                 card.className = "bg-white dark:bg-darkCard rounded-3xl border border-slate-200 dark:border-darkBorder overflow-hidden hover:shadow-xl hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 group flex flex-col cursor-pointer relative";
@@ -2007,21 +2012,18 @@
                     <button onclick="toggleSaveCourse('${course.id}', event)" class="absolute top-4 left-4 z-10 w-8 h-8 bg-white/95 dark:bg-slate-900/95 rounded-lg flex items-center justify-center text-xs shadow hover:scale-110 transition">
                         <i class="${heartClass}"></i>
                     </button>
-
-                    <div class="p-2" onclick="window.openCoursePlayer('${course.id}')">
+                    <div class="p-2" onclick="${cardClickAction}">
                         <div class="relative h-32 overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 mb-2.5">
                             <img src="${course.cover || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
                         </div>
                         <div class="text-center px-1">
                             <h4 class="text-xs font-black text-slate-800 dark:text-white line-clamp-1 mb-1">${course.title}</h4>
                             <p class="text-[9px] text-slate-400 font-bold mb-1.5"><i class="fa-solid fa-user-tie text-brand-500"></i> د. ${course.creatorName || 'إدارة الأكاديمية'}</p>
-                            
                             <div class="flex items-center justify-center gap-1 mb-1.5">
                                 <span class="text-[10px] font-black text-slate-800 dark:text-slate-200">${avgRating}</span>
                                 <div class="flex text-amber-400 text-[8px]"><i class="fa-solid fa-star"></i></div>
                                 <span class="text-[8px] text-slate-400">(${course.ratingCount || 1})</span>
                             </div>
-
                             <p class="text-brand-600 dark:text-brand-400 font-black text-xs mb-2">${priceLabel}</p>
                             <div class="flex justify-between items-center text-[9px] text-slate-400 mb-2 px-1">
                                 <span class="flex items-center gap-1"><i class="fa-regular fa-eye"></i> ${course.views || 0}</span>
@@ -2325,6 +2327,18 @@
         window.openCoursePlayer = async function(courseId) {
             const course = allCourses.find(c => c.id === courseId);
             if(!course) return;
+            // --- حارس الأمان (منع فتح الكورس المقفل بأي طريقة) ---
+            const isPaid = course.priceType === 'paid';
+            const isUnlocked = userData?.unlockedCourses?.includes(courseId) || 
+                               userData?.role === 'superadmin' || 
+                               (userData?.role === 'admin' && course.createdBy === currentUser.uid);
+            
+            if (isPaid && !isUnlocked) {
+                showToast("عذراً، هذا الكورس مدفوع ويتطلب إدخال كود التفعيل أولاً.", "error");
+                window.openActivationModal(courseId);
+                return; // إيقاف العملية وطرد المستخدم
+            }
+            // ----------------------------------------------------
 
             // زيادة عداد المشاهدات تلقائياً (+1) في قاعدة البيانات السحابية عند فتح الكورس
             try {
@@ -2817,13 +2831,17 @@
                 const avgRating = course.ratingAvg ? course.ratingAvg.toFixed(1) : "5.0";
                 const heartClass = 'fa-solid fa-heart text-rose-500';
 
-                // منطق التسعير والتفعيل الجديد
                 const isPaid = course.priceType === 'paid';
-                const isUnlocked = userData?.unlockedCourses?.includes(course.id) || userData?.role === 'admin' || userData?.role === 'superadmin';
+                const isUnlocked = userData?.unlockedCourses?.includes(course.id) || 
+                                   userData?.role === 'superadmin' || 
+                                   (userData?.role === 'admin' && course.createdBy === currentUser.uid);
+
                 const priceLabel = isPaid ? (isUnlocked ? '<span class="text-emerald-500"><i class="fa-solid fa-lock-open"></i> مفعّل</span>' : '<span class="text-rose-500"><i class="fa-solid fa-lock"></i> يتطلب كود</span>') : 'مجانـاً';
+                const cardClickAction = (isPaid && !isUnlocked) ? `window.openActivationModal('${course.id}', event)` : `window.openCoursePlayer('${course.id}')`;
+
                 const actionBtnHtml = (isPaid && !isUnlocked) 
-                    ? `<button onclick="window.openActivationModal('${course.id}', event)" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-key"></i> تفعيل بالكود</button>` 
-                    : `<button class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow">متابعة الدراسة</button>`;
+                    ? `<button onclick="${cardClickAction}" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow"><i class="fa-solid fa-key"></i> تفعيل بالكود</button>` 
+                    : `<button onclick="${cardClickAction}" class="w-full bg-brand-500 hover:bg-brand-600 text-white font-bold py-1.5 rounded-lg text-[10px] transition-colors shadow">متابعة الدراسة</button>`;
 
                 const card = document.createElement('div');
                 card.className = "bg-white dark:bg-darkCard rounded-3xl border border-slate-200 dark:border-darkBorder overflow-hidden hover:shadow-xl hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-300 group flex flex-col cursor-pointer relative";
@@ -2832,21 +2850,18 @@
                     <button onclick="toggleSaveCourse('${course.id}', event)" class="absolute top-4 left-4 z-10 w-8 h-8 bg-white/95 dark:bg-slate-900/95 rounded-lg flex items-center justify-center text-xs shadow hover:scale-110 transition">
                         <i class="${heartClass}"></i>
                     </button>
-
-                    <div class="p-2" onclick="window.openCoursePlayer('${course.id}')">
+                    <div class="p-2" onclick="${cardClickAction}">
                         <div class="relative h-32 overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800 mb-2.5">
-                            <img src="${course.cover || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+                            <img src="${course.cover || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                         </div>
                         <div class="text-center px-1">
                             <h4 class="text-xs font-black text-slate-800 dark:text-white line-clamp-1 mb-1">${course.title}</h4>
                             <p class="text-[9px] text-slate-400 font-bold mb-1.5"><i class="fa-solid fa-user-tie text-brand-500"></i> د. ${course.creatorName || 'إدارة الأكاديمية'}</p>
-                            
                             <div class="flex items-center justify-center gap-1 mb-1.5">
                                 <span class="text-[10px] font-black text-slate-800 dark:text-slate-200">${avgRating}</span>
                                 <div class="flex text-amber-400 text-[8px]"><i class="fa-solid fa-star"></i></div>
                                 <span class="text-[8px] text-slate-400">(${course.ratingCount || 1})</span>
                             </div>
-
                             <p class="text-brand-600 dark:text-brand-400 font-black text-xs mb-2">${priceLabel}</p>
                             <div class="flex justify-between items-center text-[9px] text-slate-400 mb-2 px-1">
                                 <span class="flex items-center gap-1"><i class="fa-regular fa-eye"></i> ${course.views || 0}</span>
