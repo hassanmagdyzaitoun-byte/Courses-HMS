@@ -3972,9 +3972,10 @@ const actionBtnHtml = (isPaid && !isUnlocked)
 
             const isPaidCourse = course.priceType === 'paid';
 
-            // تحديث رؤوس الجدول ديناميكياً بناءً على نوع الكورس
+            // تحديث رؤوس الجدول ديناميكياً بناءً على نوع الكورس (تم فصل الاسم والإيميل)
             headerRow.innerHTML = `
-                <th class="p-4 rounded-tr-xl">اسم الطالب (البريد)</th>
+                <th class="p-4 rounded-tr-xl">اسم الطالب</th>
+                <th class="p-4 text-center">البريد الإلكتروني</th>
                 <th class="p-4 text-center">نسبة إنجاز المنهج</th>
                 <th class="p-4 text-center">حالة الشهادة</th>
                 <th class="p-4 text-center">أعلى درجة باختبارات الكورس</th>
@@ -4045,7 +4046,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 studentsData.sort((a, b) => b.progress - a.progress);
 
                 if(studentsData.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-slate-400 font-bold">لا يوجد طلاب مسجلين في هذا الكورس حالياً.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" class="p-10 text-center text-slate-400 font-bold">لا يوجد طلاب مسجلين في هذا الكورس حالياً.</td></tr>`;
                     return;
                 }
 
@@ -4077,6 +4078,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                                 <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500"><i class="fa-solid fa-user text-xs"></i></div>
                                 ${s.name}
                             </td>
+                            <td class="p-4 text-center font-en font-bold text-slate-650 dark:text-slate-400 select-all">${s.email}</td>
                             <td class="p-4 text-center">
                                 <div class="flex items-center justify-center gap-2">
                                     <div class="w-24 bg-slate-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
@@ -4097,7 +4099,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
 
             } catch(e) {
                 console.error(e);
-                tbody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-rose-500 font-bold">حدث خطأ في قراءة البيانات.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-10 text-center text-rose-500 font-bold">حدث خطأ في قراءة البيانات.</td></tr>`;
             }
         };
 
