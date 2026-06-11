@@ -2508,6 +2508,9 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             const filterRole = document.getElementById('user-filter-select')?.value || "all";
 
             const filtered = superAdminUsersList.filter(user => {
+                // إذا كان المستخدم محذوفاً، لا تعرضه نهائياً في الجدول
+                if (user.status === 'deleted') return false; 
+                
                 const matchSearch = user.email.toLowerCase().includes(searchQuery);
                 let matchRole = true;
                 if (filterRole === 'student') matchRole = user.role === 'student';
@@ -2608,16 +2611,16 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             }
         };
         
-        // دالة حذف حساب مستخدم نهائياً من قاعدة البيانات وطرد جلسته الفورية
+        // دالة حذف حساب مستخدم نهائياً ومسحه كلياً من قاعدة البيانات
         window.deleteUserByOwner = async function(userId) { 
-            if(confirm("🚨 تنبيه مالك المنصة: هل أنت متأكد من رغبتك في حذف هذا الحساب نهائياً من المنصة؟ سيتم تسجيل خروجه فوراً وطرده من السيرفر.")) { 
+            if(confirm("🚨 تنبيه هام للمالك:\nهل أنت متأكد من مسح هذا العميل نهائياً وبشكل كامل من قاعدة البيانات؟\nسيتم تدمير ملفه الشخصي وبياناته وفصل جلسته فوراً.")) { 
                 try {
-                    // تحديث الحالة بدلاً من الحذف لتفعيل الطرد التلقائي
-                    await updateDoc(doc(db, "users", userId), { status: 'deleted' }); 
-                    showToast("تم حظر وحذف الحساب بالكامل من المنصة بنجاح.", "success"); 
+                    // حذف مستند المستخدم كلياً من Firestore
+                    await deleteDoc(doc(db, "users", userId)); 
+                    showToast("تم مسح بيانات حساب العميل نهائياً من المنصة بنجاح.", "success"); 
                     window.initSuperAdmin(); 
                 } catch(e) {
-                    showToast("فشلت عملية حذف العميل.", "error");
+                    showToast("فشلت عملية الحذف النهائي: " + e.message, "error");
                 }
             } 
         };
