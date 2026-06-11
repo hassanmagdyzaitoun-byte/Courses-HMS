@@ -1325,12 +1325,14 @@ Here is an example of the expected output format:
         };
 
         window.navTo = function(viewId, pushToHistory = true) {
-            // تسجيل الصفحة الحالية في التاريخ قبل الانتقال (إذا كان مسموحاً)
             const currentActive = document.querySelector('.content-view.active');
-            if (currentActive && pushToHistory && currentActive.id !== viewId) {
-                // منع تكرار نفس الصفحة وتجنب تسجيل صفحات تسجيل الدخول أو الانتظار
-                if (!['login-view', 'pending-view'].includes(currentActive.id)) {
-                    viewHistory.push(currentActive.id);
+            
+            // إدارة الذاكرة السحابية للمتصفح (History API) لربط أزرار الهاتف
+            if (pushToHistory) {
+                if (window.history.state === null) {
+                    window.history.replaceState({ viewId: viewId }, "", "");
+                } else {
+                    window.history.pushState({ viewId: viewId }, "", "");
                 }
             }
 
@@ -1342,7 +1344,7 @@ Here is an example of the expected output format:
             const backBtn = document.getElementById('global-back-btn');
             if (backBtn) {
                 const noBackViews = ['student-dashboard', 'login-view', 'pending-view'];
-                if (noBackViews.includes(viewId) || viewHistory.length === 0) {
+                if (noBackViews.includes(viewId)) {
                     backBtn.classList.add('hidden');
                 } else {
                     backBtn.classList.remove('hidden');
@@ -1376,7 +1378,6 @@ Here is an example of the expected output format:
             if(viewId === 'student-dashboard') buildDashboardHub();
             if(viewId === 'student-community') loadCommunityPosts();
             if(viewId === 'student-progress') buildAchievementsGrid();
-            if(viewId === 'student-doctors-directory') renderFullDoctorsDirectory();
 
             // إرجاع الشاشة لأعلى نقطة تلقائياً
             const viewsContainer = document.getElementById('views-container');
@@ -4724,14 +4725,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
         };
         // دالة العودة للخلف الذكية مع تصفير وحذف السجل تدريجياً
         window.goBack = function() {
-            if (viewHistory.length > 0) {
-                const previousViewId = viewHistory.pop();
-                // نمرر false لكي لا نقوم بإعادة تسجيل نفس الصفحة في السجل أثناء الرجوع
-                navTo(previousViewId, false);
-            } else {
-                // إذا كان السجل فارغاً كاحتياط، نرجع الطالب للرئيسية
-                navTo('student-dashboard', false);
-            }
+            window.history.back(); // تفعيل الرجوع الأصلي للهاتف والمتصفح
         };
         // دوال إدارة السعر والتواصل للكورسات المدفوعة
 window.togglePriceFields = function() {
@@ -4854,6 +4848,15 @@ window.openContactPriceModal = function(courseId) {
                 grid.innerHTML = `<div class="col-span-full text-center py-10 text-rose-500">حدث خطأ أثناء جلب البيانات.</div>`;
             }
         };
+        // مستمع ضغط أزرار الهاتف الأصلية للرجوع للخلف بدون الخروج من الموقع
+        window.addEventListener('popstate', function(event) {
+            // فقط إذا كان هناك مستخدم مسجل دخول، نقوم بالتحكم بالرجوع
+            if (currentUser && event.state && event.state.viewId) {
+                navTo(event.state.viewId, false); // التنقل للقسم السابق بدون تكراره بالذاكرة
+            } else if (currentUser) {
+                navTo('student-dashboard', false); // تراجع احتياطي للرئيسية
+            }
+        });
     </script>
     <!-- زر الرجوع العائم الذكي (Floating Back Button) -->
     <button id="global-back-btn" onclick="goBack()" class="fixed bottom-20 right-6 lg:right-[20.5rem] z-[9990] hidden bg-slate-900/90 dark:bg-white/90 text-white dark:text-slate-900 w-12 h-12 rounded-full shadow-2xl flex items-center justify-center text-lg hover:scale-110 active:scale-95 transition-all border border-white/10 dark:border-slate-200" title="رجوع للخلف">
