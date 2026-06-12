@@ -1753,9 +1753,14 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                                 syncCourses();
                                 listenToAnnouncements();
                             }
-                        }
-                    } else signOut(auth);
-                } catch(e) { showToast("خطأ الاتصال: " + e.message, "error"); }
+                    }
+                } else {
+                    // التعديل الأمني: إذا كان الحساب جديداً وجاري تسجيل الدخول بجوجل، لا تطرده!
+                    if (!isLoginInProgress) {
+                        signOut(auth);
+                    }
+                }
+            } catch(e) { showToast("خطأ الاتصال: " + e.message, "error"); }
             } else {
                 // تنظيف وإيقاف جميع الدوال اللحظية فور تسجيل الخروج لمنع الخطأ الأحمر
                 if (window.unsubscribeSession) { window.unsubscribeSession(); window.unsubscribeSession = null; }
@@ -5668,6 +5673,8 @@ window.openContactPriceModal = function(courseId) {
                         completedLectures: []
                     });
                     showToast("مرحباً بك! تم إنشاء حسابك وتفعيله بنجاح عبر جوجل.", "success");
+                    // إعادة تحميل الصفحة لتثبيت الجلسة وقراءة بيانات الهوية الأكاديمية الجديدة
+                    setTimeout(() => { location.reload(); }, 1500);
                 } else {
                     // إذا كان قديماً، نحدث رقم الجلسة لحماية الحساب ونسجل دخوله
                     await updateDoc(doc(db, "users", user.uid), { sessionId: newSessionId });
