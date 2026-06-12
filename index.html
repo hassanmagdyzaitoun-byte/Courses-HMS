@@ -5004,8 +5004,8 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             }
         };
 
-        // دالة مراقبة وعرض سجل التنبيهات الخاص بالكورس الحالي لحظياً (Real-time Timeline)
-        let activeCourseAnnouncementsListener = null; // متغير لحفظ مراقب الإعلانات الفردي ومنع التداخل
+        // دالة مراقبة وعرض سجل التنبيهات المنسدل الخاص بالكورس حالياً (Accordion Timeline)
+        let activeCourseAnnouncementsListener = null;
 
         function renderCourseAnnouncements(course) {
             const box = document.getElementById('course-announcements-box');
@@ -5014,63 +5014,86 @@ const actionBtnHtml = (isPaid && !isUnlocked)
 
             if(!box || !list) return;
 
-            // 1. التحكم في ظهور لوحة كتابة تنبيه جديد (للدكتور صاحب الكورس، أو المالك)
             const isAuthorized = userData?.role === 'superadmin' || (userData?.role === 'admin' && course.createdBy === currentUser.uid);
             adminPanel.classList.toggle('hidden', !isAuthorized);
 
-            // إظهار الصندوق الخارجي دائماً للدكاترة، وللطلاب فقط إذا كان هناك إعلانات
             box.classList.remove('hidden');
 
-            // إيقاف أي مراقب إعلانات قديم لتجنب تعارض الكورسات
             if (activeCourseAnnouncementsListener) {
                 activeCourseAnnouncementsListener();
                 activeCourseAnnouncementsListener = null;
             }
 
-            // 2. تفعيل مراقب لحظي لجلب خط التنبيهات الزمني من الفايربيس للكورس المفتوح حالياً
             activeCourseAnnouncementsListener = onSnapshot(query(collection(db, "courses", course.id, "announcements"), orderBy("createdAt", "desc")), (snap) => {
                 list.innerHTML = "";
                 let announcements = [];
                 snap.forEach(d => announcements.push({ id: d.id, ...d.data() }));
 
                 if (announcements.length === 0) {
-                    list.innerHTML = `<p class="text-xs text-slate-500/80 dark:text-slate-400 py-4 font-bold text-center">لا توجد تنبيهات نشطة لطلبة هذا المنهج حالياً.</p>`;
-                    // إخفاء الصندوق للطلاب العاديين إن لم يكن هناك تنبيهات لعدم حجز مساحة فارغة
+                    list.innerHTML = `<p class="text-xs text-slate-400 py-4 font-bold text-center">لا توجد تنبيهات نشطة لطلبة هذا المنهج حالياً.</p>`;
                     if(!isAuthorized) box.classList.add('hidden');
                     return;
                 }
 
-                // عرض الإعلانات
+                // عرض الإعلانات بنظام الأكورديون (منسدل عند الضغط)
                 announcements.forEach(ann => {
                     const dateStr = new Date(ann.createdAt).toLocaleDateString('ar-EG', { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
                     
-                    // ميزة أمان: زر حذف تنبيه الكورس يظهر للمالك، أو للدكتور ناشر الإشعار نفسه
+                    // زر الحذف يمرر (event) لمنع فتح الإغلاق عند الحذف
                     const deleteAnnBtn = (userData?.role === 'superadmin' || (userData?.role === 'admin' && course.createdBy === currentUser.uid))
-                        ? `<button onclick="window.deleteCourseAnnouncement('${course.id}', '${ann.id}')" class="text-rose-400 hover:text-rose-600 transition p-1 text-[10px]" title="حذف هذا التنبيه"><i class="fa-solid fa-trash-can"></i></button>`
+                        ? `<button onclick="window.deleteCourseAnnouncement('${course.id}', '${ann.id}', event)" class="text-rose-450 hover:text-rose-600 transition p-1.5 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/20 text-xs shrink-0" title="حذف هذا التنبيه"><i class="fa-solid fa-trash-can"></i></button>`
                         : '';
 
+                    // عرض أول 35 حرف فقط كعنوان ترويجي للإشعار قبل فتحه
+                    const shortText = ann.text.length > 35 ? ann.text.substring(0, 35) + "..." : ann.text;
+
                     list.innerHTML += `
-                        <div class="p-3 bg-white/60 dark:bg-slate-900/40 rounded-2xl border border-amber-500/10 flex gap-2.5 items-start justify-between animate-scale-up">
-                            <div class="flex gap-2.5 items-start">
-                                <div class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 text-[10px] mt-0.5"><i class="fa-solid fa-bullhorn"></i></div>
-                                <div>
-                                    <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-sans font-medium whitespace-pre-wrap">${ann.text}</p>
-                                    <div class="flex items-center gap-2 mt-1.5 text-[9px] text-slate-400 font-bold">
-                                        <span>بواسطة د. ${ann.publisher}</span>
-                                        <span>•</span>
-                                        <span class="font-en">${dateStr}</span>
-                                    </div>
+                        <div class="border border-amber-500/10 rounded-2xl overflow-hidden bg-white/80 dark:bg-slate-900/40 shadow-sm transition-all">
+                            <!-- رأس الإشعار القابل للضغط -->
+                            <button type="button" onclick="window.toggleCourseAnnDropdown('${ann.id}')" class="w-full text-right p-3.5 flex items-center justify-between gap-3 text-slate-800 dark:text-white hover:bg-amber-500/5 transition duration-150">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <div class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 text-[10px]"><i class="fa-solid fa-bullhorn animate-pulse"></i></div>
+                                    <span class="text-xs font-black truncate">${shortText}</span>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <span class="text-[9px] text-slate-400 font-bold font-en">${dateStr}</span>
+                                    <i id="ann-chevron-${ann.id}" class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform duration-300"></i>
+                                </div>
+                            </button>
+
+                            <!-- محتوى الإشعار الكامل المنسدل (مخفي افتراضياً) -->
+                            <div id="ann-content-${ann.id}" class="hidden p-4 bg-amber-500/[0.02] dark:bg-slate-950/30 border-t border-slate-100 dark:border-slate-800 animate-slide-up text-right">
+                                <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-sans font-medium whitespace-pre-wrap select-text">${ann.text}</p>
+                                <div class="flex justify-between items-center mt-3 pt-3 border-t border-slate-100 dark:border-slate-800/80">
+                                    <span class="text-[9px] text-brand-600 dark:text-brand-400 font-black flex items-center gap-1"><i class="fa-solid fa-circle-user"></i> الناشر: د. ${ann.publisher}</span>
+                                    ${deleteAnnBtn}
                                 </div>
                             </div>
-                            ${deleteAnnBtn}
                         </div>
                     `;
                 });
             });
         }
+        // دالة طوي وفرد الإعلان الفردي وتدوير السهم (Accordion Toggle)
+        window.toggleCourseAnnDropdown = function(annId) {
+            const content = document.getElementById(`ann-content-${annId}`);
+            const chevron = document.getElementById(`ann-chevron-${annId}`);
+            if(!content || !chevron) return;
+
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                chevron.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                chevron.classList.remove('rotate-180');
+            }
+        };
 
         // دالة لحذف إعلان محدد من الكورس
-        window.deleteCourseAnnouncement = async function(courseId, annId) {
+        window.deleteCourseAnnouncement = async function(courseId, annId, event) {
+            // منع تفعيل الأكورديون أو إغلاق القائمة عند الضغط على زر الحذف
+            if (event) event.stopPropagation();
+
             if (confirm("هل أنت متأكد من رغبتك في حذف هذا التنبيه نهائياً لطلبة هذا الكورس؟")) {
                 try {
                     await deleteDoc(doc(db, "courses", courseId, "announcements", annId));
