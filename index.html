@@ -976,7 +976,7 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                                         <div class="flex gap-3">
                                             <div class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center font-bold shrink-0"><i class="fa-solid fa-user text-xs"></i></div>
                                             <div class="flex-1">
-                                                <textarea id="qa-textarea" rows="2" class="w-full p-3 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200/80 rounded-xl dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none resize-none transition" placeholder="لديك استفسار حول هذا الموديل الأكاديمي؟ اكتبه هنا..."></textarea>
+                                                <textarea id="qa-textarea" maxlength="500" rows="2" class="w-full p-3 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200/80 rounded-xl dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none resize-none transition" placeholder="لديك استفسار حول هذا الموديل الأكاديمي؟ اكتبه هنا... (الحد الأقصى 500 حرف)"></textarea>
                                                 <div class="flex justify-end mt-2">
                                                     <button onclick="publishCourseQA()" class="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg font-bold text-xs shadow transition flex items-center gap-1.5"><i class="fa-regular fa-paper-plane"></i> إرسال الاستفسار</button>
                                                 </div>
@@ -1026,7 +1026,7 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
 
                         <!-- إرسال فكرة أو منشور -->
                         <div class="bg-slate-50 dark:bg-slate-850 p-4 rounded-2xl border border-slate-100 dark:border-darkBorder">
-                            <textarea id="community-post-input" rows="3" class="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none text-xs resize-none" placeholder="اكتب موضوعاً علمياً، حالة طبية، أو سؤالاً للمجتمع بالكامل..."></textarea>
+                            <textarea id="community-post-input" maxlength="1000" rows="3" class="w-full p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none text-xs resize-none" placeholder="اكتب موضوعاً علمياً، حالة طبية، أو سؤالاً للمجتمع بالكامل... (الحد الأقصى 1000 حرف)"></textarea>
                             <div class="flex justify-end mt-3">
                                 <button onclick="publishCommunityPost()" class="bg-brand-600 hover:bg-brand-700 text-white px-6 py-2.5 rounded-xl font-bold text-xs shadow flex items-center gap-1.5"><i class="fa-solid fa-bullhorn"></i> نشر بالمجتمع</button>
                             </div>
@@ -1279,7 +1279,7 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                     <div class="bg-white dark:bg-darkCard w-full max-w-lg rounded-3xl p-6 shadow-2xl relative">
                         <button onclick="document.getElementById('message-doctor-modal').classList.add('hidden')" class="absolute top-4 left-4 text-slate-400 hover:text-rose-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
                         <h3 class="text-lg font-black mb-4"><i class="fa-solid fa-envelope text-brand-500"></i> إرسال رسالة مباشرة للدكتور</h3>
-                        <textarea id="msg-to-doctor-text" rows="4" class="w-full p-3 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none resize-none mb-4" placeholder="اكتب سؤالك أو استفسارك هنا وسيصل للدكتور في صندوقه الخاص..."></textarea>
+                        <textarea id="msg-to-doctor-text" maxlength="1000" rows="4" class="w-full p-3 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none resize-none mb-4" placeholder="اكتب سؤالك أو استفسارك هنا وسيصل للدكتور في صندوقه الخاص... (الحد الأقصى 1000 حرف)"></textarea>
                         <button onclick="sendMessageToDoctor()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl transition">إرسال الرسالة</button>
                     </div>
                 </div>
@@ -2110,6 +2110,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             const input = document.getElementById('community-post-input');
             const val = input.value.trim();
             if(!val) return showToast("الرجاء كتابة الفكرة أو المنشور أولاً.", "error");
+            if(val.length > 1000) return showToast("عذراً، الحد الأقصى للمنشور هو 1000 حرف.", "error");
 
             try {
                 await addDoc(collection(db, "community"), {
@@ -3499,6 +3500,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             const input = document.getElementById('qa-textarea');
             const val = input.value.trim();
             if(!val) return showToast("الرجاء كتابة استفسارك أولاً.", "error");
+            if(val.length > 500) return showToast("عذراً، الحد الأقصى للسؤال هو 500 حرف لحماية جودة المحتوى.", "error");
             if(!currentCourseId) return;
 
             try {
@@ -4735,6 +4737,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
         window.sendMessageToDoctor = async function() {
             const text = document.getElementById('msg-to-doctor-text').value.trim();
             if(!text) return showToast("اكتب الرسالة أولاً.", "error");
+            if(text.length > 1000) return showToast("عذراً، الحد الأقصى للرسالة هو 1000 حرف.", "error");
             if(!currentViewingDoctorId || !currentUser) return;
 
             try {
