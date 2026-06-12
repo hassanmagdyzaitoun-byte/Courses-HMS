@@ -1373,6 +1373,9 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
         let isAppReady = false; 
         let uuidCounter = 0;
         let viewHistory = [];
+        let unsubCourses = null;
+        let unsubNotifs = null;
+        let isLoginInProgress = false; // حارس أمني لمنع الطرد الخاطئ أثناء تسجيل الدخول
 
         // ==========================================
         // أدوات النظام الأساسية والتفاعلية
@@ -1529,6 +1532,7 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                 // 1. تشغيل عملية تسجيل الدخول
                 if(!email || !password) return showToast("الرجاء إدخال البريد الإلكتروني وكلمة المرور.", "error");
                 try {
+                    isLoginInProgress = true; // تفعيل وضع الحماية
                     const btn = document.getElementById('btn-primary-auth');
                     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق وتسجيل الدخول...';
                     
@@ -1539,7 +1543,9 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                     localStorage.setItem('hms_session_id', newSessionId);
                     await updateDoc(doc(db, "users", auth.currentUser.uid), { sessionId: newSessionId });
                     
+                    setTimeout(() => { isLoginInProgress = false; }, 2000); // إيقاف وضع الحماية بعد اكتمال المزامنة
                 } catch(e) {
+                    isLoginInProgress = false;
                     showToast("البريد أو كلمة المرور غير صحيحة يرجى إعادة المحاولة ثانية.", "error");
                     document.getElementById('btn-primary-auth').innerHTML = `<span>تسجيل الدخول الآمن</span> <i class="fa-solid fa-arrow-right-to-bracket"></i>`;
                 }
@@ -1603,7 +1609,7 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                             if (docSnap.exists()) {
                                 const currentDbSession = docSnap.data().sessionId;
                                 const localSession = localStorage.getItem('hms_session_id');
-                                if (currentDbSession && localSession && currentDbSession !== localSession) {
+                                if (!isLoginInProgress && currentDbSession && localSession && currentDbSession !== localSession) {
                                     showToast("⚠️ تم تسجيل الدخول من جهاز آخر. سيتم تسجيل خروجك الآن حماية لحسابك.", "error");
                                     signOut(auth);
                                 }
@@ -1674,11 +1680,10 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                     } else signOut(auth);
                 } catch(e) { showToast("خطأ الاتصال: " + e.message, "error"); }
             } else {
-                // إيقاف الحارس اللحظي فوراً عند تسجيل الخروج لتجنب أخطاء الصلاحيات في الكونسول
-                if (window.unsubscribeSession) {
-                    window.unsubscribeSession();
-                    window.unsubscribeSession = null;
-                }
+                // تنظيف وإيقاف جميع الدوال اللحظية فور تسجيل الخروج لمنع الخطأ الأحمر
+                if (window.unsubscribeSession) { window.unsubscribeSession(); window.unsubscribeSession = null; }
+                if (unsubCourses) { unsubCourses(); unsubCourses = null; }
+                if (unsubNotifs) { unsubNotifs(); unsubNotifs = null; }
 
                 isAppReady = false; currentUser = null; userData = null;
                 document.getElementById('main-layout').classList.add('hidden');
@@ -1699,7 +1704,8 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
         // جلب سحابي ومزامنة البيانات اللحظية
         // ==========================================
         function syncCourses() {
-            onSnapshot(collection(db, "courses"), (snapshot) => {
+            if (unsubCourses) unsubCourses();
+            unsubCourses = onSnapshot(collection(db, "courses"), (snapshot) => {
                 allCourses = [];
                 snapshot.forEach(docSnap => allCourses.push({ id: docSnap.id, ...docSnap.data() }));
                 
@@ -1722,8 +1728,8 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
             const badge = document.getElementById('notif-badge');
             if(!list || !badge) return;
             
-            // جلب الإشعارات مرتبة من الأحدث للأقدم
-            onSnapshot(query(collection(db, "notifications"), orderBy("createdAt", "desc")), (snap) => {
+            if (unsubNotifs) unsubNotifs();
+            unsubNotifs = onSnapshot(query(collection(db, "notifications"), orderBy("createdAt", "desc")), (snap) => {
                 list.innerHTML = "";
                 let notifs = [];
                 snap.forEach(d => notifs.push({ id: d.id, ...d.data() }));
