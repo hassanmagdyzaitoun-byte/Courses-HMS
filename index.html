@@ -1723,9 +1723,9 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                 showToast("تنبيه: عطل في صلاحيات القراءة، يرجى مراجعة لوحة Firebase وقواعد الأمان Rules.", "error");
             });
         }
-
+        
         // ==========================================
-        // محرك الإشعارات والجرس الذكي (Notification Engine)
+        // محرك الإشعارات والجرس الذكي المطور (مع ميزة الحذف الفوري للمالك)
         // ==========================================
         function listenToAnnouncements() {
             const list = document.getElementById('notif-list');
@@ -1752,7 +1752,7 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                 if (unreadCount > 0) {
                     badge.textContent = unreadCount > 9 ? '+9' : unreadCount;
                     badge.classList.remove('hidden');
-                    badge.classList.add('animate-bounce'); // اهتزاز لفت الانتباه
+                    badge.classList.add('animate-bounce');
                     setTimeout(() => badge.classList.remove('animate-bounce'), 3000);
                 } else {
                     badge.classList.add('hidden');
@@ -1763,15 +1763,22 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                     const isNew = n.createdAt > lastReadTime;
                     const dateStr = new Date(n.createdAt).toLocaleDateString('ar-EG', { hour: '2-digit', minute: '2-digit' });
                     
-                    // تمييز الإشعار الجديد بلون أزرق فاتح
                     const bgClass = isNew ? 'bg-brand-50/60 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800' : 'bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40';
                     const iconColor = isNew ? 'text-brand-600 bg-brand-100 dark:bg-brand-900/50' : 'text-slate-400 bg-slate-100 dark:bg-slate-800';
+
+                    // ميزة أمان ذكية: زر الحذف لا يظهر إلا للمالك السوبر أدمن فقط
+                    const deleteBtnHtml = (userData && userData.role === 'superadmin') 
+                        ? `<button onclick="window.deleteNotification('${n.id}', event)" class="text-rose-500 hover:text-rose-700 hover:bg-rose-100 dark:hover:bg-rose-950/40 p-1.5 rounded-lg transition-colors shrink-0 mr-auto self-start" title="حذف هذا الإشعار"><i class="fa-solid fa-trash-can text-2xs"></i></button>`
+                        : '';
 
                     list.innerHTML += `
                         <div class="p-3 border rounded-xl flex gap-3 transition-colors ${bgClass}">
                             <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${iconColor}"><i class="fa-solid fa-bullhorn text-xs"></i></div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-bold">${n.text}</p>
+                                <div class="flex justify-between items-start gap-2">
+                                    <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-bold flex-1">${n.text}</p>
+                                    ${deleteBtnHtml} <!-- حقن زر الحذف هنا -->
+                                </div>
                                 <div class="flex justify-between items-center mt-2">
                                     <span class="text-[9px] text-brand-600 font-black">${n.publisher} <span class="text-slate-400">(الإدارة)</span></span>
                                     <span class="text-[9px] text-slate-400 font-en font-bold" dir="ltr">${dateStr}</span>
@@ -1782,6 +1789,22 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                 });
             });
         }
+        // دالة المالك لحذف الإشعار الفردي نهائياً من قاعدة البيانات لجميع الطلاب
+        window.deleteNotification = async function(notifId, event) {
+            // منع إغلاق القائمة المنسدلة عند الضغط على زر سلة المهملات
+            if (event) event.stopPropagation(); 
+            
+            if (confirm("🚨 تحذير أمني هام للمالك:\nهل أنت متأكد من حذف هذا الإشعار نهائياً من جميع أجهزة الطلاب؟")) {
+                try {
+                    await deleteDoc(doc(db, "notifications", notifId));
+                    showToast("تمت إزالة الإشعار بنجاح من قاعدة البيانات للجميع.", "success");
+                    // ستتحدث القائمة تلقائياً فوراً بفضل الـ Real-time listener
+                } catch (e) {
+                    console.error("خطأ حذف الإشعار:", e);
+                    showToast("فشلت عملية الحذف، يرجى مراجعة الاتصال بقاعدة البيانات.", "error");
+                }
+            }
+        };
 
         // دالة فتح وإغلاق القائمة
         window.toggleNotifications = function() {
