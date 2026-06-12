@@ -1658,8 +1658,24 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                                 document.getElementById('main-layout').classList.remove('hidden');
                                 document.getElementById('login-view').classList.remove('active');
                                 
-                                if (userData.role === 'superadmin') { navTo('super-dashboard'); window.initSuperAdmin(); }
-                                else { navTo('student-dashboard'); }
+                                // تحديد الصفحة الافتراضية بناءً على رتبة المستخدم
+                            let defaultView = userData.role === 'superadmin' ? 'super-dashboard' : 'student-dashboard';
+                            
+                            // قراءة الصفحة الحالية من رابط المتصفح (Hash) عند الـ Refresh لإبقائك عليها
+                            const savedUrlHash = window.location.hash.substring(1);
+                            if (savedUrlHash && document.getElementById(savedUrlHash)) {
+                                // حماية أمنية: منع الطالب من البقاء في صفحات الإدارة عند التلاعب بالرابط والـ Refresh
+                                if (savedUrlHash === 'super-dashboard' && userData.role !== 'superadmin') {
+                                    defaultView = 'student-dashboard';
+                                } else if ((savedUrlHash === 'admin-add' || savedUrlHash === 'admin-manage') && userData.role !== 'admin' && userData.role !== 'superadmin') {
+                                    defaultView = 'student-dashboard';
+                                } else {
+                                    defaultView = savedUrlHash; // الاحتفاظ بصفحتك الحالية بنجاح
+                                }
+                            }
+
+                            navTo(defaultView);
+                            if (userData.role === 'superadmin') window.initSuperAdmin();
 
                                 syncCourses();
                                 listenToAnnouncements();
