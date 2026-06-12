@@ -920,10 +920,10 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                             </button>
                         </div>
 
-                        <!-- تفاصيل المحاضرة والتلخيصات والتعليقات -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- تفاصيل المحاضرة والتعليقات والتقييمات -->
+                        <div class="space-y-6">
                             <!-- تفاصيل ونقاشات الكورس -->
-                            <div class="md:col-span-2 space-y-6">
+                            <div class="space-y-6">
                                 <div class="bg-white dark:bg-darkCard p-6 rounded-3xl border border-slate-200/60 dark:border-darkBorder">
                                     <!-- صندوق سجل تنبيهات وإعلانات الكورس التفاعلي الجديد -->
                         <div id="course-announcements-box" class="hidden bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 p-5 rounded-3xl relative overflow-hidden flex flex-col gap-3">
@@ -952,10 +952,10 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                                             <h2 id="current-lec-title" class="text-3xl md:text-4xl font-black mb-1 drop-shadow-md">اسم المحاضرة</h2>
                                         </div>
                                     </div>
-                                    <!-- قسم تقييم الكورس والمراجعات بالنجوم -->
+                                    <!-- قسم تقييم الكورس والمراجعات بالنجوم المطور والمحاذى أفقياً -->
                                     <div class="bg-slate-50 dark:bg-slate-900/40 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800 mb-6 space-y-3">
                                         <h3 class="font-bold text-xs text-slate-800 dark:text-white flex items-center gap-2">
-                                            <i class="fa-solid fa-star text-amber-500"></i> قيم هذا الكورس وشاركنا مراجعتك
+                                            <i class="fa-solid fa-star text-amber-500"></i> قيم هذا الكورس وشاركنا مراجعتك الأكاديمية
                                         </h3>
                                         <div class="flex items-center gap-2" id="star-rating-container">
                                             <button onclick="setCourseRating(1)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="1"><i class="fa-solid fa-star"></i></button>
@@ -963,11 +963,11 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                                             <button onclick="setCourseRating(3)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="3"><i class="fa-solid fa-star"></i></button>
                                             <button onclick="setCourseRating(4)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="4"><i class="fa-solid fa-star"></i></button>
                                             <button onclick="setCourseRating(5)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="5"><i class="fa-solid fa-star"></i></button>
-                                            <span id="rating-score-label" class="text-xs text-slate-400 font-bold mr-2">لم يتم التقييم بعد</span>
+                                            <span id="rating-score-label" class="text-xs text-slate-400 font-bold mr-2">اضغط على النجوم للتحديد</span>
                                         </div>
-                                        <div class="flex gap-2">
-                                            <input type="text" id="course-review-comment" class="flex-1 p-2.5 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none" placeholder="اكتب مراجعتك المختصرة للكورس هنا...">
-                                            <button onclick="submitCourseReview()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow transition flex items-center gap-1.5"><i class="fa-solid fa-paper-plane"></i> إرسال</button>
+                                        <div class="flex gap-2.5 items-center">
+                                            <input type="text" id="course-review-comment" class="flex-1 p-3 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none text-slate-800 dark:text-white font-bold" placeholder="اكتب مراجعتك المختصرة للكورس هنا...">
+                                            <button onclick="submitCourseReview()" class="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl text-xs font-black shadow transition-all flex items-center gap-1.5 shrink-0"><i class="fa-solid fa-paper-plane"></i> إرسال</button>
                                         </div>
                                     </div>
                                     <!-- مساحة النقاش والأسئلة الخاصة بالكورس -->
@@ -986,19 +986,6 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                                             <div class="text-center py-5 text-slate-400 text-xs">لا توجد نقاشات بعد.</div>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            <!-- المفكرة وتلخيصات الطالب الشخصية -->
-                            <div class="bg-white dark:bg-darkCard p-5 rounded-3xl border border-slate-200/60 dark:border-darkBorder flex flex-col justify-between h-[360px] md:h-auto">
-                                <div>
-                                    <h3 class="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-1.5 mb-1.5"><i class="fa-solid fa-book-open-reader text-brand-500"></i> تلخيصاتي الشخصية</h3>
-                                    <p class="text-[10px] text-slate-400 mb-3">ملاحظاتك تحفظ تلقائياً لكل محاضرة على حدة للرجوع لها وقت الاختبارات.</p>
-                                    <textarea id="lecture-note-area" oninput="saveLectureNote()" class="w-full h-44 md:h-52 p-3 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none resize-none font-sans" placeholder="اكتب ملاحظاتك وتلخيصك الشخصي هنا..."></textarea>
-                                </div>
-                                <div class="text-[10px] text-slate-400 font-bold flex justify-between items-center pt-3 border-t border-slate-100 dark:border-darkBorder">
-                                    <span><i class="fa-solid fa-floppy-disk text-emerald-500"></i> مزامنة تلقائية</span>
-                                    <button onclick="clearLectureNote()" class="text-rose-500 hover:underline">حذف الملاحظة</button>
                                 </div>
                             </div>
                         </div>
@@ -2010,6 +1997,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
         window.saveLectureNote = function() {
             if(!currentActiveLectureId || !currentUser) return;
             const noteArea = document.getElementById('lecture-note-area');
+            if(!noteArea) return; // حماية ضد الأخطاء بعد حذف القسم
             const note = noteArea.value;
             const storageKey = `hms_note_${currentUser.uid}_${currentActiveLectureId}`;
             localStorage.setItem(storageKey, note);
@@ -2018,6 +2006,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
         window.loadLectureNote = function() {
             if(!currentActiveLectureId || !currentUser) return;
             const noteArea = document.getElementById('lecture-note-area');
+            if(!noteArea) return; // حماية ضد الأخطاء بعد حذف القسم
             const storageKey = `hms_note_${currentUser.uid}_${currentActiveLectureId}`;
             const savedNote = localStorage.getItem(storageKey) || "";
             noteArea.value = savedNote;
