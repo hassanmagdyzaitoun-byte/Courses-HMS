@@ -925,19 +925,22 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                             <!-- تفاصيل ونقاشات الكورس -->
                             <div class="md:col-span-2 space-y-6">
                                 <div class="bg-white dark:bg-darkCard p-6 rounded-3xl border border-slate-200/60 dark:border-darkBorder">
-                                    <!-- صندوق تنبيهات وإعلانات الكورس -->
+                                    <!-- صندوق سجل تنبيهات وإعلانات الكورس التفاعلي الجديد -->
                         <div id="course-announcements-box" class="hidden bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30 p-5 rounded-3xl relative overflow-hidden flex flex-col gap-3">
-                            <div class="flex justify-between items-center border-b border-amber-500/20 pb-2">
-                                <h4 class="text-xs font-black text-amber-500 flex items-center gap-1.5"><i class="fa-solid fa-bullhorn animate-bounce"></i> إعلانات وتنبيهات المدرس العاجلة لهذا الكورس</h4>
-                                <span class="text-[9px] text-slate-400 font-bold" id="announcement-date"></span>
+                            <div class="flex justify-between items-center border-b border-amber-500/20 pb-2 mb-1">
+                                <h4 class="text-xs font-black text-amber-600 dark:text-amber-500 flex items-center gap-1.5"><i class="fa-solid fa-bullhorn animate-bounce"></i> سجل تنبيهات المدرس لطلبة الكورس</h4>
                             </div>
-                            <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-sans font-medium" id="announcement-text-view">لا توجد إعلانات نشطة للكورس حالياً.</p>
+                            
+                            <!-- قائمة لعرض الإعلانات المتعددة ديناميكياً -->
+                            <div id="course-announcements-list" class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                                <p class="text-xs text-slate-400 font-bold">جاري تحميل إعلانات المنهج...</p>
+                            </div>
                             
                             <!-- لوحة كتابة إعلان جديد (تظهر فقط للدكاترة والمالك) -->
-                            <div id="admin-announcement-panel" class="hidden border-t border-slate-100 dark:border-slate-800 pt-3 mt-2">
+                            <div id="admin-announcement-panel" class="hidden border-t border-slate-100 dark:border-slate-800 pt-3 mt-1">
                                 <div class="flex gap-2">
-                                    <input type="text" id="announcement-input-text" class="flex-1 p-2 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none" placeholder="اكتب تذكير أو تنبيه لطلبة هذا الكورس هنا...">
-                                    <button onclick="publishCourseAnnouncement()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-xs font-black transition">نشر الإعلان</button>
+                                    <input type="text" id="announcement-input-text" class="flex-1 p-2.5 text-xs bg-white border border-slate-200 rounded-xl dark:bg-slate-900 dark:border-darkBorder outline-none" placeholder="اكتب تنبيه أو تذكير لطلبة هذا الكورس هنا...">
+                                    <button onclick="publishCourseAnnouncement()" class="bg-amber-500 hover:bg-amber-600 text-white px-5 py-2.5 rounded-xl text-xs font-black transition whitespace-nowrap shadow">نشر التنبيه</button>
                                 </div>
                             </div>
                         </div>
@@ -4977,52 +4980,106 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 showToast("حدث خطأ أثناء إرسال الإشعار. تأكد من اتصالك بالإنترنت.", "error");
             }
         };
-        // ==========================================
-        // 10. نظام إعلانات الكورس المخصصة (Announcements)
-        // ==========================================
+        
+        // دالة نشر تنبيه جديد داخل كورس محدد
         window.publishCourseAnnouncement = async function() {
             const text = document.getElementById('announcement-input-text').value.trim();
-            if(!text) return showToast("يرجى كتابة نص الإعلان أولاً.", "error");
+            if(!text) return showToast("يرجى كتابة نص التنبيه أولاً.", "error");
             if(!currentCourseId) return;
 
             try {
-                const dateStr = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
-                await updateDoc(doc(db, "courses", currentCourseId), {
-                    announcement: {
-                        text: text,
-                        date: dateStr,
-                        createdAt: new Date().getTime()
-                    }
+                // حفظ التنبيه في مجموعة فرعية تابعة للكورس الحالي ليكون هناك خط زمني
+                await addDoc(collection(db, "courses", currentCourseId, "announcements"), {
+                    text: text,
+                    createdAt: new Date().getTime(),
+                    publisher: userData.name || currentUser.email.split('@')[0]
                 });
+                
                 document.getElementById('announcement-input-text').value = "";
-                showToast("تم نشر إعلان الكورس وإخطار الطلبة بنجاح!", "success");
-            } catch(e) { showToast("عذراً، فشل نشر الإعلان.", "error"); }
+                showToast("تم نشر التنبيه الجديد لطلبة المنهج بنجاح!", "success");
+                // سيتم التحديث تلقائياً بفضل الـ Listener اللحظي المبرمج في الخطوة التالية
+            } catch(e) { 
+                console.error(e);
+                showToast("عذراً، فشل نشر التنبيه، تأكد من الاتصال.", "error"); 
+            }
         };
 
-        // دالة لعرض الإعلان فور فتح الكورس للطالب
+        // دالة مراقبة وعرض سجل التنبيهات الخاص بالكورس الحالي لحظياً (Real-time Timeline)
+        let activeCourseAnnouncementsListener = null; // متغير لحفظ مراقب الإعلانات الفردي ومنع التداخل
+
         function renderCourseAnnouncements(course) {
             const box = document.getElementById('course-announcements-box');
-            const txtView = document.getElementById('announcement-text-view');
-            const dateView = document.getElementById('announcement-date');
+            const list = document.getElementById('course-announcements-list');
             const adminPanel = document.getElementById('admin-announcement-panel');
 
-            if(!box) return;
+            if(!box || !list) return;
 
-            // إظهار لوحة التحكم للدكتور فقط
-            const isAuthorized = userData?.role === 'admin' || userData?.role === 'superadmin';
+            // 1. التحكم في ظهور لوحة كتابة تنبيه جديد (للدكتور صاحب الكورس، أو المالك)
+            const isAuthorized = userData?.role === 'superadmin' || (userData?.role === 'admin' && course.createdBy === currentUser.uid);
             adminPanel.classList.toggle('hidden', !isAuthorized);
 
-            if (course.announcement && course.announcement.text) {
-                box.classList.remove('hidden');
-                txtView.textContent = course.announcement.text;
-                dateView.textContent = course.announcement.date;
-            } else {
-                // إذا لم يكن هناك إعلان، تظهر لوحة التحكم للدكتور فقط ليتمكن من الإضافة
-                box.classList.toggle('hidden', !isAuthorized);
-                txtView.textContent = "لا توجد إعلانات نشطة حالياً لطلبة هذا المنهج.";
-                dateView.textContent = "";
+            // إظهار الصندوق الخارجي دائماً للدكاترة، وللطلاب فقط إذا كان هناك إعلانات
+            box.classList.remove('hidden');
+
+            // إيقاف أي مراقب إعلانات قديم لتجنب تعارض الكورسات
+            if (activeCourseAnnouncementsListener) {
+                activeCourseAnnouncementsListener();
+                activeCourseAnnouncementsListener = null;
             }
+
+            // 2. تفعيل مراقب لحظي لجلب خط التنبيهات الزمني من الفايربيس للكورس المفتوح حالياً
+            activeCourseAnnouncementsListener = onSnapshot(query(collection(db, "courses", course.id, "announcements"), orderBy("createdAt", "desc")), (snap) => {
+                list.innerHTML = "";
+                let announcements = [];
+                snap.forEach(d => announcements.push({ id: d.id, ...d.data() }));
+
+                if (announcements.length === 0) {
+                    list.innerHTML = `<p class="text-xs text-slate-500/80 dark:text-slate-400 py-4 font-bold text-center">لا توجد تنبيهات نشطة لطلبة هذا المنهج حالياً.</p>`;
+                    // إخفاء الصندوق للطلاب العاديين إن لم يكن هناك تنبيهات لعدم حجز مساحة فارغة
+                    if(!isAuthorized) box.classList.add('hidden');
+                    return;
+                }
+
+                // عرض الإعلانات
+                announcements.forEach(ann => {
+                    const dateStr = new Date(ann.createdAt).toLocaleDateString('ar-EG', { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
+                    
+                    // ميزة أمان: زر حذف تنبيه الكورس يظهر للمالك، أو للدكتور ناشر الإشعار نفسه
+                    const deleteAnnBtn = (userData?.role === 'superadmin' || (userData?.role === 'admin' && course.createdBy === currentUser.uid))
+                        ? `<button onclick="window.deleteCourseAnnouncement('${course.id}', '${ann.id}')" class="text-rose-400 hover:text-rose-600 transition p-1 text-[10px]" title="حذف هذا التنبيه"><i class="fa-solid fa-trash-can"></i></button>`
+                        : '';
+
+                    list.innerHTML += `
+                        <div class="p-3 bg-white/60 dark:bg-slate-900/40 rounded-2xl border border-amber-500/10 flex gap-2.5 items-start justify-between animate-scale-up">
+                            <div class="flex gap-2.5 items-start">
+                                <div class="w-6 h-6 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0 text-[10px] mt-0.5"><i class="fa-solid fa-bullhorn"></i></div>
+                                <div>
+                                    <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-sans font-medium whitespace-pre-wrap">${ann.text}</p>
+                                    <div class="flex items-center gap-2 mt-1.5 text-[9px] text-slate-400 font-bold">
+                                        <span>بواسطة د. ${ann.publisher}</span>
+                                        <span>•</span>
+                                        <span class="font-en">${dateStr}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            ${deleteAnnBtn}
+                        </div>
+                    `;
+                });
+            });
         }
+
+        // دالة لحذف إعلان محدد من الكورس
+        window.deleteCourseAnnouncement = async function(courseId, annId) {
+            if (confirm("هل أنت متأكد من رغبتك في حذف هذا التنبيه نهائياً لطلبة هذا الكورس؟")) {
+                try {
+                    await deleteDoc(doc(db, "courses", courseId, "announcements", annId));
+                    showToast("تم إزالة التنبيه بنجاح.", "success");
+                } catch(e) {
+                    showToast("فشلت عملية الحذف، يرجى التحقق من الاتصال.", "error");
+                }
+            }
+        };
         // دالة توليد وتنزيل تقرير إنجاز ودرجات الطلاب (CSV) متوافق مع Excel
         window.exportAnalyticsToCSV = function() {
             const table = document.querySelector('#analytics-modal table');
