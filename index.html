@@ -2119,8 +2119,8 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                     const isStaff = data.role === 'admin' || data.role === 'superadmin';
                     const dateStr = new Date(data.createdAt).toLocaleDateString('ar-EG', { hour: '2-digit', minute: '2-digit' });
 
-                    // التحقق مما إذا كان المستخدم الحالي هو صاحب المنشور أو من الإدارة ليتمكن من حذفه
-                    const canDelete = (currentUser && currentUser.email === data.email) || (userData && (userData.role === 'admin' || userData.role === 'superadmin'));
+                    // التعديل الأمني: صاحب المنشور نفسه يمكنه الحذف، أو المالك (superadmin) فقط يمكنه حذف منشورات الآخرين
+                    const canDelete = (currentUser && currentUser.email === data.email) || (userData && userData.role === 'superadmin');
                     
                     let deleteBtnHtml = '';
                     if (canDelete) {
