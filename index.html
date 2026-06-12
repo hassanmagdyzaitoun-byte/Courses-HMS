@@ -336,10 +336,27 @@
                     <h1 id="page-title" class="text-2xl font-black text-slate-800 dark:text-white hidden lg:block">الرئيسية</h1>
                 </div>
                 
-                <!-- شريط الإعلانات الذكي (يتقلص بمرونة على الشاشات الصغيرة لمنع التداخل) -->
-                <div class="flex items-center gap-2 sm:gap-3 bg-brand-50 dark:bg-brand-950/30 border border-brand-100 dark:border-brand-800 text-brand-700 dark:text-brand-300 px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-bold shadow-sm max-w-[170px] xs:max-w-[240px] sm:max-w-md w-full overflow-hidden">
-                    <i class="fa-solid fa-bell animate-pulse text-brand-500 shrink-0"></i>
-                    <marquee behavior="scroll" direction="right" class="w-full flex-1" id="global-announcement">أهلاً بك في منصة تقديم الكورسات HMS المميزة...</marquee>
+                <!-- مركز الإشعارات الذكي (Notification Center) -->
+                <div class="relative">
+                    <!-- زر الجرس -->
+                    <button onclick="toggleNotifications()" class="relative w-11 h-11 flex items-center justify-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-darkBorder text-slate-600 dark:text-slate-300 rounded-xl hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200 transition-all shadow-sm group">
+                        <i class="fa-solid fa-bell text-lg group-hover:animate-pulse"></i>
+                        <!-- النقطة الحمراء للعدد (مخفية برمجياً حتى يأتي إشعار) -->
+                        <span id="notif-badge" class="hidden absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-black text-white shadow-md border-2 border-white dark:border-darkBg">0</span>
+                    </button>
+
+                    <!-- نافذة الإشعارات المنسدلة -->
+                    <div id="notif-dropdown" class="hidden absolute left-0 mt-3 w-[320px] max-w-[calc(100vw-2rem)] bg-white dark:bg-darkCard rounded-2xl shadow-2xl border border-slate-100 dark:border-darkBorder z-50 overflow-hidden transform origin-top-left transition-all">
+                        <!-- رأس القائمة -->
+                        <div class="bg-slate-50 dark:bg-slate-800/50 p-4 border-b border-slate-100 dark:border-darkBorder flex justify-between items-center">
+                            <h3 class="font-black text-slate-800 dark:text-white text-sm"><i class="fa-solid fa-bell text-brand-500 ml-1"></i> أحدث الإشعارات</h3>
+                            <button onclick="markAllAsRead()" class="text-[10px] font-bold text-brand-600 hover:underline"><i class="fa-solid fa-check-double"></i> تحديد كمقروء</button>
+                        </div>
+                        <!-- قائمة الإشعارات -->
+                        <div id="notif-list" class="max-h-80 overflow-y-auto custom-scrollbar p-2 space-y-1">
+                            <div class="p-6 text-center text-xs text-slate-400 font-bold"><i class="fa-solid fa-spinner fa-spin text-brand-500 text-lg mb-2 block"></i> جاري التحميل...</div>
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -502,7 +519,7 @@
                             <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center"><i class="fa-solid fa-bullhorn"></i></div> بث إعلان عام للطلاب بالمنصة</h3>
                             <div class="flex flex-col sm:flex-row gap-3">
                                 <input type="text" id="news-input" class="flex-1 p-3.5 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-850 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="اكتب خبراً أو تنبيهاً يظهر في أعلى الشاشة لجميع الطلاب والرواد...">
-                                <button id="btn-publish-news" class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg transition whitespace-nowrap text-sm">نشر التحديث العام</button>
+                                <button id="btn-publish-news" onclick="publishGlobalNews()" class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg transition whitespace-nowrap text-sm">نشر التحديث العام</button>
                             </div>
                         </div>
 
@@ -566,19 +583,27 @@
                                     <p class="text-slate-500 text-xs mt-1">أنشئ كورساتك بمرونة عالية، مع إمكانية إضافة عدد غير محدود من المحاضرات والمصادر الديناميكية للمحاضرة الواحدة.</p>
                                 </div>
                             </div>
-                            <!-- بطاقة توجيهية ومساعد الدكاترة لصناعة الاختبارات بالذكاء الاصطناعي -->
+                            <!-- بطاقة مساعد الذكاء الاصطناعي (أزرار منسدلة لتوفير المساحة) -->
                             <div class="bg-gradient-to-r from-brand-500/10 to-emerald-500/10 border border-brand-500/20 p-5 rounded-2xl mb-6 relative overflow-hidden animate-scale-up">
                                 <h3 class="font-black text-sm text-brand-700 dark:text-brand-400 flex items-center gap-2 mb-2">
-                                    <i class="fa-solid fa-robot animate-pulse"></i> مساعد الذكاء الاصطناعي لصناعة الاختبارات التفاعلية (AI Prompt Guide)
+                                    <i class="fa-solid fa-robot animate-pulse"></i> مساعد الذكاء الاصطناعي (AI Prompt Guide)
                                 </h3>
-                                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
-                                    دكتورنا الفاضل، يمكنك الآن توليد عشرات الأسئلة التفاعلية لكورسِك في ثوانٍ! انسخ البرومبت (الأمر) الموجه بالأسفل ثم افتح <a href="https://chatgpt.com" target="_blank" class="text-brand-600 font-bold underline">ChatGPT</a> وارفع ملف المحاضرة (PDF) والصق معه البرومبت، ليقوم بإنتاج الأسئلة بالصيغة البرمجية المناسبة للمنصة تماماً دون عناء.
+                                <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-4">
+                                    دكتورنا الفاضل، اختر نوع المحتوى، انسخ البرومبت وافتحه في <a href="https://chatgpt.com" target="_blank" class="text-brand-600 font-bold underline">ChatGPT</a> مع ملف المحاضرة (PDF) ليقوم بتوليد المحتوى برمجياً للمنصة.
                                 </p>
-                                <div class="relative bg-slate-950 rounded-xl p-4 border border-slate-800">
-                                    <button type="button" onclick="window.copyAIPrompt()" class="absolute top-3 left-3 bg-brand-600 hover:bg-brand-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold transition flex items-center gap-1 shadow-md">
-                                        <i class="fa-solid fa-copy"></i> <span id="prompt-copy-text">نسخ البرومبت</span>
-                                    </button>
-                                    <pre id="ai-prompt-content" class="text-[10px] text-slate-300 font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed select-all pr-4 max-h-40 custom-scrollbar text-left" dir="ltr">Act as an expert LMS Instructional Designer and Academic Subject Matter Expert. Your task is to analyze the attached/provided file thoroughly and generate 15 highly relevant, high-yield Multiple Choice Questions (MCQs) in Arabic.
+
+                                <div class="space-y-3">
+                                    <!-- 1. زر وبرومبت الاختبارات التفاعلية -->
+                                    <div>
+                                        <button type="button" onclick="document.getElementById('prompt-quiz-box').classList.toggle('hidden')" class="w-full flex justify-between items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-xl font-bold text-xs text-slate-700 dark:text-slate-200 hover:border-amber-500 transition shadow-sm">
+                                            <span class="flex items-center gap-2"><i class="fa-solid fa-list-check text-amber-500"></i> توليد أسئلة اختبار (MCQ Quiz)</span>
+                                            <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                                        </button>
+                                        <div id="prompt-quiz-box" class="hidden mt-2 relative bg-slate-950 rounded-xl p-4 border border-slate-800 animate-slide-up">
+                                            <button type="button" onclick="window.copyDynamicPrompt('ai-quiz-prompt-text', this)" class="absolute top-3 left-3 bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold transition flex items-center gap-1 shadow-md">
+                                                <i class="fa-solid fa-copy"></i> <span>نسخ الكود</span>
+                                            </button>
+                                            <pre id="ai-quiz-prompt-text" class="text-[10px] text-slate-300 font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed select-all pr-4 max-h-40 custom-scrollbar text-left" dir="ltr">Act as an expert LMS Instructional Designer and Academic Subject Matter Expert. Your task is to analyze the attached/provided file thoroughly and generate 15 highly relevant, high-yield Multiple Choice Questions (MCQs) in Arabic.
 
 You must strictly output the MCQs in the following custom raw-text format, with no intro, no conversational filler, and no markdown tables. Each MCQ must be on a single line using the pipe character (|) as a delimiter:
 
@@ -589,10 +614,36 @@ Strict Constraints for the Output:
 2. Options: Exactly 4 options separated by commas. Ensure no stray commas are used inside the options themselves to prevent breaking the array.
 3. Correct_Index: This must be a 0-based index indicating the correct answer (0 for Option 1, 1 for Option 2, 2 for Option 3, 3 for Option 4).
 4. Explanation: Provide a high-yield scientific/clinical explanation clarifying why the correct option is right and referencing the facts from the text.
-5. Formatting: Put all the output inside a single, copy-pasteable code block. No bullet points, no numbered lists, just plain text lines inside the code block.
+5. Formatting: Put all the output inside a single, copy-pasteable code block. No bullet points, no numbered lists, just plain text lines inside the code block.</pre>
+                                        </div>
+                                    </div>
+
+                                    <!-- 2. زر وبرومبت البطاقات التعليمية (Flashcards باللغة الإنجليزية) -->
+                                    <div>
+                                        <button type="button" onclick="document.getElementById('prompt-flashcard-box').classList.toggle('hidden')" class="w-full flex justify-between items-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-xl font-bold text-xs text-slate-700 dark:text-slate-200 hover:border-blue-500 transition shadow-sm">
+                                            <span class="flex items-center gap-2"><i class="fa-solid fa-layer-group text-blue-500"></i> توليد بطاقات تعليمية (English Flashcards)</span>
+                                            <i class="fa-solid fa-chevron-down text-slate-400"></i>
+                                        </button>
+                                        <div id="prompt-flashcard-box" class="hidden mt-2 relative bg-slate-950 rounded-xl p-4 border border-slate-800 animate-slide-up">
+                                            <button type="button" onclick="window.copyDynamicPrompt('ai-flashcard-prompt-text', this)" class="absolute top-3 left-3 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold transition flex items-center gap-1 shadow-md">
+                                                <i class="fa-solid fa-copy"></i> <span>نسخ الكود</span>
+                                            </button>
+                                            <pre id="ai-flashcard-prompt-text" class="text-[10px] text-slate-300 font-mono overflow-x-auto whitespace-pre-wrap leading-relaxed select-all pr-4 max-h-40 custom-scrollbar text-left" dir="ltr">Act as an expert Instructional Designer and Academic Subject Matter Expert. Your task is to analyze the attached/provided document thoroughly and generate 20 highly relevant, high-yield Anki-style flashcards in English.
+
+You must strictly output the flashcards in the following custom raw-text format, with no intro, no conversational filler, no numbering, and no markdown tables. Each flashcard must be on a single line using the pipe character (|) as a delimiter:
+
+Front of Card (Question or Term) | Back of Card (Answer or Definition)
+
+Strict Constraints for the Output:
+1. Front: Must be a clear, concise question, concept, or medical/academic term.
+2. Back: Provide a direct, high-yield answer, definition, or explanation based strictly on the text.
+3. Formatting: Put all the output inside a single, copy-pasteable code block. No bullet points, no numbered lists, just plain text lines.
 
 Here is an example of the expected output format:
-ما هو المستوى الفقري للغدة الدرقية؟ | C1 to C3, C3 to C5, C5 to T1, T2 to T4 | 2 | تقع الغدة الدرقية في المستويات الفقرية C5 و C6 و C7 و T1.</pre>
+What is the primary function of the aorta? | It is the main artery that carries oxygen-rich blood from the heart to the rest of the body.
+Mitochondria | The powerhouse of the cell, responsible for generating most of the cell's supply of adenosine triphosphate (ATP).</pre>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -1612,11 +1663,91 @@ Here is an example of the expected output format:
             });
         }
 
+        // ==========================================
+        // محرك الإشعارات والجرس الذكي (Notification Engine)
+        // ==========================================
         function listenToAnnouncements() {
-            onSnapshot(doc(db, "settings", "global"), (snap) => {
-                if(snap.exists() && snap.data().text) document.getElementById('global-announcement').textContent = snap.data().text;
+            const list = document.getElementById('notif-list');
+            const badge = document.getElementById('notif-badge');
+            if(!list || !badge) return;
+            
+            // جلب الإشعارات مرتبة من الأحدث للأقدم
+            onSnapshot(query(collection(db, "notifications"), orderBy("createdAt", "desc")), (snap) => {
+                list.innerHTML = "";
+                let notifs = [];
+                snap.forEach(d => notifs.push({ id: d.id, ...d.data() }));
+
+                if(notifs.length === 0) {
+                    list.innerHTML = `<div class="p-10 text-center text-xs text-slate-400 font-bold"><i class="fa-regular fa-bell-slash text-3xl mb-2 opacity-50"></i><br>لا توجد إشعارات أو تحديثات حالياً.</div>`;
+                    badge.classList.add('hidden');
+                    return;
+                }
+
+                // حساب عدد الإشعارات الجديدة (الغير مقروءة) بناءً على ذاكرة المتصفح
+                const lastReadTime = localStorage.getItem('hms_last_read_notif') || 0;
+                const unreadCount = notifs.filter(n => n.createdAt > lastReadTime).length;
+
+                // تحديث الجرس والنقطة الحمراء
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount > 9 ? '+9' : unreadCount;
+                    badge.classList.remove('hidden');
+                    badge.classList.add('animate-bounce'); // اهتزاز لفت الانتباه
+                    setTimeout(() => badge.classList.remove('animate-bounce'), 3000);
+                } else {
+                    badge.classList.add('hidden');
+                }
+
+                // عرض آخر 15 إشعار فقط لعدم إثقال القائمة
+                notifs.slice(0, 15).forEach(n => {
+                    const isNew = n.createdAt > lastReadTime;
+                    const dateStr = new Date(n.createdAt).toLocaleDateString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+                    
+                    // تمييز الإشعار الجديد بلون أزرق فاتح
+                    const bgClass = isNew ? 'bg-brand-50/60 dark:bg-brand-900/20 border-brand-200 dark:border-brand-800' : 'bg-transparent border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/40';
+                    const iconColor = isNew ? 'text-brand-600 bg-brand-100 dark:bg-brand-900/50' : 'text-slate-400 bg-slate-100 dark:bg-slate-800';
+
+                    list.innerHTML += `
+                        <div class="p-3 border rounded-xl flex gap-3 transition-colors ${bgClass}">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${iconColor}"><i class="fa-solid fa-bullhorn text-xs"></i></div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs text-slate-700 dark:text-slate-300 leading-relaxed font-bold">${n.text}</p>
+                                <div class="flex justify-between items-center mt-2">
+                                    <span class="text-[9px] text-brand-600 font-black">${n.publisher} <span class="text-slate-400">(الإدارة)</span></span>
+                                    <span class="text-[9px] text-slate-400 font-en font-bold" dir="ltr">${dateStr}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
             });
         }
+
+        // دالة فتح وإغلاق القائمة
+        window.toggleNotifications = function() {
+            const dropdown = document.getElementById('notif-dropdown');
+            dropdown.classList.toggle('hidden');
+            if(!dropdown.classList.contains('hidden')) {
+                dropdown.classList.add('animate-slide-up');
+            }
+        };
+
+        // دالة تحديد الكل كمقروء
+        window.markAllAsRead = function() {
+            localStorage.setItem('hms_last_read_notif', Date.now());
+            document.getElementById('notif-badge').classList.add('hidden');
+            document.getElementById('notif-dropdown').classList.add('hidden');
+            showToast("تم تحديد جميع الإشعارات كمقروءة.", "success");
+            listenToAnnouncements(); // إعادة رسم القائمة لإزالة التمييز اللوني
+        };
+
+        // إغلاق قائمة الإشعارات تلقائياً عند الضغط في أي مكان خارجها
+        document.addEventListener('click', (e) => {
+            const notifBtn = document.querySelector('button[onclick="toggleNotifications()"]');
+            const dropdown = document.getElementById('notif-dropdown');
+            if (notifBtn && dropdown && !notifBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
 
         // ==========================================
         // بناء وتصميم لوحة تحكم الطالب الرئيسية (Dashboard)
@@ -2092,8 +2223,9 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 {val: 'video', txt: '🎥 فيديو الشرح (YouTube/Drive)'},
                 {val: 'pdf', txt: '📄 مستند تفريغ أو مرجع PDF'},
                 {val: 'quiz', txt: '📝 اختبار تفاعلي قصير (Quiz)'},
+                {val: 'flashcard', txt: '📇 بطاقات تعليمية للمراجعة (Flashcards)'},
                 {val: 'link', txt: '🔗 رابط ويب أو مرجع خارجي'},
-                {val: 'sub-banner', txt: '🏷️ بانر فرعي / عنوان جانبي (اختياري)'} // النوع الجديد
+                {val: 'sub-banner', txt: '🏷️ بانر فرعي / عنوان جانبي (اختياري)'}
             ];
             
             let optionsHTML = types.map(t => `<option value="${t.val}" ${resData && resData.type === t.val ? 'selected' : ''}>${t.txt}</option>`).join('');
@@ -2139,18 +2271,55 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                     <!-- حقل مخفي لمعرفة أي طريقة يستخدمها الدكتور الآن لحفظها -->
                     <input type="hidden" class="active-quiz-mode" value="ui">
                 </div>
+                <!-- حقل بناء البطاقات التعليمية (Flashcards) -->
+                <div class="flashcard-wrapper ${resData && resData.type === 'flashcard' ? '' : 'hidden'} w-full bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800 mt-3">
+                    
+                    <!-- أزرار التبديل بين الطريقتين -->
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-200 dark:border-slate-700 pb-3">
+                        <label class="text-xs font-black text-blue-600 dark:text-blue-400"><i class="fa-solid fa-layer-group"></i> محرك البطاقات التعليمية:</label>
+                        <div class="flex bg-slate-200 dark:bg-slate-800 rounded-lg p-1">
+                            <button type="button" onclick="window.switchFlashcardMode(this, 'ui')" class="fc-mode-btn bg-white dark:bg-slate-700 shadow-sm text-slate-800 dark:text-white px-3 py-1.5 rounded text-[10px] font-bold transition">واجهة البطاقات (سهل)</button>
+                            <button type="button" onclick="window.switchFlashcardMode(this, 'text')" class="fc-mode-btn text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 px-3 py-1.5 rounded text-[10px] font-bold transition">الإدخال النصي (سريع)</button>
+                        </div>
+                    </div>
+
+                    <!-- الطريقة الأولى: واجهة الأزرار التفاعلية -->
+                    <div class="fc-ui-mode-container">
+                        <button type="button" onclick="window.addFlashcardUI(this)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] mb-3 transition shadow-sm"><i class="fa-solid fa-plus"></i> إضافة بطاقة جديدة</button>
+                        <div class="fc-ui-container space-y-3">
+                            <!-- سيتم حقن البطاقات هنا -->
+                        </div>
+                    </div>
+
+                    <!-- الطريقة الثانية: النص المتقدم -->
+                    <div class="fc-text-mode-container hidden">
+                        <p class="text-[9px] text-slate-500 dark:text-slate-400 mb-2 font-bold leading-relaxed">
+                            <i class="fa-solid fa-circle-info text-blue-500"></i> اكتب كل بطاقة في سطر مستقل بهذا الشكل:<br>
+                            الوجه الأول (السؤال) | الوجه الثاني (الإجابة) | رابط الصورة (اختياري)
+                        </p>
+                        <textarea class="res-flashcard-data w-full p-3 text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg outline-none resize-none h-32 font-mono" placeholder="مثال:&#10;ما هي عاصمة مصر؟ | القاهرة&#10;شريان الأورطي | أكبر شريان في الجسم يوزع الدم المحمل بالأكسجين">${resData && resData.flashcardData ? resData.flashcardData : ''}</textarea>
+                    </div>
+
+                    <!-- حقل مخفي لمعرفة الطريقة النشطة -->
+                    <input type="hidden" class="active-flashcard-mode" value="ui">
+                </div>
             `;
             container.appendChild(block);
         };
 
-        // دالة مساعدة لتشغيل/إخفاء حقل الأسئلة ديناميكياً
+        // دالة مساعدة لتشغيل/إخفاء حقل الأسئلة والبطاقات ديناميكياً
         window.toggleQuizBuilderField = function(selectElem) {
             const block = selectElem.closest('.resource-block');
-            const wrapper = block.querySelector('.quiz-questions-wrapper');
-            if (selectElem.value === 'quiz') {
-                wrapper.classList.remove('hidden');
-            } else {
-                wrapper.classList.add('hidden');
+            const quizWrapper = block.querySelector('.quiz-questions-wrapper');
+            const flashcardWrapper = block.querySelector('.flashcard-wrapper');
+            
+            if (quizWrapper) quizWrapper.classList.add('hidden');
+            if (flashcardWrapper) flashcardWrapper.classList.add('hidden');
+            
+            if (selectElem.value === 'quiz' && quizWrapper) {
+                quizWrapper.classList.remove('hidden');
+            } else if (selectElem.value === 'flashcard' && flashcardWrapper) {
+                flashcardWrapper.classList.remove('hidden');
             }
         };
         // ==========================================
@@ -2257,6 +2426,73 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             });
         };
         // ==========================================
+        // ==========================================
+        // أدوات بناء البطاقات التعليمية التفاعلية (Flashcard Builder UI)
+        // ==========================================
+        window.switchFlashcardMode = function(btnElem, mode) {
+            const wrapper = btnElem.closest('.flashcard-wrapper');
+            const uiContainer = wrapper.querySelector('.fc-ui-mode-container');
+            const textContainer = wrapper.querySelector('.fc-text-mode-container');
+            const modeInput = wrapper.querySelector('.active-flashcard-mode');
+            
+            wrapper.querySelectorAll('.fc-mode-btn').forEach(b => {
+                b.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-slate-800', 'dark:text-white');
+                b.classList.add('text-slate-500', 'dark:text-slate-400');
+            });
+            
+            btnElem.classList.remove('text-slate-500', 'dark:text-slate-400');
+            btnElem.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm', 'text-slate-800', 'dark:text-white');
+            
+            modeInput.value = mode;
+            if (mode === 'ui') {
+                uiContainer.classList.remove('hidden'); textContainer.classList.add('hidden');
+            } else {
+                uiContainer.classList.add('hidden'); textContainer.classList.remove('hidden');
+            }
+        };
+
+        window.addFlashcardUI = function(btnElem, cardData = null) {
+            const container = btnElem.closest('.flashcard-wrapper').querySelector('.fc-ui-container');
+            const div = document.createElement('div');
+            div.className = "fc-item bg-white dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 relative flex flex-col gap-2 animate-slide-up";
+            
+            let front = cardData ? cardData.front : '';
+            let back = cardData ? cardData.back : '';
+            let imgUrl = cardData && cardData.img ? cardData.img : ''; // حقل الصورة الجديد
+
+            div.innerHTML = `
+                <button type="button" onclick="this.closest('.fc-item').remove()" class="absolute top-2 left-2 text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg text-[10px] transition"><i class="fa-solid fa-xmark"></i> حذف</button>
+                <input type="text" class="fc-front-input w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-xs font-bold text-blue-600 dark:text-blue-400 mt-4" placeholder="الوجه الأول للبطاقة (السؤال أو المصطلح)" value="${front}">
+                
+                <!-- حقل الصورة الجديد -->
+                <div class="flex flex-col">
+                    <input type="text" class="fc-img-input w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-[10px]" placeholder="رابط صورة توضيحية للبطاقة (اختياري)" value="${imgUrl}">
+                    <a href="https://phototourl.com/ar" target="_blank" class="inline-flex items-center gap-1 text-[9px] font-bold text-brand-600 dark:text-brand-400 hover:underline mt-1.5 ml-1">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> اضغط هنا لرفع صورة والحصول على رابط مباشر
+                    </a>
+                </div>
+
+                <textarea class="fc-back-input w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-xs resize-none" rows="2" placeholder="الوجه الثاني للبطاقة (الإجابة أو التفسير)">${back}</textarea>
+            `;
+            container.appendChild(div);
+        };
+
+        window.parseFlashcardToUI = function(fcDataStr, wrapperElem) {
+            const container = wrapperElem.querySelector('.fc-ui-container');
+            container.innerHTML = "";
+            if(!fcDataStr) return;
+            const lines = fcDataStr.split("\\n").filter(l => l.trim().includes("|"));
+            lines.forEach(line => {
+                const parts = line.split("|");
+                if (parts.length >= 2) {
+                    window.addFlashcardUI(wrapperElem.querySelector('button'), {
+                        front: parts[0].trim(),
+                        back: parts[1].trim(),
+                        img: parts[2] ? parts[2].trim() : '' // قراءة الصورة إن وجدت
+                    });
+                }
+            });
+        };
 
         function getGenId() { 
             return 'id_' + Date.now() + '_' + (uuidCounter++); 
@@ -2329,13 +2565,32 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                         }
                     }
                     
+                    let rFlashcardData = "";
+                    if(rType === 'flashcard') {
+                        const activeMode = resBlock.querySelector('.active-flashcard-mode').value;
+                        if (activeMode === 'text') {
+                            rFlashcardData = resBlock.querySelector('.res-flashcard-data').value.trim();
+                        } else {
+                            const fcItems = resBlock.querySelectorAll('.fc-item');
+                            let builtLines = [];
+                            fcItems.forEach(item => {
+                                const f = item.querySelector('.fc-front-input').value.trim() || 'بطاقة فارغة';
+                                const b = item.querySelector('.fc-back-input').value.trim() || 'لم يتم كتابة إجابة';
+                                const img = item.querySelector('.fc-img-input').value.trim(); // سحب رابط الصورة
+                                builtLines.push(`${f} | ${b} | ${img}`);
+                            });
+                            rFlashcardData = builtLines.join('\n');
+                        }
+                    }
+
                     if(rTitle) {
                         resources.push({
                             id: getGenId(), 
                             type: rType, 
                             title: rTitle, 
-                            url: rType === 'quiz' ? "" : formatEmbedUrl(rUrl, rType),
-                            quizData: rType === 'quiz' ? rQuizData : ""
+                            url: (rType === 'quiz' || rType === 'flashcard') ? "" : formatEmbedUrl(rUrl, rType),
+                            quizData: rType === 'quiz' ? rQuizData : "",
+                            flashcardData: rType === 'flashcard' ? rFlashcardData : ""
                         });
                     }
                 });
@@ -2684,11 +2939,15 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             
             navTo('admin-add');
             document.getElementById('page-title').innerText = "تعديل محتوى الكورس";
-            // تفعيل الواجهة التفاعلية للاختبارات عند التعديل
+            // تفعيل الواجهات التفاعلية (للاختبارات والبطاقات) عند التعديل
             setTimeout(() => {
                 document.querySelectorAll('.quiz-questions-wrapper').forEach(wrapper => {
                     const textData = wrapper.querySelector('.res-quiz-data').value;
                     if(textData) window.parseQuizToUI(textData.replace(/\n/g, "\\n"), wrapper);
+                });
+                document.querySelectorAll('.flashcard-wrapper').forEach(wrapper => {
+                    const textData = wrapper.querySelector('.res-flashcard-data').value;
+                    if(textData) window.parseFlashcardToUI(textData.replace(/\n/g, "\\n"), wrapper);
                 });
             }, 500);
         };
@@ -2909,10 +3168,12 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             if(resource.type === 'pdf') icon = 'fa-file-pdf text-blue-500';
             if(resource.type === 'link') icon = 'fa-link text-emerald-500';
             if(resource.type === 'quiz') icon = 'fa-list-check text-amber-500';
+            if(resource.type === 'flashcard') icon = 'fa-layer-group text-blue-500';
 
             if (resource.type === 'quiz') {
-                // تفعيل مشغل الاختبارات التفاعلية المدمج
                 renderInteractiveQuiz(resource);
+            } else if (resource.type === 'flashcard') {
+                renderInteractiveFlashcards(resource);
             } else if(resource.type === 'video' || resource.type === 'pdf') {
                 const isYoutube = resource.url.includes("youtube.com") || resource.url.includes("youtu.be");
                 const allowAttr = isYoutube 
@@ -3927,6 +4188,120 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             // تشغيل وعرض السؤال الأول
             showQuestion(0);
         };
+        // ==========================================
+        // 5.5 محرك البطاقات التعليمية التفاعلية (Anki Flashcards Engine)
+        // ==========================================
+        window.renderInteractiveFlashcards = function(resource) {
+            const contentContainer = document.getElementById('player-dynamic-content');
+            if (!resource.flashcardData) {
+                contentContainer.innerHTML = `<p class="text-white p-5 text-center text-xs">لا توجد بطاقات مرفوعة هنا بعد.</p>`;
+                return;
+            }
+
+            // تحليل البيانات (واستخراج الصورة إن وجدت)
+            const lines = resource.flashcardData.split("\n").filter(l => l.trim().includes("|"));
+            let cards = [];
+            lines.forEach(line => {
+                const parts = line.split("|");
+                if (parts.length >= 2) {
+                    cards.push({ 
+                        front: parts[0].trim(), 
+                        back: parts[1].trim(),
+                        img: parts[2] ? parts[2].trim() : '' // استخراج الصورة
+                    });
+                }
+            });
+
+            if (cards.length === 0) {
+                contentContainer.innerHTML = `<p class="text-white p-5 text-center text-xs">صيغة البطاقات غير صحيحة.</p>`;
+                return;
+            }
+
+            let currentCardIdx = 0;
+
+            function showFlashcard(index) {
+                const card = cards[index];
+                const frontDir = detectDirection(card.front);
+                const backDir = detectDirection(card.back);
+                
+                // تجهيز كود الصورة إذا كانت موجودة
+                const imageHtml = card.img ? `<img src="${card.img}" class="w-full max-h-40 object-contain rounded-xl mb-4 border border-slate-700/50 shadow-md">` : '';
+
+                contentContainer.innerHTML = `
+                    <div class="w-full h-full bg-slate-900 text-white p-6 md:p-10 flex flex-col justify-between overflow-y-auto absolute inset-0 custom-scrollbar">
+                        
+                        <!-- Header -->
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-3 mb-4 shrink-0">
+                            <span class="text-xs bg-blue-500/20 text-blue-400 font-bold px-3 py-1.5 rounded-full flex items-center gap-2"><i class="fa-solid fa-layer-group"></i> بطاقات المراجعة الذكية</span>
+                            <span class="text-xs text-slate-400 font-bold font-en">${index + 1} / ${cards.length}</span>
+                        </div>
+                        
+                        <!-- Card Area -->
+                        <div class="flex-1 flex flex-col items-center justify-center w-full max-w-2xl mx-auto my-auto perspective-1000">
+                            <div id="flashcard-container" class="w-full bg-slate-800/80 border border-slate-700 rounded-3xl p-8 md:p-12 text-center cursor-pointer shadow-2xl transition-all duration-500 min-h-[250px] flex flex-col items-center justify-center relative overflow-hidden group" onclick="revealFlashcardAnswer()">
+                                
+                                <div class="absolute top-4 right-4 text-slate-600 opacity-50"><i class="fa-solid fa-arrows-rotate"></i></div>
+                                
+                                <!-- Front (Question) -->
+                                <div id="card-front" class="w-full animate-fade-in" dir="${frontDir.dir}">
+                                    ${imageHtml} <!-- عرض الصورة هنا -->
+                                    <h3 class="text-xl md:text-2xl font-black text-slate-200 leading-relaxed ${frontDir.font}">${card.front}</h3>
+                                    <p id="click-hint" class="text-[10px] text-blue-400 font-bold mt-6 animate-pulse"><i class="fa-solid fa-hand-pointer"></i> اضغط على البطاقة لكشف الإجابة</p>
+                                </div>
+
+                                <!-- Back (Answer) - Hidden initially -->
+                                <div id="card-back" class="w-full hidden mt-6 pt-6 border-t border-slate-600" dir="${backDir.dir}">
+                                    <h4 class="text-[10px] text-emerald-400 font-black mb-3 uppercase tracking-wider"><i class="fa-solid fa-check-double"></i> الإجابة:</h4>
+                                    <p class="text-lg md:text-xl font-bold text-emerald-50 leading-relaxed ${backDir.font}">${card.back}</p>
+                                </div>
+                            </div>
+
+                            <!-- Anki Action Buttons - Hidden initially -->
+                            <div id="anki-actions" class="hidden w-full flex justify-center gap-3 mt-8 animate-slide-up">
+                                <button onclick="nextFlashcard()" class="flex-1 max-w-[120px] bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/30 py-3 rounded-xl text-xs font-black transition"><i class="fa-solid fa-rotate-left mb-1 text-sm block"></i> صعب (أعده)</button>
+                                <button onclick="nextFlashcard()" class="flex-1 max-w-[120px] bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 border border-amber-500/30 py-3 rounded-xl text-xs font-black transition"><i class="fa-solid fa-brain mb-1 text-sm block"></i> جيد</button>
+                                <button onclick="nextFlashcard()" class="flex-1 max-w-[120px] bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 py-3 rounded-xl text-xs font-black transition"><i class="fa-solid fa-check mb-1 text-sm block"></i> سهل جداً</button>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+            }
+
+            window.revealFlashcardAnswer = function() {
+                document.getElementById('click-hint').classList.add('hidden');
+                
+                const back = document.getElementById('card-back');
+                back.classList.remove('hidden');
+                back.classList.add('animate-slide-up');
+                
+                document.getElementById('flashcard-container').classList.remove('cursor-pointer');
+                document.getElementById('flashcard-container').onclick = null;
+                
+                document.getElementById('anki-actions').classList.remove('hidden');
+            };
+
+            window.nextFlashcard = function() {
+                if (currentCardIdx < cards.length - 1) {
+                    currentCardIdx++;
+                    showFlashcard(currentCardIdx);
+                } else {
+                    contentContainer.innerHTML = `
+                        <div class="w-full h-full bg-slate-900 text-white p-10 flex flex-col items-center justify-center overflow-y-auto absolute inset-0 text-center animate-fade-in">
+                            <div class="w-20 h-20 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-4xl mb-4 shadow-lg border border-blue-500/30">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <h3 class="text-2xl font-black mb-2 text-white">ممتاز! أنهيت مراجعة البطاقات</h3>
+                            <p class="text-xs text-slate-400 max-w-sm mb-6 leading-relaxed">الاستمرار في استخدام البطاقات التعليمية يقوي الذاكرة طويلة الأمد. لا تنسَ تحديد هذا المصدر كمكتمل للحصول على نقاطك.</p>
+                            <button onclick="closeResource()" class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl text-sm font-bold transition shadow-lg"><i class="fa-solid fa-arrow-right-to-bracket ml-2"></i> العودة للقاعة</button>
+                        </div>
+                    `;
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#3b82f6', '#10b981'] });
+                }
+            };
+
+            showFlashcard(0);
+        };
         
         // ==========================================
         // 6. تحديث لوحة التحكم في البداية عند تشغيل المنصة
@@ -4396,6 +4771,35 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             }
         };
         // ==========================================
+        // نظام بث الإعلانات العامة (Global Marquee News)
+        // ==========================================
+        window.publishGlobalNews = async function() {
+            const input = document.getElementById('news-input');
+            const newsText = input.value.trim();
+            
+            if (!newsText) return showToast("الرجاء كتابة نص الإعلان أولاً.", "error");
+
+            try {
+                const btn = document.getElementById('btn-publish-news');
+                const origText = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري البث...';
+
+                // حفظ الإشعار في مجموعة الإشعارات ليكون هناك سجل تاريخي
+                await addDoc(collection(db, "notifications"), {
+                    text: newsText,
+                    createdAt: new Date().getTime(),
+                    publisher: userData.name || currentUser.email.split('@')[0]
+                });
+
+                input.value = "";
+                btn.innerHTML = origText;
+                showToast("تم إرسال الإشعار لجميع طلاب المنصة بنجاح!", "success");
+            } catch (e) {
+                console.error("خطأ النشر العام:", e);
+                showToast("حدث خطأ أثناء إرسال الإشعار. تأكد من اتصالك بالإنترنت.", "error");
+            }
+        };
+        // ==========================================
         // 10. نظام إعلانات الكورس المخصصة (Announcements)
         // ==========================================
         window.publishCourseAnnouncement = async function() {
@@ -4711,19 +5115,28 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 }
             }
         };
-        // دالة نسخ برومبت الذكاء الاصطناعي للدكاترة
-        window.copyAIPrompt = function() {
-            const promptText = document.getElementById('ai-prompt-content').textContent;
+        // دالة ديناميكية لنسخ أي برومبت ذكاء اصطناعي (Quiz أو Flashcards)
+        window.copyDynamicPrompt = function(elementId, btnElem) {
+            const promptText = document.getElementById(elementId).textContent;
             navigator.clipboard.writeText(promptText).then(() => {
-                const btnText = document.getElementById('prompt-copy-text');
-                btnText.textContent = "تم النسخ بنجاح!";
-                showToast("تم نسخ البرومبت بنجاح! افتح ChatGPT الآن والصقه هناك مع ملف المحاضرة.", "success");
+                const spanText = btnElem.querySelector('span');
+                const originalText = spanText.textContent;
+                const originalBg = btnElem.className; // حفظ الألوان الأصلية (أزرق أو أصفر)
+                
+                // تغيير شكل الزر ليعطي إيحاء بالنجاح
+                spanText.textContent = "تم النسخ بنجاح!";
+                btnElem.className = "absolute top-3 left-3 bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold transition flex items-center gap-1 shadow-md";
+                
+                showToast("تم نسخ البرومبت! اذهب إلى ChatGPT والصقه مع ملف المحاضرة.", "success");
+                
+                // إعادة الزر لشكله الطبيعي بعد ثانيتين
                 setTimeout(() => {
-                    btnText.textContent = "نسخ البرومبت";
-                }, 3000);
+                    spanText.textContent = originalText;
+                    btnElem.className = originalBg;
+                }, 2000);
             }).catch(err => {
                 console.error("فشل النسخ التلقائي:", err);
-                showToast("حدث خطأ أثناء النسخ التلقائي، يمكنك تحديد النص ونسخه يدوياً.", "error");
+                showToast("حدث خطأ أثناء النسخ التلقائي، يرجى تحديده ونسخه يدوياً.", "error");
             });
         };
         // دالة العودة للخلف الذكية
