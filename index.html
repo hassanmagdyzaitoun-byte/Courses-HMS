@@ -2419,7 +2419,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                     <!-- الطريقة الأولى: واجهة الأزرار التفاعلية -->
                     <div class="quiz-ui-mode-container">
                         <button type="button" onclick="window.addQuizQuestionUI(this)" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-lg text-[10px] mb-3 transition"><i class="fa-solid fa-plus"></i> إضافة سؤال جديد</button>
-                        <div class="quiz-ui-container space-y-4">
+                        <div class="quiz-ui-container space-y-4 max-h-96 overflow-y-auto custom-scrollbar p-3 bg-slate-100/40 dark:bg-slate-900/50 rounded-2xl border border-slate-200/50 dark:border-slate-800">
                             <!-- سيتم حقن الأسئلة هنا -->
                         </div>
                     </div>
@@ -2451,7 +2451,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                     <!-- الطريقة الأولى: واجهة الأزرار التفاعلية -->
                     <div class="fc-ui-mode-container">
                         <button type="button" onclick="window.addFlashcardUI(this)" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5 rounded-lg text-[10px] mb-3 transition shadow-sm"><i class="fa-solid fa-plus"></i> إضافة بطاقة جديدة</button>
-                        <div class="fc-ui-container space-y-3">
+                        <div class="fc-ui-container space-y-3 max-h-96 overflow-y-auto custom-scrollbar p-3 bg-slate-100/40 dark:bg-slate-900/50 rounded-2xl border border-slate-200/50 dark:border-slate-800">
                             <!-- سيتم حقن البطاقات هنا -->
                         </div>
                     </div>
@@ -2616,6 +2616,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             }
         };
 
+        // دالة توليد بطاقة الفلاش كارد الذكية في لوحة المدرس
         window.addFlashcardUI = function(btnElem, cardData = null) {
             const container = btnElem.closest('.flashcard-wrapper').querySelector('.fc-ui-container');
             const div = document.createElement('div');
@@ -2623,21 +2624,21 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             
             let front = cardData ? cardData.front : '';
             let back = cardData ? cardData.back : '';
-            let imgUrl = cardData && cardData.img ? cardData.img : ''; // حقل الصورة الجديد
+            let imgUrl = cardData && cardData.img ? cardData.img : '';
 
             div.innerHTML = `
-                <button type="button" onclick="this.closest('.fc-item').remove()" class="absolute top-2 left-2 text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg text-[10px] transition"><i class="fa-solid fa-xmark"></i> حذف</button>
-                <input type="text" class="fc-front-input w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-xs font-bold text-blue-600 dark:text-blue-400 mt-4" placeholder="الوجه الأول للبطاقة (السؤال أو المصطلح)" value="${front}">
+                <button type="button" onclick="this.closest('.fc-item').remove(); window.syncFCToTextarea(this);" class="absolute top-2 left-2 text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg text-[10px] transition"><i class="fa-solid fa-xmark"></i> حذف</button>
+                <input type="text" oninput="window.syncFCToTextarea(this)" class="fc-front-input w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg outline-none text-xs font-bold text-blue-600 dark:text-blue-400 mt-4" placeholder="الوجه الأول للبطاقة (السؤال أو المصطلح)" value="${front}">
                 
                 <!-- حقل الصورة الجديد -->
                 <div class="flex flex-col">
-                    <input type="text" class="fc-img-input w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-[10px]" placeholder="رابط صورة توضيحية للبطاقة (اختياري)" value="${imgUrl}">
+                    <input type="text" oninput="window.syncFCToTextarea(this)" class="fc-img-input w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg outline-none text-[10px]" placeholder="رابط صورة توضيحية للبطاقة (اختياري)" value="${imgUrl}">
                     <a href="https://phototourl.com/ar" target="_blank" class="inline-flex items-center gap-1 text-[9px] font-bold text-brand-600 dark:text-brand-400 hover:underline mt-1.5 ml-1">
                         <i class="fa-solid fa-cloud-arrow-up"></i> اضغط هنا لرفع صورة والحصول على رابط مباشر
                     </a>
                 </div>
 
-                <textarea class="fc-back-input w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-xs resize-none" rows="2" placeholder="الوجه الثاني للبطاقة (الإجابة أو التفسير)">${back}</textarea>
+                <textarea oninput="window.syncFCToTextarea(this)" class="fc-back-input w-full p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg outline-none text-xs resize-none" rows="2" placeholder="الوجه الثاني للبطاقة (الإجابة أو التفسير)">${back}</textarea>
             `;
             container.appendChild(div);
         };
@@ -2657,6 +2658,23 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                     });
                 }
             });
+        };
+        // دالة المزامنة اللحظية المبتكرة (Real-time Background Sync) لحفظ الروابط فور كتابتها
+        window.syncFCToTextarea = function(inputElem) {
+            const wrapper = inputElem.closest('.flashcard-wrapper');
+            if(!wrapper) return;
+            const textarea = wrapper.querySelector('.res-flashcard-data');
+            const fcItems = wrapper.querySelectorAll('.fc-item');
+            if(!textarea || !fcItems) return;
+
+            let builtLines = [];
+            fcItems.forEach(item => {
+                const f = item.querySelector('.fc-front-input').value.trim() || 'سؤال';
+                const b = item.querySelector('.fc-back-input').value.trim() || 'إجابة';
+                const img = item.querySelector('.fc-img-input').value.trim();
+                builtLines.push(`${f} | ${b} ${img ? '| ' + img : ''}`);
+            });
+            textarea.value = builtLines.join('\n');
         };
 
         function getGenId() { 
@@ -2732,20 +2750,8 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                     
                     let rFlashcardData = "";
                     if(rType === 'flashcard') {
-                        const activeMode = resBlock.querySelector('.active-flashcard-mode').value;
-                        if (activeMode === 'text') {
-                            rFlashcardData = resBlock.querySelector('.res-flashcard-data').value.trim();
-                        } else {
-                            const fcItems = resBlock.querySelectorAll('.fc-item');
-                            let builtLines = [];
-                            fcItems.forEach(item => {
-                                const f = item.querySelector('.fc-front-input').value.trim() || 'بطاقة فارغة';
-                                const b = item.querySelector('.fc-back-input').value.trim() || 'لم يتم كتابة إجابة';
-                                const img = item.querySelector('.fc-img-input').value.trim(); // سحب رابط الصورة
-                                builtLines.push(`${f} | ${b} | ${img}`);
-                            });
-                            rFlashcardData = builtLines.join('\n');
-                        }
+                        // تعديل أمني ذكي: القراءة دائماً من حقل المزامنة الخلفية المضمون 100%
+                        rFlashcardData = resBlock.querySelector('.res-flashcard-data').value.trim();
                     }
 
                     if(rTitle) {
