@@ -205,6 +205,23 @@
                         <i class="fa-solid fa-chevron-down absolute left-4 top-4 text-slate-400 pointer-events-none"></i>
                     </div>
                 </div>
+                <!-- فاصل خطي أنيق -->
+                <div class="relative flex py-2 items-center">
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                    <span class="flex-shrink mx-4 text-slate-400 text-xs font-bold">أو عن طريق</span>
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-700"></div>
+                </div>
+
+                <!-- زر الدخول السريع بجوجل -->
+                <button type="button" onclick="window.signInWithGoogle()" class="w-full bg-white hover:bg-slate-50 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-3 rounded-xl font-bold transition duration-200 border border-slate-200 dark:border-slate-700 flex justify-center items-center gap-2.5 text-xs shadow-sm">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24">
+                        <path fill="#EA4335" d="M12 5.04c1.66 0 3.2.57 4.38 1.69l3.27-3.3C17.67 1.48 14.98 1 12 1 7.35 1 3.37 3.68 1.41 7.59l3.89 3.02c.92-2.77 3.51-5.57 6.7-5.57z"/>
+                        <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.43c-.28 1.44-1.07 2.66-2.3 3.49l3.57 2.77c2.08-1.92 3.29-4.75 3.29-8.41z"/>
+                        <path fill="#FBBC05" d="M5.3 10.61c-.24-.72-.38-1.49-.38-2.29s.14-1.57.38-2.29L1.41 3.01C.51 4.81 0 6.81 0 8.92c0 2.11.51 4.11 1.41 5.91l3.89-3.02z"/>
+                        <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.91l-3.57-2.77c-.99.66-2.26 1.06-3.89 1.06-3.19 0-5.78-2.8-6.7-5.57l-3.89 3.02C3.37 20.32 7.35 23 12 23z"/>
+                    </svg>
+                    تسجيل الدخول السريع بجوجل (Google)
+                </button>
                 
                 <!-- الأزرار التفاعلية الذكية للتبديل -->
                 <div class="pt-4 flex flex-col gap-3 shrink-0">
@@ -216,6 +233,38 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+    <!-- واجهة التحقق من البريد الإلكتروني ومنع الحسابات الوهمية (Email Verification Gate) -->
+    <div id="verification-pending-view" class="view-section min-h-screen flex items-center justify-center relative overflow-hidden hidden">
+        <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('https://images.unsplash.com/photo-1525310072745-f49212b5ac6d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80');"></div>
+        <div class="absolute inset-0 bg-gradient-to-tr from-slate-900/95 via-brand-950/90 to-slate-900/95"></div>
+        
+        <div class="relative z-10 w-full max-w-md p-8 bg-white/95 dark:bg-darkCard/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 text-center space-y-6 animate-scale-up">
+            <div class="w-20 h-20 bg-amber-50 dark:bg-amber-950/30 text-amber-500 rounded-full flex items-center justify-center text-4xl mx-auto shadow-inner animate-pulse">
+                <i class="fa-solid fa-envelope-open-text"></i>
+            </div>
+            <div class="space-y-2">
+                <h2 class="text-2xl font-black text-slate-800 dark:text-white">تأكيد البريد الإلكتروني مطلوب</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">لقد أرسلنا رابط تأكيد آمن لبريدك الإلكتروني المسجل. يرجى مراجعة علبة الوارد (أو البريد المهمل Spam) والضغط على الرابط لتفعيل الحساب بالكامل للبدء.</p>
+            </div>
+
+            <!-- عرض البريد الإلكتروني المسجل للطالب للـتأكد من صحته -->
+            <div class="bg-slate-50 dark:bg-slate-900/50 p-3.5 rounded-xl border border-slate-100 dark:border-darkBorder text-xs text-slate-650 dark:text-slate-350 font-bold font-en" id="verify-email-display">
+                username@gmail.com
+            </div>
+
+            <div class="flex flex-col gap-2.5">
+                <button onclick="window.checkEmailVerificationStatus()" class="w-full bg-brand-600 hover:bg-brand-700 text-white py-3.5 rounded-xl font-black shadow-md transition-all flex items-center justify-center gap-1.5 text-xs">
+                    <i class="fa-solid fa-circle-check animate-bounce"></i> لقد قمت بالتأكيد (دخول المنصة)
+                </button>
+                <button onclick="window.resendVerificationEmail()" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-3 rounded-xl font-bold transition text-xs">
+                    إعادة إرسال رابط التأكيد مجدداً
+                </button>
+                <button onclick="signOut(auth)" class="w-full text-rose-500 hover:underline text-xs font-black pt-2">
+                    تسجيل الخروج والعودة للخلف
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1344,7 +1393,7 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
     <!-- ========================================== -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, setPersistence, browserLocalPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, setPersistence, browserLocalPersistence, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword, sendPasswordResetEmail, sendEmailVerification, reload, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, updateDoc, deleteDoc, arrayUnion, arrayRemove, query, orderBy, onSnapshot, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadString, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
@@ -1564,6 +1613,9 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                     const uc = await createUserWithEmailAndPassword(auth, email, password);
                     const newSession = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                     
+                    // إرسال رابط تفعيل الحساب السحابي للبريد المدخل فوراً لمنع الحسابات الوهمية
+                    await sendEmailVerification(uc.user);
+                    
                     await setDoc(doc(db, "users", uc.user.uid), {
                         name: name,
                         email: uc.user.email, 
@@ -1589,6 +1641,31 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
             if(initLoader) { initLoader.classList.add('opacity-0'); setTimeout(() => initLoader.classList.add('hidden'), 500); }
 
             if (user) {
+                // حارس أمان سحابي: إذا كان البريد غير مؤكد، يتم قفل الموقع فوراً وتوجيهه لواجهة التأكيد
+                if (!user.emailVerified) {
+                    document.getElementById('main-layout').classList.add('hidden');
+                    document.getElementById('login-view').classList.remove('active');
+                    
+                    const pendingView = document.getElementById('verification-pending-view');
+                    pendingView.classList.remove('hidden');
+                    pendingView.classList.add('active');
+                    
+                    document.getElementById('verify-email-display').textContent = user.email;
+                    
+                    // تنظيف الدوال النشطة لعدم إثارة أخطاء بالخلفية
+                    if (window.unsubscribeSession) { window.unsubscribeSession(); window.unsubscribeSession = null; }
+                    if (unsubCourses) { unsubCourses(); unsubCourses = null; }
+                    if (unsubNotifs) { unsubNotifs(); unsubNotifs = null; }
+                    
+                    isAppReady = false;
+                    currentUser = user;
+                    return; // إيقاف تنفيذ الدخول والداتا فوراً
+                } else {
+                    // إخفاء قفل التأكيد إذا كان الحساب مفعلاً حقيقياً
+                    document.getElementById('verification-pending-view').classList.add('hidden');
+                    document.getElementById('verification-pending-view').classList.remove('active');
+                }
+
                 currentUser = user;
                 document.getElementById('player-watermark').textContent = user.email;
 
@@ -5532,6 +5609,82 @@ window.openContactPriceModal = function(courseId) {
             } catch(e) {
                 console.error(e);
                 grid.innerHTML = `<div class="col-span-full text-center py-10 text-rose-500">حدث خطأ أثناء جلب البيانات.</div>`;
+            }
+        };
+        // دالة فحص وتحديث حالة تفعيل البريد الإلكتروني سحابياً (Reload Status)
+        window.checkEmailVerificationStatus = async function() {
+            if(!auth.currentUser) return;
+            try {
+                showToast("جاري تحديث وفحص حالة بريدك سحابياً...", "info");
+                await reload(auth.currentUser); // تحديث الجلسة محلياً من خوادم فايربيس
+                
+                if (auth.currentUser.emailVerified) {
+                    showToast("تهانينا! تم تأكيد بريدك الإلكتروني بنجاح، جاري إدخالك للمنصة...", "success");
+                    setTimeout(() => { location.reload(); }, 1500); // إعادة تحميل الصفحة لتسجيل الدخول السليم
+                } else {
+                    showToast("لم يتم تأكيد الحساب بعد! يرجى الضغط على الرابط المرسل لبريدك الإلكتروني أولاً.", "error");
+                }
+            } catch (e) {
+                console.error(e);
+                showToast("فشلت عملية تحديث الحالة، يرجى إعادة المحاولة.", "error");
+            }
+        };
+
+        // دالة إعادة إرسال رابط التأكيد في حال لم يصل للطالب
+        window.resendVerificationEmail = async function() {
+            if(!auth.currentUser) return;
+            try {
+                await sendEmailVerification(auth.currentUser);
+                showToast("تم إعادة إرسال رابط التأكيد بنجاح لعلبة الوارد ببريدك.", "success");
+            } catch (e) {
+                console.error(e);
+                showToast("فشل الإرسال المكرر، يرجى الانتظار دقيقة قبل المحاولة مجدداً.", "error");
+            }
+        };
+        // دالة تسجيل الدخول السريع والآمن بحسابات جوجل (Google Sign-In)
+        window.signInWithGoogle = async function() {
+            try {
+                isLoginInProgress = true; // تفعيل حارس الجلسات لمنع الطرد الخاطئ أثناء تبديل النوافذ
+                const provider = new GoogleAuthProvider();
+                
+                // فتح نافذة جوجل المنبثقة للتأكيد الآمن
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+
+                const newSessionId = 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('hms_session_id', newSessionId);
+
+                // فحص قاعدة البيانات: هل الطالب مسجل مسبقاً بجوجل أم حساب جديد؟
+                const uDoc = await getDoc(doc(db, "users", user.uid));
+                
+                if (!uDoc.exists()) {
+                    // إذا كان جديداً، نقوم بإنشاء حساب له تلقائياً كرتبة "طالب" مفعل ومؤكد فوراً
+                    await setDoc(doc(db, "users", user.uid), {
+                        name: user.displayName || user.email.split('@')[0],
+                        email: user.email,
+                        role: 'student',
+                        status: 'active',
+                        sessionId: newSessionId,
+                        completedLectures: []
+                    });
+                    showToast("مرحباً بك! تم إنشاء حسابك وتفعيله بنجاح عبر جوجل.", "success");
+                } else {
+                    // إذا كان قديماً، نحدث رقم الجلسة لحماية الحساب ونسجل دخوله
+                    await updateDoc(doc(db, "users", user.uid), { sessionId: newSessionId });
+                    showToast("أهلاً بك مجدداً! تم تسجيل دخولك بنجاح.", "success");
+                }
+
+                setTimeout(() => { isLoginInProgress = false; }, 2000);
+            } catch (e) {
+                isLoginInProgress = false;
+                console.error("خطأ تسجيل جوجل:", e);
+                
+                // تنبيه ذكي للطالب في حال قام متصفحه بحظر النوافذ المنبثقة
+                if (e.code === 'auth/popup-blocked') {
+                    showToast("فشل التسجيل! متصفحك يمنع النوافذ المنبثقة، يرجى السماح بها لجوجل.", "error");
+                } else {
+                    showToast("تم إلغاء أو فشل تسجيل الدخول بواسطة جوجل.", "error");
+                }
             }
         };
     </script>
