@@ -1050,35 +1050,79 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                 </div>
 
                 <!-- شاشة: الإنجازات والتقدم والملف الشخصي المطور -->
-                <div id="student-progress" class="content-view space-y-6">
+                <div id="student-progress" class="content-view flex-col space-y-6">
+                    
+                    <!-- بنر الهوية الأكاديمية الفاخرة (لعرض الاسم وبقية البيانات) -->
+                    <div class="bg-gradient-to-l from-slate-900 via-slate-800 to-slate-950 rounded-3xl text-white p-6 md:p-8 shadow-xl border border-slate-800/80 relative overflow-hidden flex flex-col md:flex-row justify-between items-center gap-6 animate-scale-up">
+                        <div class="flex items-center gap-4 text-center md:text-right flex-col md:flex-row">
+                            <!-- الصورة الشخصية الكبيرة للبروفايل -->
+                            <div class="w-20 h-20 rounded-full border-4 border-brand-500/30 bg-slate-800/60 flex items-center justify-center text-4xl text-brand-400 shadow-lg overflow-hidden shrink-0" id="profile-large-avatar-container">
+                                <i class="fa-solid fa-user-graduate"></i>
+                            </div>
+                            <div>
+                                <h2 id="profile-display-name" class="text-2xl font-black text-white">جاري تحميل الاسم...</h2>
+                                <p id="profile-display-email" class="text-xs text-slate-400 mt-1 font-en font-bold">student@hms.com</p>
+                                <div class="flex flex-wrap gap-2 mt-3 justify-center md:justify-start">
+                                    <span id="profile-badge-role" class="bg-brand-500/10 text-brand-400 text-[10px] font-black px-2.5 py-1 rounded-lg border border-brand-500/20">طالب</span>
+                                    <span id="profile-badge-xp" class="bg-amber-500/10 text-amber-400 text-[10px] font-black px-2.5 py-1 rounded-lg border border-amber-500/20">0 XP</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center md:text-left shrink-0">
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">رقم الهوية الأكاديمية (UID)</p>
+                            <p id="profile-display-uid" class="text-xs font-mono text-slate-400 mt-1 select-all">UID_XXXXXXXXXXXX</p>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         
-                        <!-- القسم الأيمن: تعديل الملف الشخصي والرمز التعبيري -->
+                       <!-- القسم الأيمن: تعديل الملف الشخصي والرمز التعبيري -->
                         <div class="bg-white dark:bg-darkCard p-6 rounded-3xl border border-slate-100 dark:border-darkBorder space-y-6">
-                            <h3 class="font-black text-lg text-slate-800 dark:text-white flex items-center gap-2">
-                                <i class="fa-solid fa-user-gear text-brand-500"></i> إعدادات حسابي الشخصي
-                            </h3>
+                            <div class="flex items-center justify-between border-b border-slate-100 dark:border-darkBorder pb-4">
+                                <h3 class="font-black text-lg text-slate-800 dark:text-white flex items-center gap-2">
+                                    <i class="fa-solid fa-user-gear text-brand-500"></i> إعدادات حسابي الشخصي
+                                </h3>
+                                <span id="profile-role-badge" class="bg-brand-50 text-brand-600 dark:bg-brand-950/40 dark:text-brand-400 text-[10px] font-black px-2.5 py-1 rounded-lg border border-brand-100 dark:border-brand-800/40">جاري التحميل...</span>
+                            </div>
+
+                            <!-- بطاقة معلومات الحساب الحالية (تظهر الإيميل والرتبة بوضوح) -->
+                            <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-150 dark:border-darkBorder space-y-3">
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-slate-400 font-bold">البريد الإلكتروني للوجين:</span>
+                                    <span id="profile-current-email" class="font-en font-black text-slate-705 dark:text-slate-300 select-all">email@hms.com</span>
+                                </div>
+                                <div class="flex justify-between items-center text-xs">
+                                    <span class="text-slate-400 font-bold">حالة الحساب السحابي:</span>
+                                    <span id="profile-current-status" class="text-emerald-500 font-black flex items-center gap-1"><i class="fa-solid fa-shield-halved text-[10px]"></i> نشط ومؤمن تلقائياً</span>
+                                </div>
+                            </div>
                             
-                            <!-- نموذج تحديث الاسم وصورة الرابط -->
+                            <!-- نموذج تحديث الاسم وصورة الرابط مع تعبئة تلقائية -->
                             <div class="space-y-4 border-b border-slate-100 dark:border-darkBorder pb-4">
-                                <label class="block text-xs font-bold text-slate-400">صورتك الشخصية واسمك</label>
+                                <label class="block text-xs font-bold text-slate-400">تعديل اسمك وصورتك الشخصية بمرونة</label>
                                 <div class="flex items-center gap-4">
-                                    <!-- عرض الصورة فقط -->
-                                    <div class="relative w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-brand-500 flex items-center justify-center overflow-hidden shrink-0">
+                                    <!-- عرض الصورة الشخصية أو الرمز -->
+                                    <div class="relative w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 border-2 border-brand-500 flex items-center justify-center overflow-hidden shrink-0" id="profile-avatar-wrapper">
                                         <img id="real-profile-img" src="" class="absolute inset-0 w-full h-full object-cover hidden z-10">
                                         <i class="fa-solid fa-user text-brand-500 text-xl z-0"></i>
                                     </div>
                                     <!-- تغيير الاسم ورابط الصورة -->
                                     <div class="flex-1 space-y-2">
-                                        <input type="text" id="update-profile-name" class="w-full p-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-brand-500" placeholder="اكتب اسمك الجديد هنا...">
-                                        <input type="text" id="update-profile-url" class="w-full p-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-brand-500" placeholder="الصق رابط صورتك (URL)..." oninput="document.getElementById('real-profile-img').src=this.value; document.getElementById('real-profile-img').classList.remove('hidden');">
-                                        <a href="https://phototourl.com/ar" target="_blank" class="inline-flex items-center gap-1 text-[10px] font-bold text-brand-600 dark:text-brand-400 hover:underline mt-1">
+                                        <div class="relative">
+                                            <input type="text" id="update-profile-name" class="w-full pl-3 pr-8 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-brand-500 font-bold text-slate-850 dark:text-white" placeholder="اكتب اسمك الحقيقي بالكامل...">
+                                            <i class="fa-solid fa-id-card absolute right-3 top-3 text-slate-400 text-[11px]"></i>
+                                        </div>
+                                        <div class="relative">
+                                            <input type="text" id="update-profile-url" class="w-full pl-3 pr-8 py-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none focus:ring-2 focus:ring-brand-500" placeholder="رابط صورتك الشخصية الجديد..." oninput="document.getElementById('real-profile-img').src=this.value; document.getElementById('real-profile-img').classList.remove('hidden');">
+                                            <i class="fa-solid fa-link absolute right-3 top-3 text-slate-400 text-[11px]"></i>
+                                        </div>
+                                        <a href="https://phototourl.com/ar" target="_blank" class="inline-flex items-center gap-1 text-[9px] font-bold text-brand-600 dark:text-brand-400 hover:underline mt-1">
                                             <i class="fa-solid fa-cloud-arrow-up"></i> اضغط هنا لرفع صورتك الشخصية والحصول على رابط مباشر
                                         </a>
                                     </div>
                                 </div>
-                                <button onclick="updatePersonalData()" class="w-full bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white py-2.5 rounded-xl font-bold text-xs transition shadow-md">
-                                    حفظ البيانات الأساسية
+                                <button onclick="updatePersonalData()" class="w-full bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white py-2.5 rounded-xl font-bold text-xs transition shadow-md flex justify-center items-center gap-1.5">
+                                    <i class="fa-solid fa-floppy-disk"></i> حفظ البيانات الأساسية
                                 </button>
                             </div>
 
@@ -1431,7 +1475,7 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
 
             if(viewId === 'student-dashboard') buildDashboardHub();
             if(viewId === 'student-community') loadCommunityPosts();
-            if(viewId === 'student-progress') buildAchievementsGrid();
+            if(viewId === 'student-progress') { buildAchievementsGrid(); fillProfileFields(); }
             if(viewId === 'student-doctors-directory') renderFullDoctorsDirectory();
 
             const viewsContainer = document.getElementById('views-container');
@@ -1591,6 +1635,7 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                                 editPreviewImg.classList.remove('hidden');
                             }
                         }
+                        fillProfileFields();
                         if(!userData.completedLectures) userData.completedLectures = [];
                         
                         let roleName = "👨‍🎓 طالب";
@@ -4726,6 +4771,57 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                     }
                 };
                 reader.readAsDataURL(file);
+            }
+        };
+       // دالة تعبئة معلومات الحساب والاسم الحالي تلقائياً لسهولة التعديل (Pre-fill)
+        window.fillProfileFields = function() {
+            if(!currentUser || !userData) return;
+            
+            // 1. تعبئة البيانات في بنر الهوية الأكاديمية العلوي الفاخر
+            document.getElementById('profile-display-name').textContent = userData.name || currentUser.email.split('@')[0];
+            document.getElementById('profile-display-email').textContent = currentUser.email;
+            document.getElementById('profile-display-uid').textContent = currentUser.uid;
+            
+            // حساب نقاط الخبرة الحقيقية وعرضها
+            const completedCount = userData.completedLectures ? userData.completedLectures.length : 0;
+            const xpPoints = completedCount * 15;
+            document.getElementById('profile-badge-xp').textContent = `${xpPoints} XP`;
+
+            let roleName = "👨‍🎓 طالب بالمنصة";
+            if (userData.role === 'superadmin') roleName = "👑 مالك المنصة";
+            if (userData.role === 'admin') roleName = "👨‍🏫 مسؤول الكورسات";
+            
+            document.getElementById('profile-badge-role').textContent = roleName;
+            document.getElementById('profile-role-badge').textContent = roleName;
+            
+            // 2. تعبئة البريد الإلكتروني في بطاقة البيانات الجانبية
+            document.getElementById('profile-current-email').textContent = currentUser.email;
+            
+            // 3. تعبئة الحقول بالاسم والروابط لتسهيل التعديل بمرونة فائقة
+            document.getElementById('update-profile-name').value = userData.name || "";
+            document.getElementById('update-profile-url').value = userData.realPhoto || "";
+            
+            // 4. تحديث عرض الصور في البنر والبطاقة الجانبية
+            const imgEl = document.getElementById('real-profile-img');
+            const sideAvatarWrapper = document.getElementById('profile-avatar-wrapper');
+            const largeAvatarContainer = document.getElementById('profile-large-avatar-container');
+            
+            if (userData.realPhoto) {
+                // تحديث صورة المعاينة الجانبية
+                imgEl.src = userData.realPhoto;
+                imgEl.classList.remove('hidden');
+                
+                // تحديث الصورة في بنر الهوية الكبير
+                largeAvatarContainer.innerHTML = `<img src="${userData.realPhoto}" class="w-full h-full object-cover">`;
+            } else {
+                imgEl.classList.add('hidden');
+                
+                // الرمز التعبيري الافتراضي المختار
+                const avatarIcon = userData.avatar || 'user-graduate';
+                largeAvatarContainer.innerHTML = `<i class="fa-solid fa-${avatarIcon}"></i>`;
+                if (sideAvatarWrapper) {
+                    sideAvatarWrapper.innerHTML = `<i class="fa-solid fa-${avatarIcon} text-brand-500 text-xl z-0"></i><img id="real-profile-img" src="" class="absolute inset-0 w-full h-full object-cover hidden z-10">`;
+                }
             }
         };
 
