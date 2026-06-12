@@ -1753,14 +1753,14 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                                 syncCourses();
                                 listenToAnnouncements();
                             }
+                        }
+                    } else {
+                        // التعديل الأمني: إذا كان الحساب جديداً وجاري تسجيل الدخول بجوجل، لا تطرده!
+                        if (!isLoginInProgress) {
+                            signOut(auth);
+                        }
                     }
-                } else {
-                    // التعديل الأمني: إذا كان الحساب جديداً وجاري تسجيل الدخول بجوجل، لا تطرده!
-                    if (!isLoginInProgress) {
-                        signOut(auth);
-                    }
-                }
-            } catch(e) { showToast("خطأ الاتصال: " + e.message, "error"); }
+                } catch(e) { showToast("خطأ الاتصال: " + e.message, "error"); }
             } else {
                 // تنظيف وإيقاف جميع الدوال اللحظية فور تسجيل الخروج لمنع الخطأ الأحمر
                 if (window.unsubscribeSession) { window.unsubscribeSession(); window.unsubscribeSession = null; }
@@ -3191,6 +3191,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
         // ==========================================
         // قاعة مشغل الكورسات التفاعلي (MasterClass Player)
         // ==========================================
+        // دالة فتح قاعة الكورس والمشاهدة وتجهيز المحتوى (Course Player Controller)
         window.openCoursePlayer = async function(courseId) {
             const course = allCourses.find(c => c.id === courseId);
             if(!course) return;
@@ -3220,8 +3221,6 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             document.getElementById('resource-completion-bar').classList.add('hidden');
             document.getElementById('player-controls-overlay').classList.add('hidden');
             
-            document.getElementById('lecture-note-area').value = "";
-            
             const contentContainer = document.getElementById('player-dynamic-content');
             
             // --- السحر هنا: إذا كان مقفولاً، نعرض شاشة قفل ترويجية بدلاً من شاشة الترحيب العادية ---
@@ -3233,35 +3232,34 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                         </div>
                         <h3 class="text-2xl md:text-3xl font-black drop-shadow-md">هذا الكورس مقفل</h3>
                         <p class="text-sm text-slate-400 max-w-lg leading-relaxed">${course.desc || 'استكشف الفهرس والمحتويات من القائمة الجانبية. لمشاهدة الفيديوهات والملفات واختبار معلوماتك، يرجى تفعيل الكورس باستخدام كود الاشتراك الخاص بك.'}</p>
-                        <button onclick="window.openActivationModal('${course.id}')" class="mt-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white px-8 py-3.5 rounded-xl font-black shadow-lg shadow-amber-500/20 transition transform hover:-translate-y-1 flex items-center gap-2">
+                        <button onclick="window.openContactPriceModal('${course.id}')" class="mt-4 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white px-8 py-3.5 rounded-xl font-black shadow-lg shadow-amber-500/20 transition transform hover:-translate-y-1 flex items-center gap-2">
                             <i class="fa-solid fa-key"></i> تفعيل الكورس الآن
                         </button>
                     </div>`;
                 
-                // تعطيل التلخيصات والأسئلة للمتطفلين
-                document.getElementById('lecture-note-area').disabled = true;
-                document.getElementById('lecture-note-area').placeholder = "يجب تفعيل الكورس لكتابة ملاحظاتك...";
+                // تعطيل الأسئلة والنقاشات للمتطفلين (تم إزالة أسطر الملاحظات المحذوفة لمنع الأخطاء)
                 document.getElementById('qa-textarea').disabled = true;
                 document.getElementById('qa-textarea').placeholder = "يجب تفعيل الكورس للمشاركة في النقاش...";
             } else {
                 contentContainer.innerHTML = `
                     <div class="text-slate-400 font-bold flex flex-col items-center gap-3 w-full h-full justify-center bg-white dark:bg-slate-900 absolute top-0 left-0">
                         <i class="fa-solid fa-laptop-medical text-5xl mb-2 text-slate-300 dark:text-slate-700"></i>
-                        <span class="text-base text-slate-800 dark:text-slate-200">مرحباً بك في كورس ${course.title}</span>
+                        <span class="text-base text-slate-800 dark:text-white">مرحباً بك في كورس ${course.title}</span>
                         <span class="text-xs font-normal text-slate-400">اضغط على المحاضرات في القائمة الجانبية لتوسيعها وعرض مصادرها.</span>
                     </div>`;
                 
-                document.getElementById('lecture-note-area').disabled = true; // يفعل فقط عند اختيار محاضرة
-                document.getElementById('lecture-note-area').placeholder = "اكتب ملاحظاتك وتلخيصك الشخصي هنا...";
+                // تفعيل الأسئلة والنقاشات للمشتركين
                 document.getElementById('qa-textarea').disabled = false;
                 document.getElementById('qa-textarea').placeholder = "لديك استفسار حول هذا الموديل الأكاديمي؟ اكتبه هنا...";
             }
 
             buildCourseSidebar(course);
             loadCourseQA(courseId);
+            window.loadCourseReviews(courseId); // تفعيل جلب وعرض تقييمات الكورس
         };
 
         // دالة لفتح وإغلاق الأكورديون الخاص بالمحاضرة
+        // دالة طوي وفرد المحاضرات داخل القائمة الجانبية للمشغل (Sidebar Accordion)
         window.toggleAccordion = function(lecId) {
             const contentDiv = document.getElementById(`accordion-content-${lecId}`);
             const icon = document.getElementById(`accordion-icon-${lecId}`);
@@ -3280,10 +3278,8 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 icon.classList.remove('rotate-180');
             }
             
-            // تفعيل الملاحظات للمحاضرة المختارة
             currentActiveLectureId = lecId;
-            document.getElementById('lecture-note-area').disabled = false;
-            loadLectureNote();
+            loadLectureNote(); // محمية داخلياً بالفعل من أي أخطاء
             
             const course = allCourses.find(c => c.id === currentCourseId);
             const lecture = course.lectures.find(l => l.id === lecId);
@@ -3439,7 +3435,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                         const lockIcon = !currentCourseIsUnlocked ? '<i class="fa-solid fa-lock text-amber-500 text-[10px] mr-auto pl-2 opacity-70" title="محتوى مقفل"></i>' : '';
 
                         resourcesHtml += `
-                            <button id="res-btn-${res.id}" onclick="window.selectResource('${lec.id}', '${res.id}')" class="resource-item-btn w-full text-right p-3 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border-b border-slate-100 dark:border-slate-700/50 last:border-0 group animate-scale-up ${!currentCourseIsUnlocked ? 'opacity-80' : ''}">
+                            <button id="res-btn-${res.id}" onclick="window.selectResource('${lec.id}', '${res.id}')" class="resource-item-btn w-full text-right p-3 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors border-b border-slate-100 dark:border-darkBorder last:border-0 group animate-scale-up ${!currentCourseIsUnlocked ? 'opacity-80' : ''}">
                                 <div class="flex items-center gap-3 w-full animate-fade-in">
                                     <i class="fa-solid ${resIcon} text-sm ${!currentCourseIsUnlocked ? 'text-slate-400' : ''}"></i>
                                     <span class="text-xs font-bold text-slate-700 dark:text-slate-300 group-hover:text-brand-600 transition-colors flex-1 text-right truncate">${res.title}</span>
@@ -3457,7 +3453,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 const isLecActive = currentActiveLectureId === lec.id;
                 
                 sidebar.innerHTML += `
-                    <div class="mb-2 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="mb-2 rounded-xl overflow-hidden border border-slate-200 dark:border-darkBorder shadow-sm">
                         <!-- الشريط الأخضر للمحاضرة -->
                         <button onclick="window.toggleAccordion('${lec.id}')" class="w-full text-right p-3.5 bg-brand-600 hover:bg-brand-700 transition-colors flex items-center justify-between text-white">
                             <div class="flex items-center gap-2">
