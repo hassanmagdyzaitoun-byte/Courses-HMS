@@ -3980,7 +3980,9 @@ const actionBtnHtml = (isPaid && !isUnlocked)
         }
 
         window.renderInteractiveQuiz = async function(resource) {
-            const contentContainer = document.getElementById('player-dynamic-content');
+            // فتح قاعة الامتحانات الغامرة فوراً وإعطائها العنوان المناسب
+            window.openImmersiveStudyRoom(`اختبار تفاعلي: ${resource.title}`);
+            const contentContainer = document.getElementById('study-room-dynamic-content'); // حقن الداتا داخل القاعة الغامرة
             if (!resource.quizData) {
                 contentContainer.innerHTML = `<p class="text-white p-5 text-center text-xs">لا توجد أسئلة مرفوعة لهذا الاختبار بعد.</p>`;
                 return;
@@ -4341,7 +4343,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                             ${leaderboardBox}
                             ${modelAnswerHTML}
 
-                            <button onclick="closeResource()" class="mt-8 bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl text-xs font-bold transition shadow-lg shrink-0">العودة لقاعة الكورس الرئيسية</button>
+                            <button onclick="window.closeImmersiveStudyRoom()" class="mt-8 bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl text-xs font-bold transition shadow-lg shrink-0">العودة لقاعة الكورس الرئيسية</button>
                         </div>
                     `;
 
@@ -4365,7 +4367,9 @@ const actionBtnHtml = (isPaid && !isUnlocked)
         // 5.5 محرك البطاقات التعليمية التفاعلية الفاخرة والملائمة للشاشة الكاملة (مع التكبير السينمائي للصور)
         // ==========================================
         window.renderInteractiveFlashcards = function(resource) {
-            const contentContainer = document.getElementById('player-dynamic-content');
+            // فتح قاعة المراجعة الغامرة فوراً وإعطائها العنوان المناسب
+            window.openImmersiveStudyRoom(`مراجعة بطاقات: ${resource.title}`);
+            const contentContainer = document.getElementById('study-room-dynamic-content'); // حقن الداتا داخل القاعة الغامرة
             if (!resource.flashcardData) {
                 contentContainer.innerHTML = `<p class="text-white p-5 text-center text-xs">لا توجد بطاقات مرفوعة هنا بعد.</p>`;
                 return;
@@ -4505,7 +4509,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                         </div>
                         <h3 class="text-2xl font-black mb-2 text-white">ممتاز! أكملت ثبات الحفظ بنجاح</h3>
                         <p class="text-xs text-slate-400 max-w-sm mb-6 leading-relaxed">أتممت جلسة المذاكرة بنجاح، وتم تكرار الأسئلة المتوسطة والصعبة حتى تغلبت عليها تماماً. لا تنسَ تحديد هذا المصدر كمكتمل للحصول على نقاطك.</p>
-                        <button onclick="closeResource()" class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl text-sm font-bold transition shadow-lg"><i class="fa-solid fa-arrow-right-to-bracket ml-2"></i> العودة للقاعة</button>
+                        <button onclick="window.closeImmersiveStudyRoom()" class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl text-sm font-bold transition shadow-lg"><i class="fa-solid fa-arrow-right-to-bracket ml-2"></i> العودة للقاعة</button>
                     </div>
                 `;
                 confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ['#3b82f6', '#10b981'] });
@@ -5716,6 +5720,26 @@ window.openContactPriceModal = function(courseId) {
                 modal.classList.remove('flex');
             }
         };
+        // دالة فتح قاعة الدراسة والامتحانات الغامرة (Open Immersive Study Room)
+        window.openImmersiveStudyRoom = function(title) {
+            document.getElementById('study-room-title').textContent = title;
+            const room = document.getElementById('immersive-study-room');
+            if(room) {
+                room.classList.remove('hidden');
+                room.classList.add('flex');
+            }
+        };
+
+        // دالة إغلاق قاعة الدراسة والعودة التلقائية لقاعة الكورس
+        window.closeImmersiveStudyRoom = function() {
+            const room = document.getElementById('immersive-study-room');
+            if(room) {
+                room.classList.add('hidden');
+                room.classList.remove('flex');
+            }
+            // إغلاق المصدر وتصفير المشغل الداخلي للعودة لحالته الطبيعية
+            window.closeResource();
+        };
     </script>
     <!-- نافذة معاينة الصور التوضيحية الكبيرة الفاخرة (Image Lightbox Modal) -->
     <div id="image-lightbox-modal" onclick="window.closeImageLightbox()" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-[99999] hidden flex items-center justify-center p-4 cursor-zoom-out animate-fade-in select-none">
@@ -5723,6 +5747,25 @@ window.openContactPriceModal = function(courseId) {
         <button onclick="window.closeImageLightbox()" class="absolute top-6 left-6 text-white/60 hover:text-white text-3xl transition duration-150"><i class="fa-solid fa-xmark"></i></button>
         <!-- مكان رسم الصورة الكبيرة -->
         <img id="lightbox-render-img" src="" class="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl border border-white/10 animate-scale-up" alt="Enlarged Diagram">
+    </div>
+    <!-- قاعة الدراسة والامتحانات الغامرة الفاخرة (Immersive Study Room Modal) -->
+    <div id="immersive-study-room" class="fixed inset-0 bg-slate-950/98 backdrop-blur-md z-[9999] hidden flex flex-col justify-between overflow-hidden animate-fade-in select-text text-right" dir="rtl">
+        <!-- الهيدر العائم الأنيق للقاعة -->
+        <div class="h-16 px-6 border-b border-white/5 bg-slate-900/40 flex items-center justify-between shrink-0 select-none">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-brand-500 text-white flex items-center justify-center shadow-md"><i class="fa-solid fa-graduation-cap animate-bounce"></i></div>
+                <span id="study-room-title" class="font-black text-xs md:text-sm text-slate-200">قاعة الدراسة والامتحانات التفاعلية</span>
+            </div>
+            <!-- زر الخروج والعودة للمنهج -->
+            <button onclick="window.closeImmersiveStudyRoom()" class="bg-white/5 hover:bg-rose-600 text-white w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-150 shadow-lg" title="الخروج والعودة للمنهج">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+        
+        <!-- حاوية المحتوى التفاعلي المباشر (حقن الكويز أو الفلاش كارد هنا بكامل حرية المساحة) -->
+        <div id="study-room-dynamic-content" class="flex-1 w-full relative overflow-y-auto custom-scrollbar">
+            <!-- Injected dynamically via JS -->
+        </div>
     </div>
     <!-- زر الرجوع العائم الذكي (Floating Back Button) -->
     <button id="global-back-btn" onclick="goBack()" class="fixed bottom-20 right-6 lg:right-[20.5rem] z-[9990] hidden bg-slate-900/90 dark:bg-white/90 text-white dark:text-slate-900 w-12 h-12 rounded-full shadow-2xl flex items-center justify-center text-lg hover:scale-110 active:scale-95 transition-all border border-white/10 dark:border-slate-200" title="رجوع للخلف">
