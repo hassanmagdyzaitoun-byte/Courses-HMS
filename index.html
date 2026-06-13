@@ -1001,22 +1001,21 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                                             <h2 id="current-lec-title" class="text-3xl md:text-4xl font-black mb-1 drop-shadow-md">اسم المحاضرة</h2>
                                         </div>
                                     </div>
-                                    <!-- قسم تقييم الكورس والمراجعات بالنجوم المطور والمحاذى أفقياً -->
+                                    <!-- قسم تقييم الكورس بالنجوم فقط -->
                                     <div class="bg-slate-50 dark:bg-slate-900/40 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800 mb-6 space-y-3">
                                         <h3 class="font-bold text-xs text-slate-800 dark:text-white flex items-center gap-2">
-                                            <i class="fa-solid fa-star text-amber-500"></i> قيم هذا الكورس وشاركنا مراجعتك الأكاديمية
+                                            <i class="fa-solid fa-star text-amber-500"></i> تقييم الكورس
                                         </h3>
-                                        <div class="flex items-center gap-2" id="star-rating-container">
-                                            <button onclick="setCourseRating(1)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="1"><i class="fa-solid fa-star"></i></button>
-                                            <button onclick="setCourseRating(2)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="2"><i class="fa-solid fa-star"></i></button>
-                                            <button onclick="setCourseRating(3)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="3"><i class="fa-solid fa-star"></i></button>
-                                            <button onclick="setCourseRating(4)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="4"><i class="fa-solid fa-star"></i></button>
-                                            <button onclick="setCourseRating(5)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="5"><i class="fa-solid fa-star"></i></button>
-                                            <span id="rating-score-label" class="text-xs text-slate-400 font-bold mr-2">اضغط على النجوم للتحديد</span>
-                                        </div>
-                                        <div class="flex gap-2.5 items-center">
-                                            <input type="text" id="course-review-comment" class="flex-1 p-3 text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none text-slate-800 dark:text-white font-bold" placeholder="اكتب مراجعتك المختصرة للكورس هنا...">
-                                            <button onclick="submitCourseReview()" class="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-xl text-xs font-black shadow transition-all flex items-center gap-1.5 shrink-0"><i class="fa-solid fa-paper-plane"></i> إرسال</button>
+                                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                                            <div class="flex items-center gap-2" id="star-rating-container">
+                                                <button onclick="setCourseRating(1)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="1"><i class="fa-solid fa-star"></i></button>
+                                                <button onclick="setCourseRating(2)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="2"><i class="fa-solid fa-star"></i></button>
+                                                <button onclick="setCourseRating(3)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="3"><i class="fa-solid fa-star"></i></button>
+                                                <button onclick="setCourseRating(4)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="4"><i class="fa-solid fa-star"></i></button>
+                                                <button onclick="setCourseRating(5)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition" data-star="5"><i class="fa-solid fa-star"></i></button>
+                                                <span id="rating-score-label" class="text-xs text-slate-400 font-bold mr-2">اضغط للتحديد</span>
+                                            </div>
+                                            <button id="submit-rating-btn" onclick="submitCourseReview()" class="bg-amber-500 hover:bg-amber-600 text-white px-6 py-2.5 rounded-xl text-xs font-black shadow transition-all flex items-center gap-1.5 w-full sm:w-auto justify-center"><i class="fa-solid fa-paper-plane"></i> إرسال التقييم</button>
                                         </div>
                                     </div>
                                     <!-- مساحة النقاش والأسئلة الخاصة بالكورس -->
@@ -3261,7 +3260,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
 
             buildCourseSidebar(course);
             loadCourseQA(courseId);
-            window.loadCourseReviews(courseId); // تفعيل جلب وعرض تقييمات الكورس
+            window.checkIfUserRated(courseId); // فحص حالة تقييم الطالب لقفل النجوم
         };
 
         // دالة لفتح وإغلاق الأكورديون الخاص بالمحاضرة
@@ -3604,10 +3603,12 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإرسال...';
                 
                 await addDoc(collection(db, `courses/${currentCourseId}/qa`), {
-                    text: val,
-                    email: currentUser.email,
-                    role: userData.role,
-                    createdAt: new Date().getTime()
+                 text: val,
+                 email: currentUser.email,
+                 userId: currentUser.uid, // حقل الأمان الجديد بالـ UID لمنع تعارض الإيميلات
+                 role: userData.role,
+                 createdAt: new Date().getTime()
+                 
                 });
                 
                 input.value = "";
@@ -3815,16 +3816,53 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             document.getElementById('rating-score-label').textContent = `${stars} من 5 نجوم`;
         };
 
+        window.checkIfUserRated = async function(courseId) {
+            if(!currentUser) return;
+            const reviewSnap = await getDoc(doc(db, `courses/${courseId}/reviews`, currentUser.uid));
+            const btn = document.getElementById('submit-rating-btn');
+            const label = document.getElementById('rating-score-label');
+
+            if(reviewSnap.exists()) {
+                const myRating = reviewSnap.data().rating;
+                // تلوين النجوم بناءً على التقييم السابق وتعطيلها
+                document.querySelectorAll('.star-btn').forEach(b => {
+                    const sVal = parseInt(b.dataset.star);
+                    b.className = sVal <= myRating ? "star-btn text-2xl text-amber-400 cursor-default" : "star-btn text-2xl text-slate-200 cursor-default opacity-50";
+                    b.disabled = true;
+                });
+                label.textContent = `تقييمك: ${myRating} من 5`;
+                // تعطيل الزر
+                if(btn) {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    btn.classList.remove('hover:bg-amber-600');
+                    btn.innerHTML = `<i class="fa-solid fa-check-double"></i> تم التقييم مسبقاً`;
+                }
+            } else {
+                // إعادة ضبط الواجهة إذا لم يقم بالتقييم
+                tempUserRating = 0;
+                document.querySelectorAll('.star-btn').forEach(b => {
+                    b.className = "star-btn text-2xl text-slate-300 hover:text-amber-400 transition";
+                    b.disabled = false;
+                });
+                label.textContent = "اضغط للتحديد";
+                if(btn) {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                    btn.classList.add('hover:bg-amber-600');
+                    btn.innerHTML = `<i class="fa-solid fa-paper-plane"></i> إرسال التقييم`;
+                }
+            }
+        };
+
         window.submitCourseReview = async function() {
             if(!currentUser || !currentCourseId) return;
             if(tempUserRating === 0) return showToast("الرجاء تحديد عدد النجوم للتقييم أولاً.", "error");
             
-            const comment = document.getElementById('course-review-comment').value.trim();
             try {
-                // حفظ التقييم في Firestore
+                // حفظ التقييم
                 await setDoc(doc(db, `courses/${currentCourseId}/reviews`, currentUser.uid), {
                     rating: tempUserRating,
-                    comment: comment,
                     userName: currentUser.email.split('@')[0],
                     createdAt: new Date().getTime()
                 });
@@ -3843,11 +3881,9 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                     ratingCount: count
                 });
                 
-                showToast("شكرًا لك! تم تسجيل مراجعتك وقيمتك للكورس بنجاح.", "success");
-                document.getElementById('course-review-comment').value = "";
-                tempUserRating = 0;
-                setCourseRating(0);
-                document.getElementById('rating-score-label').textContent = "تم إرسال تقييمك!";
+                showToast("شكرًا لك! تم تسجيل تقييمك للكورس بنجاح.", "success");
+                // قفل الواجهة فوراً بعد نجاح التقييم
+                window.checkIfUserRated(currentCourseId);
             } catch(e) {
                 console.error(e);
                 showToast("عذراً، فشل تسجيل التقييم في السيرفر.", "error");
