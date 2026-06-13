@@ -246,12 +246,21 @@
             </div>
             <div class="space-y-2">
                 <h2 class="text-2xl font-black text-slate-800 dark:text-white">تأكيد البريد الإلكتروني مطلوب</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">لقد أرسلنا رابط تأكيد آمن لبريدك الإلكتروني المسجل. يرجى مراجعة علبة الوارد (أو البريد المهمل Spam) والضغط على الرابط لتفعيل الحساب بالكامل للبدء.</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">لقد أرسلنا رابط تأكيد آمن لبريدك الإلكتروني التالي لتفعيل الحساب:</p>
             </div>
 
             <!-- عرض البريد الإلكتروني المسجل للطالب للـتأكد من صحته -->
-            <div class="bg-slate-50 dark:bg-slate-900/50 p-3.5 rounded-xl border border-slate-100 dark:border-darkBorder text-xs text-slate-650 dark:text-slate-350 font-bold font-en" id="verify-email-display">
+            <div class="bg-slate-50 dark:bg-slate-900/50 p-3.5 rounded-xl border border-slate-100 dark:border-darkBorder text-sm text-slate-700 dark:text-slate-300 font-black font-en select-all shadow-inner" id="verify-email-display">
                 username@gmail.com
+            </div>
+
+            <!-- صندوق النصيحة الجديد للبحث في الـ Spam -->
+            <div class="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-xl p-3.5 text-right flex items-start gap-3 text-amber-700 dark:text-amber-500 shadow-sm animate-slide-up">
+                <div class="mt-0.5 text-xl"><i class="fa-solid fa-circle-exclamation animate-pulse"></i></div>
+                <div class="text-[11px] font-bold leading-relaxed">
+                    <span class="block mb-1 text-xs font-black">أين أجد رسالة التفعيل؟</span>
+                    افتح تطبيق (Gmail)، وإذا لم تجدها في الوارد، افتح القائمة الجانبية وابحث في قسم <span class="bg-amber-200/60 dark:bg-amber-900/60 px-1.5 py-0.5 rounded text-amber-900 dark:text-amber-300">الرسائل غير المرغوب فيها (Spam)</span> أو البريد المهمل، واضغط على الرابط بداخلها.
+                </div>
             </div>
 
             <div class="flex flex-col gap-2.5">
@@ -1569,14 +1578,16 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                 roleContainer.classList.remove('hidden');
                 primaryText.textContent = "إنشاء الحساب الجديد بالمنصة";
                 primaryIcon.className = "fa-solid fa-user-plus";
-                toggleBtn.textContent = "لديك حساب بالفعل؟ تسجيل الدخول الآن";
+                // النص يظهر بشكل صحيح ومنطقي في صفحة إنشاء الحساب
+                toggleBtn.innerHTML = "لديك حساب بالفعل؟ <span class='text-brand-600 dark:text-brand-400 font-black'>تسجيل الدخول الآن</span>";
             } else {
                 authMode = 'login';
                 nameContainer.classList.add('hidden');
                 roleContainer.classList.add('hidden');
                 primaryText.textContent = "تسجيل الدخول الآمن";
                 primaryIcon.className = "fa-solid fa-arrow-right-to-bracket";
-                toggleBtn.textContent = "ليس لديك حساب؟ إنشاء حساب جديد بالمنصة";
+                // النص يظهر بشكل صحيح ومنطقي في صفحة تسجيل الدخول
+                toggleBtn.innerHTML = "ليس لديك حساب؟ <span class='text-brand-600 dark:text-brand-400 font-black'>إنشاء حساب جديد بالمنصة</span>";
             }
         });
 
@@ -1802,13 +1813,13 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                 document.getElementById('login-view').classList.remove('hidden');
                 document.getElementById('login-view').classList.add('active');
                 
-                // إعادة تهيئة أزرار تسجيل الدخول التفاعلية الجديدة 
+                // إعادة تهيئة أزرار تسجيل الدخول التفاعلية الجديدة
                 authMode = 'login';
                 document.getElementById('name-field-container').classList.add('hidden');
                 document.getElementById('role-field-container').classList.add('hidden');
                 document.getElementById('primary-auth-text').textContent = "تسجيل الدخول الآمن";
                 document.getElementById('primary-auth-icon').className = "fa-solid fa-arrow-right-to-bracket";
-                document.getElementById('btn-toggle-auth-mode').textContent = "ليس لديك حساب؟ إنشاء حساب جديد بالمنصة";
+                document.getElementById('btn-toggle-auth-mode').innerHTML = "ليس لديك حساب؟ <span class='text-brand-600 dark:text-brand-400 font-black'>إنشاء حساب جديد بالمنصة</span>";
                 document.getElementById('btn-primary-auth').innerHTML = `<span>تسجيل الدخول الآمن</span> <i class="fa-solid fa-arrow-right-to-bracket" id="primary-auth-icon"></i>`;
             }
         });    
