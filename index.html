@@ -1800,9 +1800,11 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                 // تنظيف وإيقاف جميع الدوال اللحظية فور تسجيل الخروج لمنع الخطأ الأحمر
                 if (window.unsubscribeSession) { window.unsubscribeSession(); window.unsubscribeSession = null; }
                 if (unsubCourses) { unsubCourses(); unsubCourses = null; }
-                if (unsubNotifs) { unsubNotifs(); unsubNotifs = null; }
+                if (unsubNotifs) { unsubNotifs = null; }
 
                 isAppReady = false; currentUser = null; userData = null;
+                // مسح الكورس النشط من الذاكرة عند الخروج
+                localStorage.removeItem('hms_active_course_id');
                 
                 // إخفاء كافة الشاشات الأخرى لضمان عدم دمجها
                 document.getElementById('main-layout').classList.add('hidden');
@@ -1838,6 +1840,13 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                 buildManagementTable();
                 updateGeneralProgress();
                 if(userData?.role === 'superadmin') window.initSuperAdmin();
+
+                // 🧠 ذكاء التحديث اللحظي: إعادة بناء محتويات الكورس إذا كان الطالب متواجداً في قاعة المشاهدة أثناء الـ Refresh
+                const savedCourseId = localStorage.getItem('hms_active_course_id');
+                const isPlayerActive = document.getElementById('student-player').classList.contains('active');
+                if (isPlayerActive && savedCourseId && allCourses.length > 0 && !currentCourseId) {
+                    window.openCoursePlayer(savedCourseId);
+                }
             }, (error) => {
                 console.error(error);
                 showToast("تنبيه: عطل في صلاحيات القراءة، يرجى مراجعة لوحة Firebase وقواعد الأمان Rules.", "error");
@@ -3243,6 +3252,9 @@ const actionBtnHtml = (isPaid && !isUnlocked)
         window.openCoursePlayer = async function(courseId) {
             const course = allCourses.find(c => c.id === courseId);
             if(!course) return;
+            
+            // حفظ معرف الكورس الحالي في الذاكرة لمقاومة عمل تحديث الصفحة (Refresh)
+            localStorage.setItem('hms_active_course_id', courseId);
             
             // تحديد ما إذا كان الكورس مفتوحاً أم مقفلاً للطالب الحالي
             const isPaid = course.priceType === 'paid';
