@@ -1614,6 +1614,21 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                 if(!name) return showToast("يرجى إدخال اسمك بالكامل أولاً.", "error");
                 if(!email || !password) return showToast("يرجى ملء جميع الحقول المطلوبة.", "error");
 
+                // 🛡️ جدار حماية (1): التحقق من أن صيغة الإيميل صحيحة تماماً
+                const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                if (!emailRegex.test(email)) return showToast("صيغة البريد الإلكتروني غير صحيحة، يرجى كتابته بشكل سليم.", "error");
+
+                // 🛡️ جدار حماية (2): منع الإيميلات العشوائية والمؤقتة (Temp Mail) لحماية الرصيد
+                const domain = email.split('@')[1].toLowerCase();
+                const blockedDomains = ['test.com', 'example.com', '123.com', 'yopmail.com', 'tempmail.com', '10minutemail.com', 'mailinator.com', 'guerrillamail.com'];
+                if (blockedDomains.includes(domain)) return showToast("غير مسموح باستخدام بريد إلكتروني وهمي أو مؤقت بالمنصة.", "error");
+
+                // 🛡️ جدار حماية (3): منع أسماء الإيميلات البديهية الوهمية
+                const emailPrefix = email.split('@')[0].toLowerCase();
+                if (emailPrefix === 'test' || emailPrefix === 'admin' || emailPrefix.length < 3) {
+                    return showToast("هذا البريد الإلكتروني يبدو وهمياً، يرجى استخدام بريدك الشخصي الحقيقي.", "error");
+                }
+
                 try {
                     const btn = document.getElementById('btn-primary-auth');
                     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري تأسيس حسابك وحفظ البيانات...';
@@ -1629,12 +1644,12 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                         email: uc.user.email, 
                         role: role,
                         sessionId: newSession,
-                        status: role === 'admin' ? 'pending' : 'active',
+                        status: 'unverified', // حساب غير مؤكد ومجمد مبدئياً
                         completedLectures: [] 
                     });
                     
                     localStorage.setItem('hms_session_id', newSession);
-                    showToast("تم تأسيس حسابك بنجاح وسلاسه بالمنصة!", "success");
+                    showToast("تم تسجيل بياناتك مبدئياً! يرجى تأكيد بريدك لتفعيل الحساب نهائياً.", "info");
                 } catch(e) {
                     showToast("خطأ أمن: " + e.message, "error");
                     document.getElementById('btn-primary-auth').innerHTML = `<span>إنشاء الحساب الجديد بالمنصة</span> <i class="fa-solid fa-user-plus"></i>`;
@@ -5683,8 +5698,18 @@ window.openContactPriceModal = function(courseId) {
                 await reload(auth.currentUser); // تحديث الجلسة محلياً من خوادم فايربيس
                 
                 if (auth.currentUser.emailVerified) {
-                    showToast("تهانينا! تم تأكيد بريدك الإلكتروني بنجاح، جاري إدخالك للمنصة...", "success");
-                    setTimeout(() => { location.reload(); }, 1500); // إعادة تحميل الصفحة لتسجيل الدخول السليم
+                    // تحويل الحساب من (غير مؤكد) إلى (نشط) أو (معلق للدكتور) في قاعدة البيانات
+                    const uDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+                    if(uDoc.exists()) {
+                        const userData = uDoc.data();
+                        if (userData.status === 'unverified') {
+                            const finalStatus = userData.role === 'admin' ? 'pending' : 'active';
+                            await updateDoc(doc(db, "users", auth.currentUser.uid), { status: finalStatus });
+                        }
+                    }
+
+                    showToast("تهانينا! تم تأكيد وتفعيل حسابك بنجاح، جاري إدخالك للمنصة...", "success");
+                    setTimeout(() => { location.reload(); }, 1500); // إعادة تحميل الصفحة
                 } else {
                     showToast("لم يتم تأكيد الحساب بعد! يرجى الضغط على الرابط المرسل لبريدك الإلكتروني أولاً.", "error");
                 }
@@ -5694,15 +5719,33 @@ window.openContactPriceModal = function(courseId) {
             }
         };
 
-        // دالة إعادة إرسال رابط التأكيد في حال لم يصل للطالب
+        // دالة إعادة إرسال رابط التأكيد مع حماية (Cooldown 60s) لمنع استنزاف رصيد Firebase
         window.resendVerificationEmail = async function() {
             if(!auth.currentUser) return;
+            
+            // فحص المؤقت الزمني في ذاكرة المتصفح
+            const lastSentTime = localStorage.getItem('hms_last_verify_email_time');
+            const now = new Date().getTime();
+            
+            // إذا لم يمر 60 ثانية (60000 ملي ثانية) على آخر رسالة، نمنعه من الإرسال
+            if (lastSentTime && (now - lastSentTime < 60000)) {
+                const remainingSeconds = Math.ceil((60000 - (now - lastSentTime)) / 1000);
+                return showToast(`يرجى الانتظار ${remainingSeconds} ثانية قبل طلب رسالة جديدة لحماية حسابك.`, "error");
+            }
+
             try {
                 await sendEmailVerification(auth.currentUser);
+                // تسجيل وقت الإرسال الجديد في المتصفح
+                localStorage.setItem('hms_last_verify_email_time', now);
                 showToast("تم إعادة إرسال رابط التأكيد بنجاح لعلبة الوارد ببريدك.", "success");
             } catch (e) {
                 console.error(e);
-                showToast("فشل الإرسال المكرر، يرجى الانتظار دقيقة قبل المحاولة مجدداً.", "error");
+                // حماية إضافية: إذا رد فايربيس بأن المستخدم يطلب رسائل كثيرة
+                if (e.code === 'auth/too-many-requests') {
+                    showToast("لقد طلبت رسائل كثيرة جداً! يرجى المحاولة لاحقاً.", "error");
+                } else {
+                    showToast("فشل الإرسال المكرر، يرجى الانتظار دقيقة قبل المحاولة مجدداً.", "error");
+                }
             }
         };
         // دالة تسجيل الدخول السريع والآمن بحسابات جوجل (Google Sign-In)
