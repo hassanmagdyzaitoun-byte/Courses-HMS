@@ -375,9 +375,9 @@
         </aside>
 
         <!-- المحتوى الرئيسي -->
-        <main class="flex-1 flex flex-col h-full w-full overflow-hidden relative">
+        <main class="flex-1 flex flex-col h-full w-full overflow-hidden relative min-h-0">
             
-            <header class="h-20 bg-white/80 dark:bg-darkCard/80 backdrop-blur-md border-b border-slate-200 dark:border-darkBorder flex items-center justify-between px-4 sm:px-6 z-10">
+            <header class="h-20 bg-white/80 dark:bg-darkCard/80 backdrop-blur-md border-b border-slate-200 dark:border-darkBorder flex items-center justify-between px-4 sm:px-6 z-10 shrink-0">
                 <div class="flex items-center gap-3 sm:gap-4">
                     <!-- زر القائمة الجانبية -->
                     <button onclick="toggleSidebar()" class="lg:hidden text-slate-600 dark:text-slate-300 text-2xl hover:text-brand-600"><i class="fa-solid fa-bars-staggered"></i></button>
@@ -418,7 +418,7 @@
                 </div>
             </header>
 
-            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8 relative custom-scrollbar" id="views-container">
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-12 relative custom-scrollbar min-h-0" id="views-container">
                 
                 <!-- ========================================== -->
                 <!-- الشاشة الاحترافية المضافة: لوحة تحكم الطالب الرئيسية -->
@@ -559,75 +559,77 @@
                 </div>
 
                 <!-- شاشة: لوحة تحكم المالك وسجل المسؤولين والطلبات -->
-                <div id="super-dashboard" class="content-view space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-                        <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-darkBorder flex items-center gap-4">
-                            <div class="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/30 text-blue-500 flex items-center justify-center text-2xl"><i class="fa-solid fa-users"></i></div>
-                            <div><p class="text-slate-500 dark:text-slate-400 text-sm font-bold">إجمالي الطلاب</p><h3 class="text-3xl font-black mt-1" id="stat-students">0</h3></div>
-                        </div>
-                        <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-darkBorder flex items-center gap-4">
-                            <div class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 flex items-center justify-center text-2xl"><i class="fa-solid fa-book-bookmark"></i></div>
-                            <div><p class="text-slate-500 dark:text-slate-400 text-sm font-bold">الكورسات المتاحة</p><h3 class="text-3xl font-black mt-1" id="stat-courses">0</h3></div>
-                        </div>
-                        <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-darkBorder flex items-center gap-4">
-                            <div class="w-14 h-14 rounded-2xl bg-purple-50 dark:bg-purple-950/30 text-purple-500 flex items-center justify-center text-2xl"><i class="fa-solid fa-user-tie"></i></div>
-                            <div><p class="text-slate-500 dark:text-slate-400 text-sm font-bold">مسؤولي الكورسات</p><h3 class="text-3xl font-black mt-1" id="stat-admins">0</h3></div>
-                        </div>
-                        <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-darkBorder flex items-center gap-4">
-                            <div class="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-950/30 text-rose-500 flex items-center justify-center text-2xl"><i class="fa-solid fa-user-clock"></i></div>
-                            <div><p class="text-slate-500 dark:text-slate-400 text-sm font-bold">طلبات معلقة</p><h3 class="text-3xl font-black mt-1 text-rose-500" id="stat-pending">0</h3></div>
-                        </div>
-                    </div>
-
-                    <!-- الواجهة المتكاملة الجديدة للتحكم السحابي للمالك -->
+                <div id="super-dashboard" class="content-view block w-full h-full overflow-y-auto custom-scrollbar pb-32 pr-2">
                     <div class="space-y-6">
-                        <!-- أولاً: صندوق بث الإعلانات -->
-                        <div class="bg-white dark:bg-darkCard p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-darkBorder">
-                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center"><i class="fa-solid fa-bullhorn"></i></div> بث إعلان عام للطلاب بالمنصة</h3>
-                            <div class="flex flex-col sm:flex-row gap-3">
-                                <input type="text" id="news-input" class="flex-1 p-3.5 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-850 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="اكتب خبراً أو تنبيهاً يظهر في أعلى الشاشة لجميع الطلاب والرواد...">
-                                <button id="btn-publish-news" onclick="publishGlobalNews()" class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg transition whitespace-nowrap text-sm">نشر التحديث العام</button>
+                        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                            <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-darkBorder flex items-center gap-4">
+                                <div class="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-950/30 text-blue-500 flex items-center justify-center text-2xl"><i class="fa-solid fa-users"></i></div>
+                                <div><p class="text-slate-500 dark:text-slate-400 text-sm font-bold">إجمالي الطلاب</p><h3 class="text-3xl font-black mt-1" id="stat-students">0</h3></div>
+                            </div>
+                            <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-darkBorder flex items-center gap-4">
+                                <div class="w-14 h-14 rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 text-emerald-500 flex items-center justify-center text-2xl"><i class="fa-solid fa-book-bookmark"></i></div>
+                                <div><p class="text-slate-500 dark:text-slate-400 text-sm font-bold">الكورسات المتاحة</p><h3 class="text-3xl font-black mt-1" id="stat-courses">0</h3></div>
+                            </div>
+                            <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-darkBorder flex items-center gap-4">
+                                <div class="w-14 h-14 rounded-2xl bg-purple-50 dark:bg-purple-950/30 text-purple-500 flex items-center justify-center text-2xl"><i class="fa-solid fa-user-tie"></i></div>
+                                <div><p class="text-slate-500 dark:text-slate-400 text-sm font-bold">مسؤولي الكورسات</p><h3 class="text-3xl font-black mt-1" id="stat-admins">0</h3></div>
+                            </div>
+                            <div class="bg-white dark:bg-darkCard p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-darkBorder flex items-center gap-4">
+                                <div class="w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-950/30 text-rose-500 flex items-center justify-center text-2xl"><i class="fa-solid fa-user-clock"></i></div>
+                                <div><p class="text-slate-500 dark:text-slate-400 text-sm font-bold">طلبات معلقة</p><h3 class="text-3xl font-black mt-1 text-rose-500" id="stat-pending">0</h3></div>
                             </div>
                         </div>
 
-                        <!-- ثانياً: كونسول إدارة المستخدمين والصلاحيات والطلبات -->
-                        <div class="bg-white dark:bg-darkCard p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-darkBorder">
-                            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-100 dark:border-darkBorder pb-4">
-                                <div>
-                                    <h3 class="font-black text-xl flex items-center gap-2">
-                                        <i class="fa-solid fa-users-gear text-brand-500"></i> التحكم بالمستخدمين والصلاحيات والطلبات
-                                    </h3>
-                                    <p class="text-xs text-slate-400 mt-1">تعديل الصلاحيات الفورية، قبول طلبات التدريس، أو إلغاء وحذف الحسابات.</p>
+                        <!-- الواجهة المتكاملة الجديدة للتحكم السحابي للمالك -->
+                        <div class="space-y-6">
+                            <!-- أولاً: صندوق بث الإعلانات -->
+                            <div class="bg-white dark:bg-darkCard p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-darkBorder">
+                                <h3 class="font-bold text-lg mb-4 flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center"><i class="fa-solid fa-bullhorn"></i></div> بث إعلان عام للطلاب بالمنصة</h3>
+                                <div class="flex flex-col sm:flex-row gap-3">
+                                    <input type="text" id="news-input" class="flex-1 p-3.5 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-850 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="اكتب خبراً أو تنبيهاً يظهر في أعلى الشاشة لجميع الطلاب والرواد...">
+                                    <button id="btn-publish-news" onclick="publishGlobalNews()" class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl font-bold shadow-lg transition whitespace-nowrap text-sm">نشر التحديث العام</button>
+                                </div>
+                            </div>
+
+                            <!-- ثانياً: كونسول إدارة المستخدمين والصلاحيات والطلبات -->
+                            <div class="bg-white dark:bg-darkCard p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-darkBorder">
+                                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-100 dark:border-darkBorder pb-4">
+                                    <div>
+                                        <h3 class="font-black text-xl flex items-center gap-2">
+                                            <i class="fa-solid fa-users-gear text-brand-500"></i> التحكم بالمستخدمين والصلاحيات والطلبات
+                                        </h3>
+                                        <p class="text-xs text-slate-400 mt-1">تعديل الصلاحيات الفورية، قبول طلبات التدريس، أو إلغاء وحذف الحسابات.</p>
+                                    </div>
+                                    
+                                    <!-- أدوات الفلترة والبحث السريع -->
+                                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                                        <input type="text" id="user-search-input" oninput="window.filterUsersTable()" class="p-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none" placeholder="ابحث بالبريد الإلكتروني...">
+                                        <select id="user-filter-select" onchange="window.filterUsersTable()" class="p-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none font-bold text-slate-600 dark:text-slate-300">
+                                            <option value="all">كل الحسابات</option>
+                                            <option value="student">👨‍🎓 الطلاب</option>
+                                            <option value="admin_active">👨‍🏫 الدكاترة النشطين</option>
+                                            <option value="admin_pending">⏳ طلبات الدكاترة المعلقة</option>
+                                        </select>
+                                    </div>
                                 </div>
                                 
-                                <!-- أدوات الفلترة والبحث السريع -->
-                                <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                                    <input type="text" id="user-search-input" oninput="window.filterUsersTable()" class="p-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none" placeholder="ابحث بالبريد الإلكتروني...">
-                                    <select id="user-filter-select" onchange="window.filterUsersTable()" class="p-2.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-xl outline-none font-bold text-slate-600 dark:text-slate-300">
-                                        <option value="all">كل الحسابات</option>
-                                        <option value="student">👨‍🎓 الطلاب</option>
-                                        <option value="admin_active">👨‍🏫 الدكاترة النشطين</option>
-                                        <option value="admin_pending">⏳ طلبات الدكاترة المعلقة</option>
-                                    </select>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-right text-xs">
+                                        <thead>
+                                            <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-150 dark:border-darkBorder">
+                                                <th class="p-4">البريد الإلكتروني للعميل / الطالب</th>
+                                                <th class="p-4 text-center">نوع الرتبة / الصلاحية الفورية</th>
+                                                <th class="p-4 text-center">الحالة</th>
+                                                <th class="p-4 text-center">التحكم والإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="owner-users-tbody" class="divide-y divide-slate-100 dark:divide-darkBorder font-medium">
+                                            <tr>
+                                                <td colspan="4" class="p-10 text-center"><i class="fa-solid fa-spinner fa-spin text-2xl text-slate-300"></i></td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
-                            </div>
-                            
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-right text-xs">
-                                    <thead>
-                                        <tr class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400 font-bold border-b border-slate-150 dark:border-darkBorder">
-                                            <th class="p-4">البريد الإلكتروني للعميل / الطالب</th>
-                                            <th class="p-4 text-center">نوع الرتبة / الصلاحية الفورية</th>
-                                            <th class="p-4 text-center">الحالة</th>
-                                            <th class="p-4 text-center">التحكم والإجراءات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="owner-users-tbody" class="divide-y divide-slate-100 dark:divide-darkBorder font-medium">
-                                        <tr>
-                                            <td colspan="4" class="p-10 text-center"><i class="fa-solid fa-spinner fa-spin text-2xl text-slate-300"></i></td>
-                                        </tr>
-                                    </tbody>
-                                </table>
                             </div>
                         </div>
                     </div>
@@ -1266,31 +1268,42 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
 
             </div>
             <!-- شاشة: بروفايل الدكتور والكورسات الخاصة به -->
-                <div id="doctor-profile-view" class="content-view space-y-6">
-                    <div class="bg-white dark:bg-darkCard rounded-3xl border border-slate-100 dark:border-darkBorder overflow-hidden relative shadow-sm">
-                        <div id="doc-profile-banner" class="h-32 bg-gradient-to-r from-brand-600 to-emerald-400 w-full transition-colors duration-500"></div>
-                        <div class="px-6 sm:px-10 pb-6 relative">
-                            <div class="flex flex-col sm:flex-row justify-between items-center sm:items-end gap-4 -mt-12 sm:-mt-16 mb-6">
-                                <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-right">
-                                    <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white dark:border-darkCard bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-4xl sm:text-5xl text-brand-500 shadow-lg" id="doc-profile-avatar">
-                                        <i class="fa-solid fa-user-tie"></i>
+                <div id="doctor-profile-view" class="content-view block w-full h-full overflow-y-auto custom-scrollbar pb-32 pr-2">
+                    <div class="space-y-6">
+                        <!-- بطاقة معلومات الدكتور -->
+                        <div class="bg-white dark:bg-darkCard rounded-3xl border border-slate-100 dark:border-darkBorder shadow-sm w-full">
+                            <div id="doc-profile-banner" class="h-32 rounded-t-3xl bg-gradient-to-r from-brand-600 to-emerald-400 w-full transition-colors duration-500"></div>
+                            <div class="px-6 sm:px-10 pb-8 relative">
+                                <div class="flex flex-col sm:flex-row justify-between items-center sm:items-end gap-4 -mt-16 mb-2">
+                                    <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-right">
+                                        <div class="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white dark:border-darkCard bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-4xl sm:text-5xl text-brand-500 shadow-lg relative z-10" id="doc-profile-avatar">
+                                            <i class="fa-solid fa-user-tie"></i>
+                                        </div>
+                                        <div class="mt-2 sm:mt-8 relative z-10">
+                                            <h2 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white" id="doc-profile-name">اسم الدكتور</h2>
+                                            <p class="text-sm font-bold text-slate-500 mt-1"><i class="fa-solid fa-chalkboard-user"></i> عضو هيئة تدريس معتمد</p>
+                                        </div>
                                     </div>
-                                    <div class="mt-2 sm:mt-8">
-                                        <h2 class="text-2xl sm:text-3xl font-black text-slate-800 dark:text-white" id="doc-profile-name">اسم الدكتور</h2>
-                                        <p class="text-sm font-bold text-slate-500 mt-1"><i class="fa-solid fa-chalkboard-user"></i> عضو هيئة تدريس معتمد</p>
-                                    </div>
+                                    <button onclick="document.getElementById('message-doctor-modal').classList.remove('hidden')" class="bg-slate-900 hover:bg-brand-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition-all flex items-center gap-2 text-sm shrink-0 relative z-10">
+                                        <i class="fa-solid fa-paper-plane"></i> تواصل مع الدكتور
+                                    </button>
                                 </div>
-                                <button onclick="document.getElementById('message-doctor-modal').classList.remove('hidden')" class="bg-slate-900 hover:bg-brand-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition-all flex items-center gap-2 text-sm shrink-0">
-                                    <i class="fa-solid fa-paper-plane"></i> تواصل مع الدكتور
-                                </button>
                             </div>
-                            <h3 class="font-bold text-lg mb-4 border-b border-slate-100 dark:border-darkBorder pb-2">الكورسات التي يقدمها الدكتور</h3>
-                            <div id="doc-profile-courses" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-4">
+                        </div>
+
+                        <!-- قسم الكورسات -->
+                        <div class="w-full">
+                            <h3 class="font-bold text-lg mb-4 text-slate-800 dark:text-white flex items-center gap-2">
+                                <i class="fa-solid fa-book-open text-brand-500"></i> الكورسات التي يقدمها
+                            </h3>
+                            
+                            <div id="doc-profile-courses" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                                 <!-- سيتم جلب كورسات الدكتور هنا -->
                             </div>
-                            <div id="doc-courses-load-more" class="hidden flex justify-center pt-2">
-                                <button onclick="loadMoreDocCourses()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-2.5 px-6 rounded-xl transition shadow-sm text-xs">
-                                    عرض المزيد من كورساته <i class="fa-solid fa-angle-down"></i>
+                            
+                            <div id="doc-courses-load-more" class="hidden flex justify-center mt-6 pb-6">
+                                <button onclick="loadMoreDocCourses()" class="bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 px-8 rounded-xl transition shadow-sm text-sm flex items-center gap-2">
+                                    عرض المزيد <i class="fa-solid fa-angle-down"></i>
                                 </button>
                             </div>
                         </div>
@@ -1373,7 +1386,7 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                     </div>
                 </div>
             <!-- تذييل المنصة (حقوق الملكية والدعاء) -->
-            <footer class="w-full py-3 mt-auto bg-white/90 dark:bg-darkCard/90 backdrop-blur-md border-t border-slate-200 dark:border-darkBorder z-10 flex flex-col items-center justify-center gap-1.5 transition-colors duration-300">
+            <footer class="w-full py-3 bg-white/90 dark:bg-darkCard/90 backdrop-blur-md border-t border-slate-200 dark:border-darkBorder z-10 flex flex-col items-center justify-center gap-1.5 transition-colors duration-300 shrink-0">
                 <p class="text-xs font-bold text-slate-500 dark:text-slate-400 font-en">
                     Created by <span class="text-brand-600 dark:text-brand-400 font-black">Hassan Magdy Zaitoun</span>
                 </p>
@@ -4943,11 +4956,11 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             // تغيير غلاف البروفايل للون الملوكي إذا كان المالك
             const banner = document.getElementById('doc-profile-banner');
             if (doctor.role === 'superadmin') {
-                banner.className = "h-32 bg-gradient-to-r from-purple-900 via-purple-700 to-amber-500 w-full transition-colors duration-500 relative overflow-hidden";
+                banner.className = "h-32 rounded-t-3xl bg-gradient-to-r from-purple-900 via-purple-700 to-amber-500 w-full transition-colors duration-500 relative overflow-hidden shrink-0";
                 banner.innerHTML = '<i class="fa-solid fa-crown absolute -bottom-4 right-10 text-white opacity-20 text-7xl"></i>';
                 document.getElementById('doc-profile-avatar').classList.replace('text-brand-500', 'text-amber-500');
             } else {
-                banner.className = "h-32 bg-gradient-to-r from-brand-600 to-emerald-400 w-full transition-colors duration-500";
+                banner.className = "h-32 rounded-t-3xl bg-gradient-to-r from-brand-600 to-emerald-400 w-full transition-colors duration-500 shrink-0";
                 banner.innerHTML = '';
                 document.getElementById('doc-profile-avatar').classList.replace('text-amber-500', 'text-brand-500');
             }
