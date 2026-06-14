@@ -4219,49 +4219,80 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 return mins > 0 ? `${mins} دقيقة و ${secs} ثانية` : `${secs} ثانية`;
             }
 
-            // دالة بناء ورسم جدول الصدارة
+            // دالة بناء ورسم جدول الصدارة بنظام الدرج الجانبي وبلا حدود للطلاب (تعديل 1)
             async function renderLeaderboard() {
                 try {
                     const snap = await getDocs(query(collection(db, "quizAttempts"), where("quizId", "==", resource.id)));
                     let attempts = [];
+                    let allAttemptsMap = {};
+                    
                     snap.forEach(d => {
-                        if(d.exists()) attempts.push(d.data());
+                        if(d.exists()) {
+                            const data = d.data();
+                            attempts.push(data);
+                            allAttemptsMap[data.userId] = data; // تخزين ورقة إجابة كل طالب برقم هويته
+                        }
                     });
                     
+                    // حفظها في نطاق النافذة العامة لتمكين الاستدعاء عند الضغط
+                    window.currentQuizAttemptsMap = allAttemptsMap;
+
                     // ترتيب الطلاب: الدرجة الأعلى أولاً، ثم الوقت الأسرع ثانياً
                     attempts.sort((a, b) => {
                         if (b.score !== a.score) return b.score - a.score;
                         return (a.timeTaken || 9999) - (b.timeTaken || 9999);
                     });
 
+                    const course = allCourses.find(c => c.id === currentCourseId);
+                    const isAuthorizedToViewSheet = userData?.role === 'superadmin' || (userData?.role === 'admin' && course?.createdBy === currentUser?.uid);
+
                     let leaderboardHTML = `
-                        <div class="mt-8 bg-slate-950/80 p-5 rounded-2xl border border-slate-800 w-full max-w-2xl text-right">
-                            <h4 class="font-black text-xs text-amber-400 mb-4 flex items-center gap-2">
-                                <i class="fa-solid fa-trophy"></i> لوحة المتصدرين وقائمة التفوق الدراسي
-                            </h4>
-                            <div class="space-y-2 max-h-48 overflow-y-auto custom-scrollbar">
+                        <!-- الدرج الجانبي المنزلق لترتيب الطلاب (التعديل الأول) -->
+                        <div id="quiz-leaderboard-sidebar" class="fixed top-16 bottom-0 left-0 w-85 bg-slate-950/95 border-r border-slate-800/80 backdrop-blur-md z-[99998] shadow-2xl transition-transform duration-300 transform -translate-x-full flex flex-col text-right" dir="rtl">
+                            <div class="p-5 border-b border-slate-800 flex justify-between items-center bg-slate-900/40">
+                                <h4 class="font-black text-xs text-amber-400 flex items-center gap-2">
+                                    <i class="fa-solid fa-trophy"></i> جدول ترتيب المتسابقين والنتائج (${attempts.length})
+                                </h4>
+                                <button onclick="document.getElementById('quiz-leaderboard-sidebar').classList.add('-translate-x-full')" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
                     `;
 
                     if (attempts.length === 0) {
-                        leaderboardHTML += `<p class="text-center text-[10px] text-slate-500 py-4">لا توجد محاولات مرصودة حتى الآن. كن البطل الأول وصاحب الصدارة!</p>`;
+                        leaderboardHTML += `<p class="text-center text-[10px] text-slate-500 py-4">لا توجد محاولات مرصودة حتى الآن.</p>`;
                     } else {
-                        attempts.slice(0, 10).forEach((attempt, index) => {
+                        attempts.forEach((attempt, index) => {
                             let rankBadge = `<span class="w-5 h-5 rounded-full bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400 font-en">${index + 1}</span>`;
-                            if (index === 0) rankBadge = `<span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center text-[10px] font-black" title="المركز الأول">🏆</span>`;
-                            if (index === 1) rankBadge = `<span class="w-5 h-5 rounded-full bg-slate-300 text-slate-950 flex items-center justify-center text-[10px] font-black" title="المركز الثاني">🥈</span>`;
-                            if (index === 2) rankBadge = `<span class="w-5 h-5 rounded-full bg-amber-700 text-white flex items-center justify-center text-[10px] font-black" title="المركز الثالث">🥉</span>`;
+                            if (index === 0) rankBadge = `<span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center text-[10px] font-black">🏆</span>`;
+                            if (index === 1) rankBadge = `<span class="w-5 h-5 rounded-full bg-slate-300 text-slate-950 flex items-center justify-center text-[10px] font-black">🥈</span>`;
+                            if (index === 2) rankBadge = `<span class="w-5 h-5 rounded-full bg-amber-700 text-white flex items-center justify-center text-[10px] font-black">🥉</span>`;
 
                             const formattedTime = formatSeconds(attempt.timeTaken);
+                            const attCorrect = attempt.correctCount !== undefined ? attempt.correctCount : Math.round((attempt.score / 100) * (attempt.totalCount || quizQuestions.length));
+                            const attTotal = attempt.totalCount || quizQuestions.length;
+
+                            // زر عرض نموذج الإجابات الخاص بالطالب (تعديل 3)
+                            let viewSheetBtn = '';
+                            if (isAuthorizedToViewSheet) {
+                                viewSheetBtn = `
+                                    <button onclick="window.viewStudentAnswersSheet('${attempt.userId}')" class="text-blue-400 hover:text-blue-100 bg-blue-500/10 hover:bg-blue-500/20 px-2.5 py-1 rounded-lg transition text-[9px] font-black flex items-center gap-1 shrink-0" title="عرض ورقة إجابة الطالب">
+                                        <i class="fa-solid fa-file-invoice"></i> عرض الإجابات
+                                    </button>
+                                `;
+                            }
 
                             leaderboardHTML += `
-                                <div class="flex items-center justify-between p-2.5 bg-slate-900/60 rounded-xl border border-slate-800/40">
-                                    <div class="flex items-center gap-2">
+                                <div class="flex items-center justify-between p-2.5 bg-slate-900/60 rounded-xl border border-slate-800/40 gap-3">
+                                    <div class="flex items-center gap-2 min-w-0">
                                         ${rankBadge}
-                                        <span class="text-xs font-bold ${attempt.userId === currentUser.uid ? 'text-brand-400' : 'text-slate-300'}">${attempt.userName || attempt.email.split('@')[0]}</span>
+                                        <span class="text-xs font-bold truncate ${attempt.userId === currentUser.uid ? 'text-brand-400' : 'text-slate-300'}" title="${attempt.email}">${attempt.userName || attempt.email.split('@')[0]}</span>
                                     </div>
-                                    <div class="flex items-center gap-4 text-[11px] font-bold">
-                                        <span class="text-emerald-500 font-en">${attempt.score}%</span>
-                                        <span class="text-slate-500 font-en">${formattedTime}</span>
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <div class="text-left font-bold text-[10px]">
+                                            <span class="text-emerald-500 font-en block">${attempt.score}% (${attCorrect}/${attTotal})</span>
+                                            <span class="text-slate-500 font-en text-[9px] block">${formattedTime}</span>
+                                        </div>
+                                        ${viewSheetBtn}
                                     </div>
                                 </div>`;
                         });
@@ -4274,6 +4305,104 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                     return `<div class="mt-4 p-3 bg-rose-950/20 border border-rose-900/40 rounded-xl text-center text-xs text-rose-400 font-bold">عذراً، لم نتمكن من جلب لوحة الصدارة الحية الآن.</div>`;
                 }
             }
+
+            // دالتي عرض حلول الطالب للـ دكتور والمالك والعودة (التعديل الثالث)
+            window.viewStudentAnswersSheet = function(studentId) {
+                const attempt = window.currentQuizAttemptsMap ? window.currentQuizAttemptsMap[studentId] : null;
+                if (!attempt) return showToast("لم يتم العثور على بيانات إجابة هذا العميل.", "error");
+
+                const sidebarTrigger = document.getElementById('leaderboard-floating-trigger');
+                if (sidebarTrigger) sidebarTrigger.classList.add('hidden');
+                const sidebar = document.getElementById('quiz-leaderboard-sidebar');
+                if (sidebar) sidebar.classList.add('-translate-x-full');
+
+                const viewSheetContainer = document.getElementById('study-room-dynamic-content');
+                
+                let answersSheetHTML = `
+                    <div class="w-full h-full bg-slate-900 text-white p-6 md:p-10 flex flex-col items-center justify-start overflow-y-auto absolute inset-0 custom-scrollbar text-right" dir="rtl">
+                        
+                        <!-- رأس الورقة مع زر الرجوع -->
+                        <div class="w-full max-w-2xl bg-slate-950 p-4 rounded-2xl border border-slate-800 flex justify-between items-center mb-6 shrink-0 gap-4">
+                            <div class="min-w-0">
+                                <h4 class="text-xs font-black text-amber-400 flex items-center gap-1.5"><i class="fa-solid fa-user-graduate animate-pulse"></i> ورقة إجابة الطالب: ${attempt.userName || attempt.email.split('@')[0]}</h4>
+                                <p class="text-[9px] text-slate-500 mt-1 font-en truncate">${attempt.email}</p>
+                            </div>
+                            <button onclick="window.exitStudentAnswersView()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0">
+                                <i class="fa-solid fa-rotate-left"></i> رجوع للنتيجة
+                            </button>
+                        </div>
+
+                        <!-- إحصائيات الطالب المختار (التعديل الثاني) -->
+                        <div class="grid grid-cols-2 gap-4 w-full max-w-2xl mb-6 shrink-0">
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center">
+                                <p class="text-[10px] text-slate-500 font-bold">درجته المحققة</p>
+                                <p class="text-xl font-black text-brand-400 mt-1 font-en">${attempt.score}% (${attempt.correctCount !== undefined ? attempt.correctCount : Math.round((attempt.score/100)*quizQuestions.length)} من ${attempt.totalCount || quizQuestions.length})</p>
+                            </div>
+                            <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center">
+                                <p class="text-[10px] text-slate-500 font-bold">الوقت المستغرق</p>
+                                <p class="text-base font-black text-slate-300 mt-2 font-en">${formatSeconds(attempt.timeTaken)}</p>
+                            </div>
+                        </div>
+
+                        <!-- نموذج الإجابات الخاص بالطالب -->
+                        <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 w-full max-w-2xl text-right space-y-6">
+                `;
+
+                quizQuestions.forEach((q, qIndex) => {
+                    const studentChoice = attempt.studentAnswers ? attempt.studentAnswers[qIndex] : null;
+                    const isCorrect = studentChoice === q.correctIndex;
+                    const qTextDir = detectDirection(q.question);
+                    const alphabet = ["A", "B", "C", "D", "E"];
+
+                    let answersList = q.options.map((opt, oIndex) => {
+                        let itemBg = 'bg-slate-900/40 border-slate-900';
+                        let icon = '';
+                        
+                        if (oIndex === q.correctIndex) {
+                            itemBg = 'bg-emerald-950/30 border-emerald-500 text-emerald-400 font-bold';
+                            icon = '<i class="fa-solid fa-check text-emerald-400"></i>';
+                        } else if (oIndex === studentChoice) {
+                            itemBg = 'bg-rose-950/30 border-rose-500 text-rose-400';
+                            icon = '<i class="fa-solid fa-xmark text-rose-400"></i>';
+                        }
+                        
+                        return `
+                            <div class="p-3 rounded-xl border text-xs flex justify-between items-center ${itemBg}">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-5 h-5 rounded bg-slate-950 flex items-center justify-center font-bold text-[10px] text-slate-500 font-en shrink-0">${alphabet[oIndex]}</span>
+                                    <span class="${detectDirection(opt).font}">${opt}</span>
+                                </div>
+                                ${icon}
+                            </div>
+                        `;
+                    }).join('');
+
+                    answersSheetHTML += `
+                        <div class="space-y-2 border-b border-slate-900/60 pb-4 last:border-0 last:pb-0" dir="${qTextDir.dir}">
+                            <div class="flex items-start gap-2 ${qTextDir.align}">
+                                ${studentChoice === null ? '<span class="text-[10px] bg-slate-500/10 text-slate-400 px-2 py-0.5 rounded font-bold shrink-0">لم يُجب</span>' : (isCorrect ? '<span class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-bold shrink-0">إجابة صحيحة</span>' : '<span class="text-[10px] bg-rose-500/10 text-rose-400 px-2 py-0.5 rounded font-bold shrink-0">إجابة خاطئة</span>')}
+                                <h5 class="text-xs font-black text-slate-300 ${qTextDir.font}">${q.question}</h5>
+                            </div>
+                            <div class="grid grid-cols-1 gap-1.5 mt-2">
+                                ${answersList}
+                            </div>
+                            ${q.explanation ? `
+                                <div class="mt-3 p-3.5 bg-brand-500/10 border-r-4 border-brand-500 rounded-xl text-right">
+                                    <p class="text-[11px] font-black text-brand-500 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-lightbulb"></i> الشرح العلمي للحل:</p>
+                                    <p class="text-[11px] text-slate-300 leading-relaxed font-sans">${q.explanation}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                });
+
+                answersSheetHTML += `</div></div>`;
+                viewSheetContainer.innerHTML = answersSheetHTML;
+            };
+
+            window.exitStudentAnswersView = function() {
+                window.renderInteractiveQuiz(resource);
+            };
 
             // دالة بناء نموذج الإجابة للأسئلة
             function renderModelAnswerMarkup(savedAnswersArray) {
@@ -4324,8 +4453,8 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                             </div>
                             <!-- عرض صندوق التفسير العلمي الفاخر للطالب -->
                             ${q.explanation ? `
-                                <div class="mt-3 p-3.5 bg-brand-500/10 border-r-4 border-brand-500 rounded-xl text-right animate-slide-up">
-                                    <p class="text-[11px] font-black text-brand-500 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-lightbulb"></i> Scientific Explanation (الشرح العلمي للحل):</p>
+                                <div class="mt-3 p-3.5 bg-brand-500/10 border-r-4 border-brand-500 rounded-xl text-right">
+                                    <p class="text-[11px] font-black text-brand-500 mb-1 flex items-center gap-1.5"><i class="fa-solid fa-lightbulb"></i> الشرح العلمي للحل:</p>
                                     <p class="text-[11px] text-slate-300 leading-relaxed font-sans">${q.explanation}</p>
                                 </div>
                             ` : ''}
@@ -4341,8 +4470,11 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             if (previousAttempt || hasCompletedLocal) {
                 const leaderboardBox = await renderLeaderboard();
                 
-                // جلب القيم من السيرفر أو استخدام قيم افتراضية إذا كانت المحاولة محلية فقط
+                // جلب القيم من السيرفر وعرض الدرجة بالأرقام والنسبة معاً (التعديل الثاني)
                 const score = previousAttempt ? previousAttempt.score : 100;
+                const correctCount = previousAttempt ? (previousAttempt.correctCount !== undefined ? previousAttempt.correctCount : Math.round((previousAttempt.score/100)*quizQuestions.length)) : 0;
+                const totalCount = previousAttempt ? (previousAttempt.totalCount || quizQuestions.length) : quizQuestions.length;
+                
                 const timeTaken = previousAttempt ? previousAttempt.timeTaken : null;
                 const savedAnswers = previousAttempt ? previousAttempt.studentAnswers : null;
                 
@@ -4350,17 +4482,18 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 const modelAnswerBox = renderModelAnswerMarkup(savedAnswers);
 
                 contentContainer.innerHTML = `
-                    <div class="w-full h-full bg-slate-900 text-white p-6 md:p-10 flex flex-col justify-start items-center overflow-y-auto absolute inset-0 custom-scrollbar">
+                    <div class="w-full h-full bg-slate-900 text-white p-6 md:p-10 flex flex-col justify-start items-center overflow-y-auto absolute inset-0 custom-scrollbar text-center animate-fade-in">
                         <div class="w-16 h-16 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center text-3xl mb-4">
                             <i class="fa-solid fa-lock"></i>
                         </div>
                         <h3 class="text-lg font-black mb-1">لقد أديت هذا الاختبار مسبقاً</h3>
                         <p class="text-xs text-slate-400 max-w-sm text-center leading-relaxed">تسمح إدارة المنصة بمحاولة واحدة فقط لكل طالب لضمان النزاهة والمنافسة العادلة.</p>
                         
+                        <!-- إحصائيات الدرجة بالأرقام والنسبة المئوية معاً (التعديل الثاني) -->
                         <div class="grid grid-cols-2 gap-4 mt-6 w-full max-w-sm">
                             <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center">
                                 <p class="text-[10px] text-slate-500 font-bold">درجتك المحققة</p>
-                                <p class="text-xl font-black text-brand-400 mt-1 font-en">${score}%</p>
+                                <p class="text-xl font-black text-brand-400 mt-1 font-en">${score}% (${correctCount} من ${totalCount})</p>
                             </div>
                             <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center">
                                 <p class="text-[10px] text-slate-500 font-bold">الوقت المستغرق</p>
@@ -4372,7 +4505,13 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                         ${modelAnswerBox}
 
                         <button onclick="window.closeImmersiveStudyRoom()" class="mt-6 bg-slate-800 hover:bg-slate-700 text-white px-8 py-3 rounded-xl text-xs font-bold transition shrink-0">العودة لقاعة الكورس</button>
-                    </div>`;
+                    </div>
+                    
+                    <!-- زر عائم لعرض لوحة المتصدرين الجانبية (التعديل الأول) -->
+                    <button id="leaderboard-floating-trigger" onclick="document.getElementById('quiz-leaderboard-sidebar').classList.toggle('-translate-x-full')" class="fixed bottom-6 left-6 z-[99999] bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-2 text-xs transition transform active:scale-95 border border-amber-400 animate-scale-up">
+                        <i class="fa-solid fa-trophy text-sm animate-bounce"></i> <span>🏆 ترتيب الطلاب الحاصلين على الكورس</span>
+                    </button>
+                `;
                 return;
             }
 
