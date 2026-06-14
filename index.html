@@ -280,7 +280,7 @@
     <!-- ========================================== -->
     <!-- هيكل الواجهة الرئيسية المحدثة -->
     <!-- ========================================== -->
-    <div id="main-layout" class="hidden h-screen flex overflow-hidden bg-slate-50 dark:bg-darkBg">
+    <div id="main-layout" class="hidden h-[100dvh] w-full flex overflow-hidden bg-slate-50 dark:bg-darkBg">
         
         <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-20 hidden lg:hidden backdrop-blur-sm transition-opacity" onclick="toggleSidebar()"></div>
 
@@ -375,7 +375,7 @@
         </aside>
 
         <!-- المحتوى الرئيسي -->
-        <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <main class="flex-1 flex flex-col h-full w-full overflow-hidden relative">
             
             <header class="h-20 bg-white/80 dark:bg-darkCard/80 backdrop-blur-md border-b border-slate-200 dark:border-darkBorder flex items-center justify-between px-4 sm:px-6 z-10">
                 <div class="flex items-center gap-3 sm:gap-4">
@@ -418,7 +418,7 @@
                 </div>
             </header>
 
-            <div class="flex-1 overflow-y-auto p-4 md:p-8 relative custom-scrollbar" id="views-container">
+            <div class="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8 relative custom-scrollbar" id="views-container">
                 
                 <!-- ========================================== -->
                 <!-- الشاشة الاحترافية المضافة: لوحة تحكم الطالب الرئيسية -->
@@ -887,14 +887,15 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
         </div>
     </div>
     
-    <div id="saved-courses-grid" class="grid grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 pb-10 animate-slide-up">
+    <div id="saved-courses-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-6 animate-slide-up">
         <!-- جاري العمل عليها برمجياً -->
-        <div class="col-span-full py-20 flex flex-col items-center justify-center text-slate-400 bg-white dark:bg-darkCard rounded-3xl border border-slate-100 dark:border-darkBorder">
-            <i class="fa-solid fa-heart-crack text-6xl mb-4 opacity-30 text-rose-500"></i>
-            <h3 class="text-xl font-black text-slate-700 dark:text-slate-300">لا توجد كورسات محفوظة</h3>
-            <p class="text-sm mt-2">قم باستكشاف الكورسات واضغط على زر الحفظ لإضافتها هنا.</p>
-            <button onclick="navTo('student-catalog')" class="mt-4 bg-brand-500 hover:bg-brand-600 text-white px-6 py-2 rounded-xl font-bold transition">استكشاف الكورسات الآن</button>
-        </div>
+    </div>
+    
+    <!-- زر عرض المزيد للكورسات المحفوظة -->
+    <div id="saved-load-more-container" class="hidden flex justify-center pb-10">
+        <button onclick="loadMoreSaved()" class="bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 px-8 rounded-xl transition shadow-sm flex items-center gap-2 text-sm">
+            عرض المزيد <i class="fa-solid fa-angle-down"></i>
+        </button>
     </div>
 </div>
                 <!-- شاشة: الكتالوج والأقسام للطالب (النسخة الاحترافية الحديثة) -->
@@ -947,11 +948,17 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                         </div>
                         <div class="relative w-full md:max-w-md">
                             <i class="fa-solid fa-search absolute right-4 top-3.5 text-slate-400"></i>
-                            <input type="text" id="doctor-search-input" oninput="renderFullDoctorsDirectory()" class="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-900 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="ابحث باسم الدكتور...">
+                            <input type="text" id="doctor-search-input" oninput="resetAndRenderDirectory()" class="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-900 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="ابحث باسم الدكتور...">
                         </div>
                     </div>
-                    <div id="full-doctors-grid" class="grid grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 pb-10 animate-slide-up">
+                    <div id="full-doctors-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-4 pb-6 animate-slide-up">
                         <!-- سيتم حقن الدكاترة هنا برمجياً -->
+                    </div>
+                    
+                    <div id="directory-load-more-container" class="hidden flex justify-center pb-10">
+                        <button onclick="loadMoreDirectory()" class="bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 px-8 rounded-xl transition shadow-sm flex items-center gap-2 text-sm">
+                            عرض المزيد من الدكاترة <i class="fa-solid fa-angle-down"></i>
+                        </button>
                     </div>
                 </div>
                 
@@ -1261,7 +1268,7 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
             <!-- شاشة: بروفايل الدكتور والكورسات الخاصة به -->
                 <div id="doctor-profile-view" class="content-view space-y-6">
                     <div class="bg-white dark:bg-darkCard rounded-3xl border border-slate-100 dark:border-darkBorder overflow-hidden relative shadow-sm">
-                        <div class="h-32 bg-gradient-to-r from-brand-600 to-emerald-400 w-full"></div>
+                        <div id="doc-profile-banner" class="h-32 bg-gradient-to-r from-brand-600 to-emerald-400 w-full transition-colors duration-500"></div>
                         <div class="px-6 sm:px-10 pb-6 relative">
                             <div class="flex flex-col sm:flex-row justify-between items-center sm:items-end gap-4 -mt-12 sm:-mt-16 mb-6">
                                 <div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-right">
@@ -1278,8 +1285,13 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                                 </button>
                             </div>
                             <h3 class="font-bold text-lg mb-4 border-b border-slate-100 dark:border-darkBorder pb-2">الكورسات التي يقدمها الدكتور</h3>
-                            <div id="doc-profile-courses" class="grid grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4">
+                            <div id="doc-profile-courses" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-4">
                                 <!-- سيتم جلب كورسات الدكتور هنا -->
+                            </div>
+                            <div id="doc-courses-load-more" class="hidden flex justify-center pt-2">
+                                <button onclick="loadMoreDocCourses()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-2.5 px-6 rounded-xl transition shadow-sm text-xs">
+                                    عرض المزيد من كورساته <i class="fa-solid fa-angle-down"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -3826,14 +3838,22 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             }
         };
 
+        let currentSavedLimit = 8;
+        
+        window.resetAndRenderSaved = function() { currentSavedLimit = 8; renderSavedCourses(); };
+        window.loadMoreSaved = function() { currentSavedLimit += 8; renderSavedCourses(); };
+
         window.renderSavedCourses = function() {
             const grid = document.getElementById('saved-courses-grid');
+            const loadMoreBtn = document.getElementById('saved-load-more-container');
             if(!grid) return;
+            grid.innerHTML = "";
             
             const savedIds = userData?.savedCourses || [];
             const savedList = allCourses.filter(c => savedIds.includes(c.id));
             
             if (savedList.length === 0) {
+                if(loadMoreBtn) loadMoreBtn.classList.add('hidden');
                 grid.innerHTML = `
                     <div class="col-span-full py-20 flex flex-col items-center justify-center text-slate-400 bg-white dark:bg-darkCard rounded-3xl border border-slate-100 dark:border-darkBorder w-full shadow-sm">
                         <i class="fa-solid fa-heart-crack text-6xl mb-4 opacity-30 text-rose-500"></i>
@@ -3844,8 +3864,12 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 return;
             }
             
-            grid.innerHTML = "";
-            savedList.forEach(course => {
+            const coursesToShow = savedList.slice(0, currentSavedLimit);
+            if (loadMoreBtn) {
+                loadMoreBtn.classList.toggle('hidden', savedList.length <= currentSavedLimit);
+            }
+
+            coursesToShow.forEach(course => {
                 const lecsCount = course.lectures ? course.lectures.length : 0;
                 const avgRating = course.ratingAvg ? course.ratingAvg.toFixed(1) : "5.0";
                 const heartClass = 'fa-solid fa-heart text-rose-500';
@@ -4861,27 +4885,40 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             const container = document.getElementById('doctors-directory-list');
             if(!container) return;
             try {
-                // جلب الدكاترة الذين تم تثبيتهم من المالك فقط (isFeaturedDoctor == true)
-                const snap = await getDocs(query(collection(db, "users"), where("role", "==", "admin"), where("status", "==", "active"), where("isFeaturedDoctor", "==", true)));
                 allDoctors = [];
+                // 1. جلب حساب المالك أولاً ليتصدر القائمة
+                const superSnap = await getDocs(query(collection(db, "users"), where("role", "==", "superadmin")));
+                superSnap.forEach(d => allDoctors.push({ id: d.id, ...d.data() }));
+
+                // 2. جلب الدكاترة المثبتين
+                const snap = await getDocs(query(collection(db, "users"), where("role", "==", "admin"), where("status", "==", "active"), where("isFeaturedDoctor", "==", true)));
                 snap.forEach(d => allDoctors.push({ id: d.id, ...d.data() }));
                 
                 container.innerHTML = "";
                 
                 if(allDoctors.length === 0) {
-                    container.innerHTML = `<p class="text-xs text-slate-400 w-full text-center py-4">لم تقم الإدارة بتثبيت دكاترة في الصفحة الرئيسية حالياً. ابحث عن دكتورك في قسم (دكاترة المنصة).</p>`;
+                    container.innerHTML = `<p class="text-xs text-slate-400 w-full text-center py-4">لم تقم الإدارة بتثبيت دكاترة في الصفحة الرئيسية حالياً.</p>`;
                     return;
                 }
 
                 allDoctors.forEach(doc => {
                     const avatar = doc.avatar || 'user-tie';
+                    const isOwner = doc.role === 'superadmin';
+                    
+                    // الألوان الملوكية للمالك، والألوان العادية للدكتور
+                    const cardBg = isOwner ? 'bg-gradient-to-br from-slate-900 to-purple-950 border-purple-500/50 shadow-purple-900/20 hover:border-amber-400' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-brand-500 hover:shadow-md';
+                    const iconBg = isOwner ? 'bg-amber-500 text-slate-900 border-amber-400' : 'bg-white dark:bg-darkCard text-brand-500 border-slate-100 dark:border-slate-700';
+                    const nameColor = isOwner ? 'text-amber-400' : 'text-slate-800 dark:text-white';
+                    const subtitle = isOwner ? '<i class="fa-solid fa-crown text-amber-500"></i> مالك المنصة' : 'عرض الملف';
+
                     container.innerHTML += `
-                        <div onclick="window.openDoctorProfile('${doc.id}')" class="min-w-[140px] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 flex flex-col items-center justify-center text-center cursor-pointer hover:border-brand-500 hover:shadow-md transition-all group shrink-0">
-                            <div class="w-14 h-14 rounded-full bg-white dark:bg-darkCard text-brand-500 flex items-center justify-center text-2xl shadow-sm mb-2 group-hover:scale-110 transition border border-slate-100 dark:border-slate-700">
+                        <div onclick="window.openDoctorProfile('${doc.id}')" class="min-w-[140px] ${cardBg} rounded-2xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all group shrink-0 relative overflow-hidden">
+                            ${isOwner ? '<div class="absolute -top-4 -right-4 text-purple-800 opacity-30 text-5xl"><i class="fa-solid fa-shield-halved"></i></div>' : ''}
+                            <div class="w-14 h-14 rounded-full ${iconBg} flex items-center justify-center text-2xl shadow-sm mb-2 group-hover:scale-110 transition border relative z-10">
                                 <i class="fa-solid fa-${avatar}"></i>
                             </div>
-                            <h4 class="font-bold text-xs text-slate-800 dark:text-white line-clamp-1 w-full">${doc.name || doc.email.split('@')[0]}</h4>
-                            <p class="text-[9px] text-slate-400 mt-1">عرض الملف</p>
+                            <h4 class="font-bold text-xs ${nameColor} line-clamp-1 w-full relative z-10">${doc.name || doc.email.split('@')[0]}</h4>
+                            <p class="text-[9px] text-slate-400 mt-1 relative z-10">${subtitle}</p>
                         </div>
                     `;
                 });
@@ -4898,22 +4935,53 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             localStorage.setItem('hms_active_doctor_id', doctorId);
             
             navTo('doctor-profile-view');
-            document.getElementById('page-title').innerText = "الملف الشخصي";
+            document.getElementById('page-title').innerText = doctor.role === 'superadmin' ? "ملف المالك" : "الملف الشخصي";
             
             document.getElementById('doc-profile-name').textContent = doctor.name || doctor.email.split('@')[0];
             document.getElementById('doc-profile-avatar').innerHTML = `<i class="fa-solid fa-${doctor.avatar || 'user-tie'}"></i>`;
             
+            // تغيير غلاف البروفايل للون الملوكي إذا كان المالك
+            const banner = document.getElementById('doc-profile-banner');
+            if (doctor.role === 'superadmin') {
+                banner.className = "h-32 bg-gradient-to-r from-purple-900 via-purple-700 to-amber-500 w-full transition-colors duration-500 relative overflow-hidden";
+                banner.innerHTML = '<i class="fa-solid fa-crown absolute -bottom-4 right-10 text-white opacity-20 text-7xl"></i>';
+                document.getElementById('doc-profile-avatar').classList.replace('text-brand-500', 'text-amber-500');
+            } else {
+                banner.className = "h-32 bg-gradient-to-r from-brand-600 to-emerald-400 w-full transition-colors duration-500";
+                banner.innerHTML = '';
+                document.getElementById('doc-profile-avatar').classList.replace('text-amber-500', 'text-brand-500');
+            }
+
             const coursesContainer = document.getElementById('doc-profile-courses');
             coursesContainer.innerHTML = "";
             
-            const docCourses = allCourses.filter(c => c.createdBy === doctorId);
-            if(docCourses.length === 0) {
+            window.currentDocCoursesList = allCourses.filter(c => c.createdBy === doctorId);
+            window.currentDocCoursesLimit = 4; // عرض 4 كورسات فقط مبدئياً
+            
+            window.renderDocCoursesUI();
+        };
+
+        window.loadMoreDocCourses = function() {
+            window.currentDocCoursesLimit += 4;
+            window.renderDocCoursesUI();
+        };
+
+        window.renderDocCoursesUI = function() {
+            const coursesContainer = document.getElementById('doc-profile-courses');
+            const loadMoreBtn = document.getElementById('doc-courses-load-more');
+            coursesContainer.innerHTML = "";
+
+            if(!window.currentDocCoursesList || window.currentDocCoursesList.length === 0) {
                 coursesContainer.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 text-sm border border-dashed border-slate-200 dark:border-slate-700 rounded-2xl">لا توجد كورسات منشورة لهذا الدكتور بعد.</div>`;
+                if(loadMoreBtn) loadMoreBtn.classList.add('hidden');
                 return;
             }
 
+            const coursesToShow = window.currentDocCoursesList.slice(0, window.currentDocCoursesLimit);
+            if(loadMoreBtn) loadMoreBtn.classList.toggle('hidden', window.currentDocCoursesList.length <= window.currentDocCoursesLimit);
+
             // رسم بطاقات الكورسات الخاصة به بنفس التصميم الاحترافي الموحد
-            docCourses.forEach(course => {
+            coursesToShow.forEach(course => {
                 const lecsCount = course.lectures ? course.lectures.length : 0;
                 const avgRating = course.ratingAvg ? course.ratingAvg.toFixed(1) : "5.0";
                 const isSaved = userData?.savedCourses?.includes(course.id);
@@ -5765,9 +5833,14 @@ window.openContactPriceModal = function(courseId) {
             }
         };
 
+        let currentDirectoryLimit = 10;
+        window.resetAndRenderDirectory = function() { currentDirectoryLimit = 10; renderFullDoctorsDirectory(); };
+        window.loadMoreDirectory = function() { currentDirectoryLimit += 10; renderFullDoctorsDirectory(); };
+
         // دالة عرض جميع الدكاترة في قسم الدليل (مع البحث)
         window.renderFullDoctorsDirectory = async function() {
             const grid = document.getElementById('full-doctors-grid');
+            const loadMoreBtn = document.getElementById('directory-load-more-container');
             if(!grid) return;
             
             const searchQuery = (document.getElementById('doctor-search-input')?.value || "").toLowerCase().trim();
@@ -5775,9 +5848,17 @@ window.openContactPriceModal = function(courseId) {
             grid.innerHTML = `<div class="col-span-full flex justify-center py-10"><div class="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div></div>`;
             
             try {
+                let directoryDoctors = [];
+                // جلب المالك
+                const superSnap = await getDocs(query(collection(db, "users"), where("role", "==", "superadmin")));
+                superSnap.forEach(d => {
+                    const docData = { id: d.id, ...d.data() };
+                    directoryDoctors.push(docData);
+                    if (!allDoctors.find(existing => existing.id === d.id)) allDoctors.push(docData);
+                });
+
                 // جلب جميع الدكاترة النشطين
                 const snap = await getDocs(query(collection(db, "users"), where("role", "==", "admin"), where("status", "==", "active")));
-                let directoryDoctors = [];
                 snap.forEach(d => {
                     const docData = { id: d.id, ...d.data() };
                     directoryDoctors.push(docData);
@@ -5797,23 +5878,32 @@ window.openContactPriceModal = function(courseId) {
                 
                 if(directoryDoctors.length === 0) {
                     grid.innerHTML = `<div class="col-span-full text-center py-10 text-slate-400 font-bold bg-white dark:bg-darkCard rounded-3xl border border-slate-100 dark:border-darkBorder"><i class="fa-solid fa-user-xmark text-4xl mb-3 opacity-50"></i><br>لم يتم العثور على دكاترة تطابق بحثك.</div>`;
+                    if(loadMoreBtn) loadMoreBtn.classList.add('hidden');
                     return;
                 }
 
+                const docsToShow = directoryDoctors.slice(0, currentDirectoryLimit);
+                if(loadMoreBtn) loadMoreBtn.classList.toggle('hidden', directoryDoctors.length <= currentDirectoryLimit);
+
                 grid.innerHTML = "";
-                directoryDoctors.forEach(doc => {
+                docsToShow.forEach(doc => {
                     const avatar = doc.avatar || 'user-tie';
-                    // جلب عدد كورسات الدكتور
                     const docCoursesCount = allCourses.filter(c => c.createdBy === doc.id).length;
-                    
+                    const isOwner = doc.role === 'superadmin';
+
+                    const cardBg = isOwner ? 'bg-gradient-to-br from-slate-900 to-purple-950 border-purple-500/50 hover:border-amber-400' : 'bg-white dark:bg-darkCard border-slate-200 dark:border-darkBorder hover:border-blue-500 dark:hover:border-blue-500';
+                    const iconBg = isOwner ? 'bg-amber-500 text-slate-900 border-amber-400' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 border-blue-100 dark:border-blue-800';
+                    const nameColor = isOwner ? 'text-amber-400' : 'text-slate-800 dark:text-white';
+                    const badge = isOwner ? '<span class="bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded text-[8px] font-black"><i class="fa-solid fa-crown"></i> مالك المنصة</span>' : `<span class="bg-slate-100 dark:bg-slate-800 text-slate-500 text-[8px] font-bold px-1.5 py-1 rounded whitespace-nowrap"><i class="fa-solid fa-book-open text-blue-500"></i> ${docCoursesCount} كورسات</span>`;
+
                     grid.innerHTML += `
-                        <div class="bg-white dark:bg-darkCard rounded-2xl border border-slate-200 dark:border-darkBorder p-3 flex flex-col items-center justify-center text-center hover:shadow-xl hover:border-blue-500 dark:hover:border-blue-500 transition-all group">
-                            <div class="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center text-xl shadow-inner mb-2 border border-blue-100 dark:border-blue-800">
+                        <div class="${cardBg} rounded-2xl border p-3 flex flex-col items-center justify-center text-center hover:shadow-xl transition-all group relative overflow-hidden">
+                            <div class="w-12 h-12 rounded-full ${iconBg} flex items-center justify-center text-xl shadow-inner mb-2 border relative z-10">
                                 <i class="fa-solid fa-${avatar}"></i>
                             </div>
-                            <h4 class="font-black text-xs text-slate-800 dark:text-white line-clamp-1 w-full">${doc.name || doc.email.split('@')[0]}</h4>
-                            <span class="bg-slate-100 dark:bg-slate-800 text-slate-500 text-[8px] font-bold px-1.5 py-1 rounded mt-1 mb-2 whitespace-nowrap"><i class="fa-solid fa-book-open text-blue-500"></i> ${docCoursesCount} كورسات</span>
-                            <button onclick="window.openDoctorProfile('${doc.id}')" class="w-full bg-slate-800 hover:bg-blue-600 text-white font-bold py-1.5 rounded-lg transition text-[9px] shadow-sm">الملف الشخصي</button>
+                            <h4 class="font-black text-xs ${nameColor} line-clamp-1 w-full relative z-10">${doc.name || doc.email.split('@')[0]}</h4>
+                            <div class="mt-1 mb-2 relative z-10 h-4 flex items-center">${badge}</div>
+                            <button onclick="window.openDoctorProfile('${doc.id}')" class="w-full ${isOwner ? 'bg-amber-500 hover:bg-amber-600 text-slate-900' : 'bg-slate-800 hover:bg-blue-600 text-white'} font-bold py-1.5 rounded-lg transition text-[9px] shadow-sm relative z-10">الملف الشخصي</button>
                         </div>
                     `;
                 });
