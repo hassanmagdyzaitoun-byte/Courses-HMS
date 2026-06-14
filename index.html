@@ -1803,8 +1803,9 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                 if (unsubNotifs) { unsubNotifs = null; }
 
                 isAppReady = false; currentUser = null; userData = null;
-                // مسح الكورس النشط من الذاكرة عند الخروج
+                // مسح كافة المحفوظات المؤقتة لتسجيل خروج آمن ونظيف
                 localStorage.removeItem('hms_active_course_id');
+                localStorage.removeItem('hms_active_doctor_id');
                 
                 // إخفاء كافة الشاشات الأخرى لضمان عدم دمجها
                 document.getElementById('main-layout').classList.add('hidden');
@@ -1835,20 +1836,12 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                 allCourses = [];
                 snapshot.forEach(docSnap => allCourses.push({ id: docSnap.id, ...docSnap.data() }));
                 
-                if(document.getElementById('student-catalog').classList.contains('active')) renderModernCatalog();
-                if(document.getElementById('student-dashboard').classList.contains('active')) buildDashboardHub();
-                buildManagementTable();
+                // تحديث تقدم الطالب العام
                 updateGeneralProgress();
-                if(userData?.role === 'superadmin') window.initSuperAdmin();
-
-                // 🧠 ذكاء التحديث اللحظي: إعادة بناء محتويات الكورس إذا كان الطالب متواجداً في قاعة المشاهدة أثناء الـ Refresh
-                const savedCourseId = localStorage.getItem('hms_active_course_id');
-                const isPlayerActive = document.getElementById('student-player').classList.contains('active');
-                if (isPlayerActive && savedCourseId && allCourses.length > 0 && !currentCourseId) {
-                    window.openCoursePlayer(savedCourseId);
-                }
+                
+                // تفعيل الموزع الموحد الذكي لتحديث بيانات الصفحة النشطة حالياً أياً كانت
+                window.refreshActiveViewData();
             }, (error) => {
-                console.error(error);
                 showToast("تنبيه: عطل في صلاحيات القراءة، يرجى مراجعة لوحة Firebase وقواعد الأمان Rules.", "error");
             });
         }
@@ -4856,6 +4849,9 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             if(!doctor) return;
             
             currentViewingDoctorId = doctorId;
+            // حفظ معرف الدكتور النشط في الذاكرة المقاومة للتحديث
+            localStorage.setItem('hms_active_doctor_id', doctorId);
+            
             navTo('doctor-profile-view');
             document.getElementById('page-title').innerText = "الملف الشخصي";
             
@@ -4924,6 +4920,43 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                     </div>
                 `;
             });
+        };
+
+        // دالة الموزّع الموحد الذكية لإعادة بناء بيانات أي صفحة مفتوحة بعد الـ Refresh
+        window.refreshActiveViewData = function() {
+            if (!currentUser || !userData) return;
+
+            const activeView = document.querySelector('.content-view.active');
+            if (!activeView) return;
+
+            const viewId = activeView.id;
+
+            if (viewId === 'student-dashboard') buildDashboardHub();
+            if (viewId === 'student-catalog') renderModernCatalog();
+            if (viewId === 'student-saved-courses') renderSavedCourses();
+            if (viewId === 'student-doctors-directory') renderFullDoctorsDirectory();
+            if (viewId === 'student-community') loadCommunityPosts();
+            if (viewId === 'student-progress') { buildAchievementsGrid(); fillProfileFields(); }
+            if (viewId === 'admin-manage') buildManagementTable();
+            if (viewId === 'super-dashboard') initSuperAdmin();
+            if (viewId === 'doctor-inbox-view') loadDoctorMessages();
+            if (viewId === 'student-messages-view') loadStudentMessages();
+
+            // استعادة قاعة كورس المشاهدة
+            if (viewId === 'student-player') {
+                const savedCourseId = localStorage.getItem('hms_active_course_id');
+                if (savedCourseId && !currentCourseId && allCourses.length > 0) {
+                    window.openCoursePlayer(savedCourseId);
+                }
+            }
+
+            // استعادة بروفايل الدكتور
+            if (viewId === 'doctor-profile-view') {
+                const savedDocId = localStorage.getItem('hms_active_doctor_id');
+                if (savedDocId && !currentViewingDoctorId && allDoctors.length > 0) {
+                    window.openDoctorProfile(savedDocId);
+                }
+            }
         };
 
         // إرسال رسالة للدكتور
