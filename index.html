@@ -1572,10 +1572,9 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
             if(viewId === 'student-community') loadCommunityPosts();
             if(viewId === 'student-progress') { buildAchievementsGrid(); fillProfileFields(); }
             if(viewId === 'student-doctors-directory') renderFullDoctorsDirectory();
-            
-            // إصلاح مشكلة التحميل اللانهائي لصفحات الإدارة
             if(viewId === 'admin-manage') buildManagementTable();
             if(viewId === 'super-dashboard') window.initSuperAdmin();
+            if(viewId === 'student-saved-courses') renderSavedCourses(); // السطر الذي كان مفقوداً وتمت إضافته
 
             const viewsContainer = document.getElementById('views-container');
             if (viewsContainer) viewsContainer.scrollTop = 0;
@@ -1755,20 +1754,26 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                             return;
                         }
 
-                        // --- إضافة حارس الجلسات اللحظي (منع تشارك الحسابات) ---
+                        // --- إضافة حارس الجلسات والمزامنة اللحظية لبيانات المستخدم ---
                         if (window.unsubscribeSession) window.unsubscribeSession();
                         window.unsubscribeSession = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                             if (docSnap.exists()) {
-                                const currentDbSession = docSnap.data().sessionId;
+                                // مزامنة البيانات محلياً بشكل لحظي لضمان بقاء المحفوظات محدثة دائماً
+                                userData = docSnap.data();
+
+                                const currentDbSession = userData.sessionId;
                                 const localSession = localStorage.getItem('hms_session_id');
                                 if (!isLoginInProgress && currentDbSession && localSession && currentDbSession !== localSession) {
                                     showToast("⚠️ تم تسجيل الدخول من جهاز آخر. سيتم تسجيل خروجك الآن حماية لحسابك.", "error");
                                     signOut(auth);
                                 }
-                                if (docSnap.data().status === 'deleted') {
+                                if (userData.status === 'deleted') {
                                     showToast("تم حذف هذا الحساب.", "error");
                                     signOut(auth);
                                 }
+                                
+                                // تحديث الشاشة النشطة فوراً إذا تغيرت بيانات الطالب (مثل حفظ كورس)
+                                if (isAppReady) window.refreshActiveViewData();
                             }
                         });
                         // --------------------------------------------------------
