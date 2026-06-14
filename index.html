@@ -4644,17 +4644,18 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                     }
 
                     contentContainer.innerHTML = `
-                        <div class="w-full h-full bg-slate-900 text-white p-6 md:p-10 flex flex-col items-center justify-start overflow-y-auto absolute inset-0 custom-scrollbar">
+                        <div class="w-full h-full bg-slate-900 text-white p-6 md:p-10 flex flex-col items-center justify-start overflow-y-auto absolute inset-0 custom-scrollbar text-center animate-fade-in">
                             <div class="w-16 h-16 rounded-full flex items-center justify-center text-4xl mb-4 ${scorePct >= 50 ? 'bg-emerald-500/20 text-emerald-500' : 'bg-rose-500/20 text-rose-500'}">
                                 <i class="fa-solid ${scorePct >= 50 ? 'fa-square-check' : 'fa-triangle-exclamation'}"></i>
                             </div>
                             <h3 class="text-xl font-black mb-1">${scorePct >= 50 ? 'تم رصد نجاحك بنجاح!' : 'تم رصد درجتك، حظاً موفقاً في الاختبارات القادمة.'}</h3>
                             <p class="text-xs text-slate-400">تم تسجيل محاولتك بشكل نهائي ولن يُسمح لك بإعادة الاختبار مجدداً.</p>
                             
+                            <!-- كروت النتائج المحدثة بالدرجة والنسبة معاً (التعديل الثاني) -->
                             <div class="grid grid-cols-2 gap-4 mt-6 w-full max-w-sm">
                                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center">
                                     <p class="text-[10px] text-slate-500 font-bold">النتيجة النهائية</p>
-                                    <p class="text-2xl font-black text-brand-400 mt-1 font-en">${scorePct}%</p>
+                                    <p class="text-xl font-black text-brand-400 mt-1 font-en">${scorePct}% (${correctCount} من ${quizQuestions.length})</p>
                                 </div>
                                 <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 text-center">
                                     <p class="text-[10px] text-slate-500 font-bold">الوقت المستغرق</p>
@@ -4667,6 +4668,11 @@ const actionBtnHtml = (isPaid && !isUnlocked)
 
                             <button onclick="window.closeImmersiveStudyRoom()" class="mt-8 bg-brand-600 hover:bg-brand-700 text-white px-8 py-3 rounded-xl text-xs font-bold transition shadow-lg shrink-0">العودة لقاعة الكورس الرئيسية</button>
                         </div>
+                        
+                        <!-- الزر العائم لجدول المتصدرين المنزلق فور انتهاء الحل لأول مرة (التعديل الأول) -->
+                        <button id="leaderboard-floating-trigger" onclick="document.getElementById('quiz-leaderboard-sidebar').classList.toggle('-translate-x-full')" class="fixed bottom-6 left-6 z-[99999] bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-6 py-3.5 rounded-2xl shadow-2xl flex items-center gap-2 text-xs transition transform active:scale-95 border border-amber-400 animate-scale-up">
+                            <i class="fa-solid fa-trophy text-sm animate-bounce"></i> <span>🏆 ترتيب الطلاب الحاصلين على الكورس</span>
+                        </button>
                     `;
 
                     updateGeneralProgress();
