@@ -908,9 +908,9 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                         <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto flex-1 md:max-w-2xl">
                             <div class="relative w-full">
                                 <i class="fa-solid fa-search absolute right-4 top-3.5 text-slate-400"></i>
-                                <input type="text" id="catalog-search" oninput="renderModernCatalog()" class="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-900 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="ابحث باسم الكورس، التصنيف، أو الكلمات المفتاحية...">
+                                <input type="text" id="catalog-search" oninput="resetAndRenderCatalog()" class="w-full pl-4 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-900 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none text-sm" placeholder="ابحث باسم الكورس، التصنيف، أو الكلمات المفتاحية...">
                             </div>
-                            <select id="catalog-diff-filter" onchange="renderModernCatalog()" class="w-full sm:w-48 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-900 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none text-sm font-bold text-slate-600 dark:text-slate-300">
+                            <select id="catalog-diff-filter" onchange="resetAndRenderCatalog()" class="w-full sm:w-48 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl dark:bg-slate-900 dark:border-darkBorder focus:ring-2 focus:ring-brand-500 outline-none text-sm font-bold text-slate-600 dark:text-slate-300">
                                 <option value="all">كل المستويات</option>
                                 <option value="مبتدئ">مبتدئ</option>
                                 <option value="متوسط">متوسط</option>
@@ -920,8 +920,15 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                     </div>
                     
                     <!-- شبكة الكورسات -->
-                    <div id="modern-cards-grid" class="grid grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-4 pb-10 animate-slide-up">
+                    <div id="modern-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-6 animate-slide-up">
                         <!-- سيتم حقن الكورسات هنا عبر الجافاسكربت -->
+                    </div>
+                    
+                    <!-- حاوية زر عرض المزيد -->
+                    <div id="catalog-load-more-container" class="hidden flex justify-center pb-10">
+                        <button onclick="loadMoreCourses()" class="bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold py-3 px-8 rounded-xl transition shadow-sm flex items-center gap-2 text-sm">
+                            عرض المزيد من الكورسات <i class="fa-solid fa-angle-down"></i>
+                        </button>
                     </div>
                 </div>
                 <!-- شاشة: دكاترة ومدرسين المنصة (الدليل الشامل) -->
@@ -1536,6 +1543,10 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
             if(viewId === 'student-community') loadCommunityPosts();
             if(viewId === 'student-progress') { buildAchievementsGrid(); fillProfileFields(); }
             if(viewId === 'student-doctors-directory') renderFullDoctorsDirectory();
+            
+            // إصلاح مشكلة التحميل اللانهائي لصفحات الإدارة
+            if(viewId === 'admin-manage') buildManagementTable();
+            if(viewId === 'super-dashboard') window.initSuperAdmin();
 
             const viewsContainer = document.getElementById('views-container');
             if (viewsContainer) viewsContainer.scrollTop = 0;
@@ -2835,10 +2846,25 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             }
         };
         // ==========================================
-        // الكتالوج المطور والاحترافي (Modern Course Catalog)
+        // الكتالوج المطور والاحترافي (Modern Course Catalog) - مع نظام عرض المزيد
         // ==========================================
+        let currentCatalogLimit = 8; // العدد المبدئي للكورسات المعروضة
+
+        // دالة لتصفير العداد عند البحث من جديد
+        window.resetAndRenderCatalog = function() {
+            currentCatalogLimit = 8;
+            renderModernCatalog();
+        };
+
+        // دالة لزيادة العدد عند الضغط على زر عرض المزيد
+        window.loadMoreCourses = function() {
+            currentCatalogLimit += 8;
+            renderModernCatalog();
+        };
+
         window.renderModernCatalog = function() {
             const grid = document.getElementById('modern-cards-grid');
+            const loadMoreBtn = document.getElementById('catalog-load-more-container');
             if(!grid) return;
             grid.innerHTML = "";
 
@@ -2860,10 +2886,23 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                         <h3 class="text-xl font-black text-slate-700 dark:text-slate-300">عفواً، لا توجد نتائج!</h3>
                         <p class="text-sm mt-2">لم نجد كورسات تطابق بحثك الحالى.</p>
                     </div>`;
+                if(loadMoreBtn) loadMoreBtn.classList.add('hidden');
                 return;
             }
 
-            filteredCourses.forEach(course => {
+            // اقتطاع المصفوفة لعرض العدد المسموح به فقط
+            const coursesToShow = filteredCourses.slice(0, currentCatalogLimit);
+
+            // التحكم في ظهور وإخفاء زر عرض المزيد
+            if (loadMoreBtn) {
+                if (filteredCourses.length > currentCatalogLimit) {
+                    loadMoreBtn.classList.remove('hidden');
+                } else {
+                    loadMoreBtn.classList.add('hidden');
+                }
+            }
+
+            coursesToShow.forEach(course => {
                 const lecsCount = course.lectures ? course.lectures.length : 0;
                 const avgRating = course.ratingAvg ? course.ratingAvg.toFixed(1) : "5.0";
                 const isSaved = userData?.savedCourses?.includes(course.id);
@@ -4280,7 +4319,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                         ${leaderboardBox}
                         ${modelAnswerBox}
 
-                        <button onclick="closeResource()" class="mt-6 bg-slate-800 hover:bg-slate-700 text-white px-8 py-3 rounded-xl text-xs font-bold transition shrink-0">العودة لقاعة الكورس</button>
+                        <button onclick="window.closeImmersiveStudyRoom()" class="mt-6 bg-slate-800 hover:bg-slate-700 text-white px-8 py-3 rounded-xl text-xs font-bold transition shrink-0">العودة لقاعة الكورس</button>
                     </div>`;
                 return;
             }
@@ -5615,17 +5654,40 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 showToast("حدث خطأ أثناء النسخ التلقائي، يرجى تحديده ونسخه يدوياً.", "error");
             });
         };
-        // دالة العودة للخلف الذكية
+        // دالة العودة للخلف الذكية والمطورة
         window.goBack = function() {
+            // التحقق أولاً: هل قاعة الامتحانات الغامرة مفتوحة؟ إذا نعم، أغلقها فقط ولا تخرج من الكورس
+            const studyRoom = document.getElementById('immersive-study-room');
+            if (studyRoom && !studyRoom.classList.contains('hidden')) {
+                window.closeImmersiveStudyRoom();
+                return;
+            }
+
+            // التحقق ثانياً: هل شاشة تكبير الصور مفتوحة؟ أغلقها فقط
+            const lightbox = document.getElementById('image-lightbox-modal');
+            if (lightbox && !lightbox.classList.contains('hidden')) {
+                window.closeImageLightbox();
+                return;
+            }
+
+            // السلوك الطبيعي للرجوع للصفحة السابقة
             if (viewHistory.length > 0) {
-                history.back(); // هذا السطر يربط الزر العائم مع زر الهاتف
+                history.back(); 
             } else {
                 navTo('student-dashboard', false);
             }
         };
 
-        // اصطياد ضغطة زر الرجوع في الهاتف لمنع الخروج
+        // اصطياد ضغطة زر الرجوع في الهاتف (Back Button) لمنع الخروج العشوائي
         window.addEventListener('popstate', function(event) {
+            // إذا ضغط زر الرجوع في الموبايل والاختبار مفتوح، نغلقه فقط
+            const studyRoom = document.getElementById('immersive-study-room');
+            if (studyRoom && !studyRoom.classList.contains('hidden')) {
+                window.closeImmersiveStudyRoom();
+                history.pushState(null, null, window.location.href); // إعادة الرابط حتى لا يفقد الصفحة
+                return;
+            }
+
             if (viewHistory.length > 0) {
                 const previousViewId = viewHistory.pop();
                 navTo(previousViewId, false);
@@ -5897,6 +5959,10 @@ window.openContactPriceModal = function(courseId) {
                 room.classList.add('hidden');
                 room.classList.remove('flex');
             }
+            // تفريغ محتوى القاعة الغامرة لمنع تداخله
+            const contentContainer = document.getElementById('study-room-dynamic-content');
+            if(contentContainer) contentContainer.innerHTML = '';
+            
             // إغلاق المصدر وتصفير المشغل الداخلي للعودة لحالته الطبيعية
             window.closeResource();
         };
@@ -5927,8 +5993,8 @@ window.openContactPriceModal = function(courseId) {
             <!-- Injected dynamically via JS -->
         </div>
     </div>
-    <!-- زر الرجوع العائم الذكي (Floating Back Button) -->
-    <button id="global-back-btn" onclick="goBack()" class="fixed bottom-20 right-6 lg:right-[20.5rem] z-[9990] hidden bg-slate-900/90 dark:bg-white/90 text-white dark:text-slate-900 w-12 h-12 rounded-full shadow-2xl flex items-center justify-center text-lg hover:scale-110 active:scale-95 transition-all border border-white/10 dark:border-slate-200" title="رجوع للخلف">
+    <!-- زر الرجوع العائم الذكي -->
+    <button id="global-back-btn" onclick="goBack()" class="fixed bottom-6 right-4 md:bottom-20 md:right-6 lg:right-[20.5rem] z-[9990] hidden bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 w-10 h-10 md:w-12 md:h-12 rounded-full shadow-2xl flex items-center justify-center text-base md:text-lg hover:scale-110 active:scale-95 transition-all border border-white/10 dark:border-slate-200 backdrop-blur-md" title="رجوع للخلف">
         <i class="fa-solid fa-arrow-right"></i>
     </button>
 </body>
