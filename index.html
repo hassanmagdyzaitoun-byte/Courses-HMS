@@ -2473,6 +2473,9 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             const block = document.createElement('div');
             block.className = "resource-block bg-white dark:bg-darkCard p-4 rounded-2xl border border-slate-200 dark:border-darkBorder flex flex-col gap-3";
             
+            // إضافة وتثبيت الـ ID الأصلي للمصدر لكي لا يتغير ويدمر بيانات الطلاب
+            block.dataset.resid = resData ? resData.id : getGenId();
+            
             const types = [
                 {val: 'video', txt: '🎥 فيديو الشرح (YouTube/Drive)'},
                 {val: 'pdf', txt: '📄 مستند تفريغ أو مرجع PDF'},
@@ -2804,6 +2807,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 const resources = [];
                 
                 lecBlock.querySelectorAll('.resource-block').forEach(resBlock => {
+                    let rId = resBlock.dataset.resid || getGenId(); // استرجاع الـ ID الثابت
                     let rType = resBlock.querySelector('.res-type').value;
                     let rTitle = resBlock.querySelector('.res-title').value.trim();
                     let rUrl = resBlock.querySelector('.res-url').value.trim();
@@ -2847,7 +2851,7 @@ const actionBtnHtml = (isPaid && !isUnlocked)
 
                     if(rTitle) {
                         resources.push({
-                            id: getGenId(), 
+                            id: rId, // استخدام الـ ID الثابت للمصدر بدلاً من توليد واحد جديد 
                             type: rType, 
                             title: rTitle, 
                             url: (rType === 'quiz' || rType === 'flashcard') ? "" : formatEmbedUrl(rUrl, rType),
@@ -4680,14 +4684,35 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 showFlashcard();
             };
 
-            function renderCompletionScreen() {
+            async function renderCompletionScreen() {
+                // التوثيق التلقائي لاكتمال البطاقات في قاعدة البيانات
+                if(!userData?.completedLectures?.includes(resource.id)) {
+                    try {
+                        let log = userData.activityLog || {};
+                        let todayDate = new Date().toISOString().split('T')[0];
+                        log[todayDate] = (log[todayDate] || 0) + 1; 
+
+                        await updateDoc(doc(db, "users", currentUser.uid), {
+                            completedLectures: arrayUnion(resource.id),
+                            activityLog: log
+                        });
+                        userData.completedLectures.push(resource.id);
+                        userData.activityLog = log;
+                        
+                        updateGeneralProgress();
+                        const course = allCourses.find(c => c.id === currentCourseId);
+                        if(course) buildCourseSidebar(course);
+                        buildDashboardHub();
+                    } catch(e) { console.error("Error auto-completing flashcard", e); }
+                }
+
                 contentContainer.innerHTML = `
                     <div class="w-full h-full bg-slate-900 text-white p-10 flex flex-col items-center justify-center overflow-y-auto absolute inset-0 text-center animate-fade-in">
                         <div class="w-20 h-20 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-4xl mb-4 shadow-lg border border-blue-500/30 animate-pulse">
                             <i class="fa-solid fa-brain"></i>
                         </div>
-                        <h3 class="text-2xl font-black mb-2 text-white">ممتاز! أكملت ثبات الحفظ بنجاح</h3>
-                        <p class="text-xs text-slate-400 max-w-sm mb-6 leading-relaxed">أتممت جلسة المذاكرة بنجاح، وتم تكرار الأسئلة المتوسطة والصعبة حتى تغلبت عليها تماماً. لا تنسَ تحديد هذا المصدر كمكتمل للحصول على نقاطك.</p>
+                        <h3 class="text-2xl font-black mb-2 text-emerald-400">ممتاز! أكملت ثبات الحفظ بنجاح</h3>
+                        <p class="text-xs text-slate-400 max-w-sm mb-6 leading-relaxed">أتممت جلسة المذاكرة بنجاح، وتم تكرار الأسئلة الصعبة حتى تغلبت عليها تماماً. <span class="text-emerald-500 font-bold block mt-2">تم تسجيل هذا المصدر كمكتمل تلقائياً وإضافة النقاط لرصيدك!</span></p>
                         <button onclick="window.closeImmersiveStudyRoom()" class="bg-brand-600 hover:bg-brand-700 text-white px-8 py-3.5 rounded-xl text-sm font-bold transition shadow-lg"><i class="fa-solid fa-arrow-right-to-bracket ml-2"></i> العودة للقاعة</button>
                     </div>
                 `;
