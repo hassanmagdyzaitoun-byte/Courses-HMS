@@ -4898,14 +4898,28 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             const container = document.getElementById('doctors-directory-list');
             if(!container) return;
             try {
-                allDoctors = [];
+                // استخدام مصفوفة مؤقتة لتجنب التكرار عند تحديث الصفحة (Race Condition Fix)
+                let tempDoctorsList = [];
+                
                 // 1. جلب حساب المالك أولاً ليتصدر القائمة
                 const superSnap = await getDocs(query(collection(db, "users"), where("role", "==", "superadmin")));
-                superSnap.forEach(d => allDoctors.push({ id: d.id, ...d.data() }));
+                superSnap.forEach(d => {
+                    // التأكد من عدم وجود الدكتور مسبقاً قبل إضافته
+                    if (!tempDoctorsList.find(doc => doc.id === d.id)) {
+                        tempDoctorsList.push({ id: d.id, ...d.data() });
+                    }
+                });
 
                 // 2. جلب الدكاترة المثبتين
                 const snap = await getDocs(query(collection(db, "users"), where("role", "==", "admin"), where("status", "==", "active"), where("isFeaturedDoctor", "==", true)));
-                snap.forEach(d => allDoctors.push({ id: d.id, ...d.data() }));
+                snap.forEach(d => {
+                    if (!tempDoctorsList.find(doc => doc.id === d.id)) {
+                        tempDoctorsList.push({ id: d.id, ...d.data() });
+                    }
+                });
+                
+                // تحديث المصفوفة العامة ببيانات نظيفة ومفلترة
+                allDoctors = tempDoctorsList;
                 
                 container.innerHTML = "";
                 
