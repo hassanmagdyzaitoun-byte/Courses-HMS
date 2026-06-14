@@ -4271,6 +4271,12 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                             const attCorrect = attempt.correctCount !== undefined ? attempt.correctCount : Math.round((attempt.score / 100) * (attempt.totalCount || quizQuestions.length));
                             const attTotal = attempt.totalCount || quizQuestions.length;
 
+                            // عرض الإيميل للدكتور والمالك فقط (أمان وحماية خصوصية)
+                            let emailHtml = '';
+                            if (isAuthorizedToViewSheet) {
+                                emailHtml = `<span class="block text-[8px] text-slate-500 font-en truncate mt-0.5" dir="ltr" title="${attempt.email}">${attempt.email}</span>`;
+                            }
+
                             // زر عرض نموذج الإجابات الخاص بالطالب (تعديل 3)
                             let viewSheetBtn = '';
                             if (isAuthorizedToViewSheet) {
@@ -4285,7 +4291,10 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                                 <div class="flex items-center justify-between p-2.5 bg-slate-900/60 rounded-xl border border-slate-800/40 gap-3">
                                     <div class="flex items-center gap-2 min-w-0">
                                         ${rankBadge}
-                                        <span class="text-xs font-bold truncate ${attempt.userId === currentUser.uid ? 'text-brand-400' : 'text-slate-300'}" title="${attempt.email}">${attempt.userName || attempt.email.split('@')[0]}</span>
+                                        <div class="min-w-0 text-right">
+                                            <span class="text-xs font-bold truncate block ${attempt.userId === currentUser.uid ? 'text-brand-400' : 'text-slate-300'}" title="${attempt.userName || attempt.email.split('@')[0]}">${attempt.userName || attempt.email.split('@')[0]}</span>
+                                            ${emailHtml} <!-- حقن الإيميل للدكاترة والمالك فقط -->
+                                        </div>
                                     </div>
                                     <div class="flex items-center gap-2 shrink-0">
                                         <div class="text-left font-bold text-[10px]">
