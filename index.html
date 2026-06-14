@@ -635,7 +635,8 @@
 
                 <!-- شاشة: منشئ الكورسات الاحترافي الجديد مع Live Real-time Preview -->
                 <div id="admin-add" class="content-view">
-                    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- سحر الـ UI: في الهاتف نعكس الترتيب لتظهر المعاينة أولاً، وفي الكمبيوتر يعود للشبكة العادية -->
+                    <div class="max-w-6xl mx-auto flex flex-col-reverse lg:grid lg:grid-cols-3 gap-8">
                         
                         <!-- نموذج بناء بيانات الكورس -->
                         <div class="lg:col-span-2 bg-white dark:bg-darkCard rounded-3xl shadow-sm border border-slate-100 dark:border-darkBorder p-6 md:p-8 relative">
@@ -810,9 +811,12 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                                     </div>
                                 </div>
 
-                                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl font-bold shadow-lg shadow-emerald-500/20 text-md transition duration-300 transform hover:-translate-y-0.5 flex justify-center items-center gap-2">
-                                    <i class="fa-solid fa-cloud-arrow-up text-lg"></i> حفظ ومزامنة ونشر الكورس بالكامل للطلاب
-                                </button>
+                                <!-- حاوية زر الحفظ العائمة واللاصقة أسفل الشاشة لسهولة الوصول -->
+                                <div class="sticky bottom-4 z-40 pt-2">
+                                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-600 text-white py-4 rounded-2xl font-black shadow-2xl shadow-emerald-500/30 text-sm md:text-base transition duration-300 transform hover:-translate-y-1 flex justify-center items-center gap-2 border border-white/20 backdrop-blur-sm">
+                                        <i class="fa-solid fa-cloud-arrow-up text-lg animate-pulse"></i> حفظ ومزامنة ونشر الكورس بالكامل للطلاب
+                                    </button>
+                                </div>
                             </form>
                         </div>
 
@@ -2451,13 +2455,15 @@ const actionBtnHtml = (isPaid && !isUnlocked)
             let optionsHTML = types.map(t => `<option value="${t.val}" ${resData && resData.type === t.val ? 'selected' : ''}>${t.txt}</option>`).join('');
             
             block.innerHTML = `
-                <div class="flex flex-col md:flex-row gap-3 items-center w-full">
-                    <select class="res-type p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg outline-none min-w-[150px] text-xs font-black" onchange="toggleQuizBuilderField(this)">
+                <div class="flex flex-col md:flex-row gap-2.5 w-full relative pt-7 md:pt-0">
+                    <!-- زر الحذف تم نقله للأعلى يميناً في الموبايل -->
+                    <button type="button" onclick="this.closest('.resource-block').remove();" class="absolute top-0 left-0 md:relative md:top-auto md:left-auto text-slate-400 hover:text-rose-500 bg-slate-100 hover:bg-rose-50 dark:bg-slate-800 dark:hover:bg-rose-900/30 p-1.5 md:p-2 rounded-lg shrink-0 transition flex items-center justify-center" title="حذف هذا المصدر"><i class="fa-solid fa-trash-can text-[10px] md:text-sm"></i></button>
+                    
+                    <select class="res-type w-full md:w-auto p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg outline-none text-xs font-black text-brand-600 dark:text-brand-400" onchange="toggleQuizBuilderField(this)">
                         ${optionsHTML}
                     </select>
-                    <input type="text" class="res-title flex-1 p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg outline-none text-xs font-bold" placeholder="اسم المصدر لتعريفه (مثال: اختبار الفهم السريع للفصل الأول)" value="${resData ? resData.title : ''}" required>
-                    <input type="text" class="res-url flex-1 p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg outline-none text-xs" placeholder="رابط المصدر أو اتركه فارغاً للاختبار التفاعلي" value="${resData ? resData.url : ''}">
-                    <button type="button" onclick="this.closest('.resource-block').remove();" class="text-slate-400 hover:text-rose-500 p-2 shrink-0 transition"><i class="fa-solid fa-xmark"></i></button>
+                    <input type="text" class="res-title w-full md:flex-1 p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg outline-none text-xs font-bold" placeholder="اسم المصدر لتعريفه..." value="${resData ? resData.title : ''}" required>
+                    <input type="text" class="res-url w-full md:flex-1 p-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-darkBorder rounded-lg outline-none text-xs" placeholder="رابط المصدر أو اتركه فارغاً للاختبار" value="${resData ? resData.url : ''}">
                 </div>
                 <!-- حقل بناء أسئلة الاختبار (يدعم الواجهة التفاعلية والإدخال النصي معاً) -->
                 <div class="quiz-questions-wrapper ${resData && resData.type === 'quiz' ? '' : 'hidden'} w-full bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200/50 dark:border-slate-800">
