@@ -5475,52 +5475,46 @@ const actionBtnHtml = (isPaid && !isUnlocked)
                 btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
 
                 await updateDoc(doc(db, "users", currentUser.uid), updates);
-                
-                if(newName) {
-                    userData.name = newName;
-                    document.getElementById('nav-user-email').textContent = newName;
-                }
-                if(newPhotoUrl) {
-                    userData.realPhoto = newPhotoUrl;
-                    document.getElementById('user-avatar-icon').innerHTML = `<img src="${newPhotoUrl}" class="w-full h-full rounded-full object-cover">`;
-                }
-                
-                btn.innerHTML = origTxt;
-                document.getElementById('update-profile-url').value = ""; // تفريغ الحقل بعد الحفظ
-                showToast("تم تحديث بياناتك الشخصية بنجاح!", "success");
-            } catch(e) {
-                console.error(e);
-                showToast("حدث خطأ أثناء حفظ البيانات.", "error");
-            }
-        };
-        // ==========================================
-        // نظام بث الإعلانات العامة (Global Marquee News)
-        // ==========================================
-        window.publishGlobalNews = async function() {
-            const input = document.getElementById('news-input');
-            const newsText = input.value.trim();
             
-            if (!newsText) return showToast("الرجاء كتابة نص الإعلان أولاً.", "error");
+            if(newName) {
+                userData.name = newName;
+                document.getElementById('nav-user-email').textContent = newName;
+                
+                // تحديث الاسم الجديد في المستندات التاريخية بالخلفية لكي يظهر في كل مكان فوراً (Cascading Update)
+                try {
+                    // 1. تحديث الاسم في منشورات مجتمع المنصة العام
+                    const communitySnap = await getDocs(query(collection(db, "community"), where("email", "==", currentUser.email)));
+                    communitySnap.forEach(async (d) => {
+                        await updateDoc(doc(db, "community", d.id), { userName: newName });
+                    });
 
-            try {
-                const btn = document.getElementById('btn-publish-news');
-                const origText = btn.innerHTML;
-                btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري البث...';
+                    // 2. تحديث الاسم في الرسائل والاستفسارات المرسلة للدكاترة
+                    const messagesSnap = await getDocs(query(collection(db, "messages"), where("studentId", "==", currentUser.uid)));
+                    messagesSnap.forEach(async (d) => {
+                        await updateDoc(doc(db, "messages", d.id), { studentName: newName });
+                    });
 
-                // حفظ الإشعار في مجموعة الإشعارات ليكون هناك سجل تاريخي
-                await addDoc(collection(db, "notifications"), {
-                    text: newsText,
-                    createdAt: new Date().getTime(),
-                    publisher: userData.name || currentUser.email.split('@')[0]
-                });
-
-                input.value = "";
-                btn.innerHTML = origText;
-                showToast("تم إرسال الإشعار لجميع طلاب المنصة بنجاح!", "success");
-            } catch (e) {
-                console.error("خطأ النشر العام:", e);
-                showToast("حدث خطأ أثناء إرسال الإشعار. تأكد من اتصالك بالإنترنت.", "error");
+                    // 3. تحديث الاسم في سجل درجات وترتيب المتصدرين بالاختبارات
+                    const quizSnap = await getDocs(query(collection(db, "quizAttempts"), where("userId", "==", currentUser.uid)));
+                    quizSnap.forEach(async (d) => {
+                        await updateDoc(doc(db, "quizAttempts", d.id), { userName: newName });
+                    });
+                } catch (cascadeError) {
+                    console.warn("فشل تحديث الاسم في السجلات التاريخية:", cascadeError);
+                }
             }
+            if(newPhotoUrl) {
+                userData.realPhoto = newPhotoUrl;
+                document.getElementById('user-avatar-icon').innerHTML = `<img src="${newPhotoUrl}" class="w-full h-full rounded-full object-cover">`;
+            }
+            
+             btn.innerHTML = origTxt;
+             document.getElementById('update-profile-url').value = ""; // تفريغ الحقل بعد الحفظ
+             showToast("تم حفظ بيانات البروفايل وتحديث اسمك بكافة صفحات الأكاديمية بنجاح!", "success");
+           } catch(e) {
+              console.error(e);
+              showToast("حدث خطأ أثناء حفظ البيانات.", "error");
+           }
         };
         
         // دالة نشر تنبيه جديد داخل كورس محدد
