@@ -229,7 +229,7 @@
                         <span id="primary-auth-text">تسجيل الدخول الآمن</span> <i class="fa-solid fa-arrow-right-to-bracket" id="primary-auth-icon"></i>
                     </button>
                     <button type="button" id="btn-toggle-auth-mode" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 py-3.5 rounded-xl font-bold transition duration-200 border border-slate-200 dark:border-slate-700">
-                        ليس لديك حساب؟ إنشاء حساب جديد بالمنصة
+                        ليس لديك حساب؟ <span class="text-brand-600 dark:text-brand-400 font-black">إنشاء حساب جديد بالمنصة</span>
                     </button>
                 </div>
             </form>
@@ -1617,15 +1617,13 @@ Mitochondria | The powerhouse of the cell, responsible for generating most of th
                 roleContainer.classList.remove('hidden');
                 primaryText.textContent = "إنشاء الحساب الجديد بالمنصة";
                 primaryIcon.className = "fa-solid fa-user-plus";
-                // النص يظهر بشكل صحيح ومنطقي في صفحة إنشاء الحساب
-                toggleBtn.innerHTML = "لديك حساب بالفعل؟ <span class='text-brand-600 dark:text-brand-400 font-black'>تسجيل الدخول الآن</span>";
+                toggleBtn.innerHTML = "لديك حساب؟ <span class='text-brand-600 dark:text-brand-400 font-black'>قم بتسجيل الدخول من هنا</span>";
             } else {
                 authMode = 'login';
                 nameContainer.classList.add('hidden');
                 roleContainer.classList.add('hidden');
                 primaryText.textContent = "تسجيل الدخول الآمن";
                 primaryIcon.className = "fa-solid fa-arrow-right-to-bracket";
-                // النص يظهر بشكل صحيح ومنطقي في صفحة تسجيل الدخول
                 toggleBtn.innerHTML = "ليس لديك حساب؟ <span class='text-brand-600 dark:text-brand-400 font-black'>إنشاء حساب جديد بالمنصة</span>";
             }
         });
